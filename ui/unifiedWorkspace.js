@@ -1,13 +1,13 @@
 (function (root) {
   'use strict';
 
-  const RELEASE = 'PLMR V14.28.4';
+  const RELEASE = 'PLMR V14.28.6';
   const PRODUCT_INPUT_SCHEMA = 'p3dv-main-product-input-v14.04';
-  const RUNTIME_BUILD = '10.28.4-r14.28.4';
-  const RUNTIME_CONTRACT = 'plmr-p3dv-host-bridge-v14.28.4';
+  const RUNTIME_BUILD = '10.28.6-r14.28.6';
+  const RUNTIME_CONTRACT = 'plmr-p3dv-host-bridge-v14.28.6';
   function embedUrlForProduct(productId, suffix) {
     const group = PRODUCT_TO_GROUP[String(productId || '')] || PRODUCT_TO_GROUP[DEFAULT_PRODUCT_ID];
-    return `modules/p3dv/index.html?embedded=1&host=plmr-v14.28.4&v=${encodeURIComponent(RUNTIME_BUILD)}&productGroup=${encodeURIComponent(group)}${suffix || ''}`;
+    return `modules/p3dv/index.html?embedded=1&host=plmr-v14.28.6&v=${encodeURIComponent(RUNTIME_BUILD)}&productGroup=${encodeURIComponent(group)}${suffix || ''}`;
   }
   const RUNTIME_SOURCE = 'plmr-p3dv-runtime';
   const HOST_SOURCE = 'plmr-unified-host';
@@ -967,6 +967,21 @@
       if (messageTransitionId && messageTransitionId !== activeTransitionId) return;
       const payload = message.payload || {};
       switchWorkspaceMode(payload.mode, { source: 'p3dv-mode-switch' });
+      return;
+    }
+    if (message.type === 'request-host-preview-expanded') {
+      if (messageTransitionId && messageTransitionId !== activeTransitionId) return;
+      const payload = message.payload || {};
+      // V14.28.6: opaque-origin/file:// runtimes cannot call the parent API
+      // directly. Accept the same fullscreen request through the existing runtime
+      // bridge. Failure must not collapse a child-owned fullscreen/large-preview
+      // fallback; only a successful host fullscreen is echoed back to the runtime.
+      void Promise.resolve(setHostPreviewExpanded(Boolean(payload.expanded), {
+        notifyRuntime: false,
+        browserFullscreen: true
+      })).then((entered) => {
+        if (entered) notifyRuntimePreviewExpanded(true);
+      }).catch(() => {});
       return;
     }
     if (message.type === 'fullscreen-error') {

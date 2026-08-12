@@ -1,8 +1,8 @@
 (function () {
   const p3dvEmbeddedHostMode = (() => { try { return new URLSearchParams(window.location.search).get('embedded') === '1' || Boolean(window.frameElement && window.frameElement.dataset && window.frameElement.dataset.p3dvEmbeddedHost === 'true'); } catch (_) { return false; } })();
   const P3DV_PRODUCT_INPUT_SCHEMA = 'p3dv-main-product-input-v14.04';
-  const P3DV_HOST_BUILD = '10.28.4-r14.28.4';
-  const P3DV_HOST_CONTRACT = 'plmr-p3dv-host-bridge-v14.28.4';
+  const P3DV_HOST_BUILD = '10.28.6-r14.28.6';
+  const P3DV_HOST_CONTRACT = 'plmr-p3dv-host-bridge-v14.28.6';
   if (p3dvEmbeddedHostMode && document && document.body) document.body.classList.add('p3dv-host-embedded');
 
   // V3.86 demo default: keep internal Galaxy identity, expose Bioclimatic (Tilt) as the initial product.
@@ -3186,16 +3186,31 @@
 
   function requestEmbeddedHostDrawingMode(mode) {
     const target = String(mode || '').toLowerCase() === '2d' ? '2d' : '3d';
-    if (!p3dvEmbeddedHostMode) return setP3dvDrawingMode(target, { resetView: target === '2d' });
+
+    // V14.28.6 corrective: the visible toolbar must never depend on the iframe ->
+    // host bridge just to produce a visible 2D/3D transition. Apply the already
+    // existing P3DV presentation mode locally first, then synchronize the host's
+    // canonical presentation owner. This keeps physical/canonical product state in
+    // one place while making the user control reliable under file:// opaque origins
+    // and any temporarily unavailable host bridge.
+    const localMode = setP3dvDrawingMode(target, { resetView: target === '2d' });
+    if (!p3dvEmbeddedHostMode) return localMode;
+
+    let hostApplied = false;
     try {
       const host = window.parent && window.parent.PulumurUnifiedWorkspace;
-      if (host && typeof host.setMode === 'function') return host.setMode(target, { source: 'p3dv-mode-switch' });
-    } catch (_) {}
-    // file:// may make parent/child documents opaque-origin. In that case route the
-    // same UI request through the existing runtime bridge; the host remains the only
-    // activeWorkspaceMode owner and sends set-drawing-mode back to this runtime.
-    p3dvHostPost('request-workspace-mode', { mode: target }, p3dvHostActiveTransitionId);
-    return true;
+      if (host && typeof host.setMode === 'function') {
+        hostApplied = host.setMode(target, { source: 'p3dv-mode-switch' }) !== false;
+      }
+    } catch (_) {
+      hostApplied = false;
+    }
+
+    // Cross-origin/opaque file documents cannot read parent APIs. The existing
+    // postMessage bridge remains the synchronization fallback, but no longer owns
+    // whether the button visibly works.
+    if (!hostApplied) p3dvHostPost('request-workspace-mode', { mode: target }, p3dvHostActiveTransitionId);
+    return localMode;
   }
 
   function setP3dvDrawingMode(mode, options = {}) {
@@ -3862,7 +3877,7 @@
     }
   }
 
-  function applyFreedomInputs() {
+  function applyFreedomInputs(options = {}) {
     const spec = activeProductSpec();
     if (modelState.productGroup === 'pergo-rise') return applyPergoRiseInputs();
     const rawSystemCount = firstNumericInputToken($(ids.pergoSystemCount).value) || modelState.systemCount || 1;
@@ -3959,7 +3974,9 @@
       setFreedomValidation('Bu ölçüler mevcut profil kesitleri için yetersiz.');
       return false;
     }
-    (typeof commitModelChangeLive === 'function' ? commitModelChangeLive('system-inputs') : renderViewer());
+    (typeof commitModelChangeLive === 'function'
+      ? commitModelChangeLive('system-inputs', { forceRender: options.forceRender === true })
+      : renderViewer());
     showRecommendedLimitWarnings({
       width: topology.moduleWidths.length ? Math.max(...topology.moduleWidths) : topology.totalWidth,
       depth: topology.maxDepth,
@@ -4820,31 +4837,77 @@
   async function togglePreviewExpanded() {
     const expanding = !document.body.classList.contains('preview-expanded');
     if (expanding) {
-      // V14.28.4 corrective: the user gesture originates inside the P3DV iframe.
-      // Request native fullscreen from this document directly so transient user
-      // activation is not lost in an iframe -> parent -> promise round-trip. The host
-      // iframe already grants fullscreen permission via allowfullscreen/allow.
+      delete document.body.dataset.fullscreenError;
+      delete document.body.dataset.fullscreenHostError;
+
+      // V14.28.6 corrective: try the top-level host synchronously when same-origin.
+      // This is the preferred path because the host owns the whole PLMR workspace.
+      if (p3dvEmbeddedHostMode) {
+        try {
+          const host = window.parent && window.parent.PulumurUnifiedWorkspace;
+          if (host && typeof host.request3DPreviewExpanded === 'function') {
+            const entered = await Promise.resolve(host.request3DPreviewExpanded(true, {
+              notifyRuntime: false,
+              browserFullscreen: true
+            }));
+            if (entered) {
+              p3dvEmbeddedOwnFullscreen = false;
+              setPreviewExpanded(true, { notifyHost: false });
+              return true;
+            }
+          }
+        } catch (error) {
+          document.body.dataset.fullscreenHostError = String(error && (error.name || error.message) || 'HOST_FULLSCREEN_UNAVAILABLE');
+        }
+      }
+
+      // file:// gives parent and child opaque origins in normal Chrome, so the
+      // direct host API above can be inaccessible. Ask the host through the existing
+      // cross-document bridge as an additional best-effort route. Do not wait for the
+      // message task before trying the activated child document itself.
+      if (p3dvEmbeddedHostMode) {
+        p3dvHostPost('request-host-preview-expanded', { expanded: true }, p3dvHostActiveTransitionId);
+      }
+
+      // The click definitely activates this Window. Request fullscreen here with the
+      // broadest compatible signature; some Chromium builds reject an options object
+      // even though plain requestFullscreen() is available.
       try {
         const current = document.fullscreenElement || document.webkitFullscreenElement;
         if (!current) {
           const target = document.documentElement;
           const standardRequest = target && target.requestFullscreen;
           const webkitRequest = target && target.webkitRequestFullscreen;
-          if (typeof standardRequest === 'function') await standardRequest.call(target, { navigationUI: 'hide' });
-          else if (typeof webkitRequest === 'function') await webkitRequest.call(target);
-          else throw new Error('FULLSCREEN_API_UNAVAILABLE');
+          if (typeof standardRequest === 'function') {
+            try {
+              await standardRequest.call(target);
+            } catch (firstError) {
+              // If the plain call is rejected for a transient browser reason, preserve
+              // the original error. The host bridge requested above may still succeed.
+              throw firstError;
+            }
+          } else if (typeof webkitRequest === 'function') {
+            await webkitRequest.call(target);
+          } else {
+            throw new Error('FULLSCREEN_API_UNAVAILABLE');
+          }
         }
         const nativeActive = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
         if (!nativeActive) throw new Error('FULLSCREEN_NOT_ENTERED');
         p3dvEmbeddedOwnFullscreen = true;
-        delete document.body.dataset.fullscreenError;
         setPreviewExpanded(true, { notifyHost: false });
         if (p3dvEmbeddedHostMode) p3dvHostPost('preview-expanded', { expanded: true, nativeFullscreen: true }, p3dvHostActiveTransitionId);
         return true;
       } catch (error) {
         p3dvEmbeddedOwnFullscreen = false;
         document.body.dataset.fullscreenError = String(error && (error.name || error.message) || 'FULLSCREEN_REJECTED');
-        setPreviewExpanded(false, { notifyHost: false });
+
+        // Do not leave a silent no-op. If native fullscreen is rejected, keep the
+        // existing large-preview presentation visible and tell the user that browser
+        // fullscreen itself was blocked. This is a fallback only; native fullscreen
+        // is still the acceptance target.
+        setPreviewExpanded(true, { notifyHost: false });
+        setLargePreviewCommandStatus('Tarayıcı tam ekran iznini reddetti · Büyük önizleme açık');
         if (p3dvEmbeddedHostMode) p3dvHostPost('fullscreen-error', {
           message: String(error && error.message || error),
           name: String(error && error.name || ''),
@@ -4865,11 +4928,10 @@
         return false;
       }
     } else if (p3dvEmbeddedHostMode) {
-      // Compatibility exit for a host-owned fullscreen entered by an older path.
       try {
         const host = window.parent && window.parent.PulumurUnifiedWorkspace;
         if (host && typeof host.request3DPreviewExpanded === 'function') {
-          await host.request3DPreviewExpanded(false, { notifyRuntime: false, exitBrowserFullscreen: true });
+          await Promise.resolve(host.request3DPreviewExpanded(false, { notifyRuntime: false, exitBrowserFullscreen: true }));
         }
       } catch (_) {}
     }
@@ -13019,7 +13081,15 @@ initializeViewer();
     };
     on(ids.mode2D, () => { const button=$(ids.mode2D); if (button && !button.disabled) requestEmbeddedHostDrawingMode('2d'); });
     on(ids.mode3D, () => { const button=$(ids.mode3D); if (button && !button.disabled) requestEmbeddedHostDrawingMode('3d'); });
-    on(ids.toolbarRefresh, () => applyFreedomInputs());
+    on(ids.toolbarRefresh, () => {
+      const button = $(ids.toolbarRefresh);
+      const originalText = button ? button.textContent : '';
+      const applied = applyFreedomInputs({ forceRender: true });
+      if (button) {
+        button.textContent = applied ? 'Önizleme Yenilendi ✓' : originalText;
+        window.setTimeout(() => { if (button && button.isConnected) button.textContent = originalText || 'Önizlemeyi Yenile'; }, 700);
+      }
+    });
     on(ids.previewExpand, () => { void togglePreviewExpanded(); });
     return true;
   }
@@ -13959,6 +14029,10 @@ initializeViewer();
           p3dvHostActiveTransitionId = Number(transitionId || p3dvHostActiveTransitionId || 0);
           setP3dvDrawingMode(payload.mode, { resetView: payload.resetView !== false });
         } else if (message.type === 'set-preview-expanded') {
+          if (payload.expanded) {
+            delete document.body.dataset.fullscreenError;
+            delete document.body.dataset.fullscreenHostError;
+          }
           setPreviewExpanded(Boolean(payload.expanded), { notifyHost: false });
         } else if (message.type === 'viewport-resized') {
           window.dispatchEvent(new Event('resize'));

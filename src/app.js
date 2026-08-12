@@ -1195,7 +1195,7 @@
     }
 
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10.28.4-r14.28.4').catch(() => {}), { once: true });
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10.28.6-r14.28.6').catch(() => {}), { once: true });
     }
   }
 

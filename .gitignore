@@ -33,3 +33,10 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# Supabase local metadata
+supabase/.temp/
+
+# Local deployment tooling
+package.json
+package-lock.json

@@ -1,7 +1,12 @@
-# PLMR V14.28.4 DEMO FINAL CORRECTIVE
+# PLMR V14.28.6 DEMO FINAL CORRECTIVE
 
-PLMR V14.28.4 is a narrowly scoped corrective release built from the accepted immutable **PLMR V14.28.3** package. It fixes the preview-toolbar user path for Rolling Roof, Eco-Bioclimatic and Bioclimatic, restores the existing Rolling Roof Freedom multi-position dependency to the host Technical2D projection path, and makes the Pergola native 2D Large Preview contextual toolbox open and pinned by default while preserving the user's ability to unpin and close it.
+PLMR V14.28.6 is a narrowly scoped corrective release built from the accepted immutable **PLMR V14.28.5** package. It addresses the remaining real-user failure modes of the P3DV preview toolbar for Rolling Roof, Eco-Bioclimatic and Bioclimatic without introducing a parallel state or rendering system.
 
-There is **no new product feature** in this corrective release. No new geometry engine, product schema, PDF/DXF engine, canonical physical state, persistence owner or Supabase architecture is introduced. Existing 3D/2D projection, product ownership, profile/zone IDs, save/restore, PDF/DXF and project-isolation services remain the retained architecture.
+- **2D / 3D** is now local-first. The existing P3DV presentation engine changes the visible 2D/3D mode immediately from the button click, then best-effort synchronizes the existing host canonical workspace owner. If same-origin parent access or the host message bridge is unavailable, the button no longer becomes a silent no-op.
+- **Preview Expand** keeps native Fullscreen API as the target. It tries the existing top-level host fullscreen path when direct parent access is available, can request the same existing host fullscreen owner through the bridge when direct access is unavailable, and can use embedded-document fullscreen as a browser-permitted fallback. A rejected native fullscreen request is no longer silent; the large-preview presentation stays visible and an explicit browser-fullscreen rejection status is shown.
+- **Preview Refresh** retains the V14.28.5 corrective behavior: the explicit manual action reapplies current canonical inputs and forces a real viewer renderer rebuild, with a short `Önizleme Yenilendi ✓` acknowledgement.
+- The Pergola native 2D Large Preview behavior is retained: the contextual toolbox starts open and pinned, while the user can still unpin and close it.
 
-**PLMR V14.28.3 is the immutable corrective source baseline for V14.28.4.** The earlier V14.28.2 corrective baseline remains unchanged in the release lineage.
+This corrective adds **no new product feature**. No new geometry engine, canonical state, authoritative product state, product schema, PDF/DXF engine or persistence owner is introduced. Existing host/P3DV owners are reused.
+
+**PLMR V14.28.5 is the immutable corrective source baseline for V14.28.6.**
