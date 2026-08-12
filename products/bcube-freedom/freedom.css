@@ -1,0 +1,177 @@
+:root {
+  color-scheme: light;
+  --ink: #182033;
+  --muted: #64748b;
+  --line: #d7e0ea;
+  --panel: #ffffff;
+  --canvas: #f5f8fb;
+  --brand: #0d5d5f;
+  --brand-2: #0d7b71;
+  --blue: #2563eb;
+  --danger: #b42318;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: radial-gradient(circle at 20% 0%, #ffffff 0, #f4f7fa 38%, #eaf0f5 100%);
+  color: var(--ink);
+  overflow-x: hidden;
+}
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .48; }
+
+.freedom-header {
+  min-height: 92px;
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) minmax(520px, 1.4fr) auto;
+  align-items: center;
+  gap: 22px;
+  padding: 14px 24px;
+  background: rgba(255,255,255,.94);
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 9px 30px rgba(15,23,42,.06);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(14px);
+}
+.freedom-brand { display: flex; align-items: center; gap: 15px; min-width: 0; }
+.freedom-brand img { width: 112px; height: auto; object-fit: contain; }
+.freedom-brand h1 { margin: 0; font-size: 19px; letter-spacing: -.02em; }
+.freedom-brand p { margin: 4px 0 0; color: var(--muted); font-size: 12px; }
+.freedom-selectors { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.freedom-selectors label, .freedom-form-grid label, .freedom-dialog-field, .freedom-dialog-grid label { display: grid; gap: 6px; }
+.freedom-selectors span, .freedom-form-grid span, .freedom-dialog-field span, .freedom-dialog-grid span { font-size: 11px; font-weight: 800; color: #334155; }
+.freedom-selectors select, .freedom-form-grid input, .freedom-form-grid select, .freedom-dialog input, .freedom-dialog select {
+  width: 100%; min-height: 42px; border: 1px solid #cbd7e5; border-radius: 10px; padding: 9px 12px; background: #fff; color: #172033; outline: none;
+}
+.freedom-selectors select:focus, .freedom-form-grid input:focus, .freedom-form-grid select:focus, .freedom-dialog input:focus, .freedom-dialog select:focus { border-color: var(--brand-2); box-shadow: 0 0 0 3px rgba(13,123,113,.12); }
+.freedom-version { color: #0f766e; background: #e7f7f3; border: 1px solid #b8e3d9; border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: 900; }
+
+.freedom-layout { display: grid; grid-template-columns: minmax(330px, 410px) minmax(0, 1fr); gap: 18px; padding: 18px; min-height: calc(100vh - 92px); }
+.freedom-input-panel { display: grid; gap: 14px; align-content: start; }
+.freedom-card, .freedom-preview-card { background: rgba(255,255,255,.96); border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 12px 34px rgba(15,23,42,.07); }
+.freedom-card { padding: 15px; }
+.freedom-card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 13px; }
+.freedom-card-head h2 { margin: 0; font-size: 14px; }
+.freedom-card-head span { border-radius: 999px; background: #e8f7f4; color: #0f766e; font-weight: 900; font-size: 10px; padding: 5px 9px; }
+.freedom-card-head small { color: var(--muted); font-size: 9px; text-align: right; max-width: 210px; line-height: 1.35; }
+.freedom-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.freedom-project-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+.freedom-field-wide { grid-column: 1 / -1; }
+.freedom-file-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px; }
+.freedom-file-actions .freedom-btn-danger { grid-column: 1 / -1; }
+
+.freedom-btn, .freedom-icon-btn {
+  border: 0; border-radius: 10px; min-height: 40px; padding: 9px 13px; font-weight: 800; transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+.freedom-btn:hover:not(:disabled), .freedom-icon-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.freedom-btn-primary { color: #fff; background: linear-gradient(135deg, #0d5d5f, #0d7b71); box-shadow: 0 7px 18px rgba(13,93,95,.2); }
+.freedom-btn-secondary { color: #334155; background: #eef3f7; border: 1px solid #d7e0ea; }
+.freedom-btn-danger { color: #fff; background: #b42318; }
+.freedom-btn-tool { color: #14304b; background: linear-gradient(180deg,#fff,#eef4f8); border: 1px solid #cdd9e5; text-align: left; }
+.freedom-icon-btn { width: 42px; padding: 0; font-size: 22px; background: #eef3f7; color: #334155; border: 1px solid #d7e0ea; }
+
+.freedom-preview-card { min-width: 0; padding: 15px; position: relative; display: flex; flex-direction: column; min-height: 710px; }
+.freedom-preview-head { display: flex; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 12px; }
+.freedom-preview-head h2 { margin: 3px 0 0; font-size: 18px; }
+.freedom-kicker { font-size: 10px; font-weight: 900; letter-spacing: .12em; color: var(--brand-2); }
+.freedom-preview-actions { display: flex; align-items: center; gap: 8px; }
+.freedom-view-tabs { display: flex; gap: 7px; margin-bottom: 10px; }
+.freedom-view-tabs button { min-height: 36px; border: 1px solid #d2dce7; background: #f1f5f9; color: #536276; border-radius: 9px; padding: 7px 13px; font-weight: 800; }
+.freedom-view-tabs button.is-active { background: #143f45; color: #fff; border-color: #143f45; }
+.freedom-selection-bar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 10px 12px; margin-bottom: 10px; border: 1px solid #aadbd2; border-radius: 12px; background: #ecfbf7; }
+.freedom-selection-bar strong { font-size: 12px; color: #125c55; }
+.freedom-selection-bar > div { display: flex; gap: 8px; }
+.freedom-canvas-shell { flex: 1; min-height: 520px; border: 1px solid #cad5e2; border-radius: 14px; overflow: hidden; background: var(--canvas); position: relative; }
+.freedom-view-panel { width: 100%; height: 100%; min-height: 520px; }
+.freedom-view-panel svg { width: 100%; height: 100%; min-height: 520px; display: block; user-select: none; }
+.freedom-status { margin-top: 10px; min-height: 37px; border-radius: 10px; background: #f2f5f8; color: #526174; display: flex; align-items: center; padding: 9px 12px; font-size: 12px; font-weight: 700; }
+.freedom-status[data-tone="success"] { background: #e9f8f1; color: #11603d; }
+.freedom-status[data-tone="error"] { background: #fff0ef; color: #9c2019; }
+
+.freedom-toolbox {
+  position: absolute; top: 86px; right: 20px; width: 286px; max-height: calc(100vh - 116px); overflow: auto; z-index: 15; padding: 13px; border: 1px solid #bbc9d7; border-radius: 16px; background: rgba(255,255,255,.97); box-shadow: 0 18px 50px rgba(15,23,42,.22); backdrop-filter: blur(16px);
+}
+.freedom-toolbox-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-bottom: 11px; }
+.freedom-toolbox-head div { display: grid; }
+.freedom-toolbox-head span { color: var(--brand-2); font-size: 9px; letter-spacing: .13em; font-weight: 900; }
+.freedom-toolbox-head strong { font-size: 15px; }
+.freedom-toolbox-head small { font-size: 8px; color: var(--muted); text-align: right; max-width: 130px; }
+.freedom-toolbox-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.freedom-tool-wide { grid-column: 1 / -1; }
+.freedom-toggle { min-height: 54px; border-radius: 11px; border: 1px solid #d1dce6; background: #f5f8fb; padding: 8px; display: grid; gap: 4px; text-align: left; }
+.freedom-toggle span { font-size: 10px; font-weight: 800; color: #344256; }
+.freedom-toggle b { font-size: 10px; color: #9c2019; }
+.freedom-toggle.is-active { border-color: #8ecfc2; background: #eaf8f4; }
+.freedom-toggle.is-active b { color: #0d6a55; }
+.freedom-toolbox-note { margin: 10px 0 0; font-size: 9px; line-height: 1.45; color: #69778a; }
+
+.freedom-preview-expanded { overflow: hidden; }
+.freedom-preview-expanded .freedom-header, .freedom-preview-expanded .freedom-input-panel { display: none; }
+.freedom-preview-expanded .freedom-layout { display: block; padding: 0; min-height: 100vh; }
+.freedom-preview-expanded .freedom-preview-card { position: fixed; inset: 0; z-index: 100; border: 0; border-radius: 0; min-height: 100vh; padding: 14px; }
+.freedom-preview-expanded .freedom-canvas-shell, .freedom-preview-expanded .freedom-view-panel, .freedom-preview-expanded .freedom-view-panel svg { min-height: 0; height: 100%; }
+.freedom-preview-expanded .freedom-canvas-shell { flex: 1; }
+.freedom-preview-expanded .freedom-status { margin-right: 304px; }
+
+.freedom-empty-title { font-size: 25px; font-weight: 800; fill: #334155; }
+.freedom-empty-subtitle { font-size: 13px; fill: #718096; }
+.freedom-view-caption { fill: #1f2937; font-size: 18px; font-weight: 900; letter-spacing: .04em; }
+.freedom-coordinate-caption { fill: #64748b; font-size: 12px; font-weight: 700; }
+.freedom-region-label { font-size: 12px; font-weight: 900; letter-spacing: .08em; pointer-events: none; }
+.freedom-region-label-wall { fill: #3b4654; }
+.freedom-region-label-product { fill: #0f6b62; }
+.freedom-region-label-void { fill: #a3afbd; }
+.freedom-click-region, .freedom-click-point, .freedom-dimension-choice { cursor: pointer; }
+.freedom-selection-index { fill: #fff; font-size: 14px; font-weight: 900; pointer-events: none; }
+.freedom-dimension-choice rect { fill: #fff; stroke: #64748b; stroke-width: 1.5; }
+.freedom-dimension-choice text { fill: #334155; font-size: 11px; font-weight: 800; pointer-events: none; }
+.freedom-dimension-choice.is-selected rect { fill: #0d7b71; stroke: #064e48; stroke-width: 2.4; }
+.freedom-dimension-choice.is-selected text { fill: #fff; }
+
+.freedom-dialog { width: min(680px, calc(100vw - 28px)); border: 0; padding: 0; border-radius: 18px; box-shadow: 0 28px 90px rgba(15,23,42,.3); }
+.freedom-dialog::backdrop { background: rgba(15,23,42,.58); backdrop-filter: blur(3px); }
+.freedom-dialog-card { padding: 20px; display: grid; gap: 15px; }
+.freedom-dialog-small { max-width: 520px; }
+.freedom-dialog-head { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; }
+.freedom-dialog-head span { font-size: 9px; letter-spacing: .14em; font-weight: 900; color: var(--brand-2); }
+.freedom-dialog-head h2 { margin: 2px 0 0; font-size: 20px; }
+.freedom-dialog-head button { border: 0; background: #eef3f7; color: #334155; width: 38px; height: 38px; border-radius: 10px; font-size: 22px; }
+.freedom-dialog-card > p { margin: 0; color: #607086; font-size: 12px; line-height: 1.55; }
+.freedom-dialog-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 11px; }
+.freedom-dialog-actions { display: flex; justify-content: flex-end; gap: 9px; }
+.freedom-dialog-error { min-height: 18px; color: #a22119 !important; font-weight: 800; }
+.freedom-choice-list { display: grid; gap: 9px; }
+.freedom-choice-list label { display: flex; align-items: flex-start; gap: 10px; padding: 11px; border: 1px solid #d5dfe9; border-radius: 12px; cursor: pointer; }
+.freedom-choice-list input { margin-top: 4px; }
+.freedom-choice-list span { display: grid; gap: 3px; }
+.freedom-choice-list strong { font-size: 13px; }
+.freedom-choice-list small { color: #6c7a8d; font-size: 10px; }
+.freedom-wall-choice-list { display: grid; gap: 9px; max-height: 360px; overflow: auto; }
+.freedom-wall-choice-row { display: grid; grid-template-columns: minmax(170px,.8fr) minmax(220px,1.2fr); gap: 12px; align-items: center; border: 1px solid #d8e1ea; border-radius: 11px; padding: 10px; }
+.freedom-wall-choice-row strong { font-size: 11px; }
+.freedom-wall-choice-row span { color: #526174; font-size: 11px; }
+
+@media (max-width: 1180px) {
+  .freedom-header { grid-template-columns: 1fr; gap: 12px; position: static; }
+  .freedom-version { position: absolute; right: 18px; top: 18px; }
+  .freedom-layout { grid-template-columns: 1fr; }
+  .freedom-input-panel { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .freedom-file-card { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .freedom-selectors, .freedom-form-grid, .freedom-dialog-grid, .freedom-input-panel { grid-template-columns: 1fr; }
+  .freedom-layout { padding: 10px; }
+  .freedom-preview-head { align-items: flex-start; flex-direction: column; }
+  .freedom-preview-actions { width: 100%; }
+  .freedom-preview-actions .freedom-btn { flex: 1; }
+  .freedom-toolbox { width: min(280px, calc(100vw - 24px)); right: 12px; top: 118px; }
+  .freedom-selection-bar { align-items: stretch; flex-direction: column; }
+  .freedom-selection-bar > div { justify-content: flex-end; }
+  .freedom-wall-choice-row { grid-template-columns: 1fr; }
+}

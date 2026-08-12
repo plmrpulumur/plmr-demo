@@ -1,0 +1,35 @@
+# Secrets / local environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+private/
+**/private/
+
+# Generated output
+*.pdf
+*.zip
+coverage/
+playwright-report/
+test-results/
+**/test-results/
+**/screenshots/
+**/*-actual.png
+**/*-expected.png
+**/*-diff.png
+
+# Cache / temp
+node_modules/
+.cache/
+.tmp/
+tmp/
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp

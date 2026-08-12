@@ -1,0 +1,33 @@
+(function () {
+  'use strict';
+
+  const build = '10.28.4-r14.28.4';
+  const key = 'plmr_loaded_build';
+  const cachePrefix = 'pulumur-pwa-';
+
+  try {
+    if (localStorage.getItem(key) !== build) {
+      localStorage.setItem(key, build);
+      if ('caches' in window) {
+        caches.keys()
+          .then(keys => Promise.all(keys.filter(name => name.startsWith(cachePrefix)).map(name => caches.delete(name))))
+          .catch(() => {});
+      }
+      if ('serviceWorker' in navigator) {
+        const reloadKey = `plmr_sw_build_reload_${build}`;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          try {
+            if (sessionStorage.getItem(reloadKey) === '1') return;
+            sessionStorage.setItem(reloadKey, '1');
+            window.location.reload();
+          } catch (_) {}
+        }, { once: true });
+        navigator.serviceWorker.getRegistrations()
+          .then(registrations => Promise.all(registrations.map(registration => registration.update())))
+          .catch(() => {});
+      }
+    }
+  } catch (_) {}
+
+  window.PULUMUR_BUILD = build;
+})();

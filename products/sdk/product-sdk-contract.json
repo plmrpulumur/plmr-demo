@@ -1,0 +1,13 @@
+{
+  "schema": "plmr-product-sdk-v1",
+  "runtimeContract": "plmr-product-runtime-contract-v2",
+  "contractVersion": 2,
+  "requiredFiles": ["product.manifest.json", "product-schema.js", "product-geometry.js", "product-renderer.js", "product-adapter.js", "product-contract.test.js", "package.json"],
+  "requiredAdapterMethods": ["createDefaultProject", "validateProject", "migrateProject", "buildStandaloneGeometry", "buildPlacementGeometry", "renderPreview", "serializeProject", "deserializeProject", "exportDxf", "exportPdf"],
+  "rules": {
+    "deterministic": true,
+    "finiteGeometry": true,
+    "productionSupabase": false,
+    "externalRuntimeDependency": false
+  }
+}

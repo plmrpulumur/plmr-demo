@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0d5d5f" />
+  <title>B-Cube Freedom · Pülümür Automation Studio</title>
+  <link rel="icon" type="image/png" sizes="64x64" href="../../assets/icons/favicon-64.png" />
+  <link rel="stylesheet" href="freedom.css?v=10.4-r13.63" />
+  <script src="../../core/accessPolicy.js?v=10.4-r13.63"></script>
+  <script src="../../core/productAccessTicket.js?v=10.4-r13.63"></script>
+  <script src="../../core/directProductAccessGuard.js?v=10.4-r13.63" data-product="B-Cube Freedom" data-fallback="../../index.html"></script>
+  <script src="../product-registry.js?v=10.4-r13.63"></script>
+  <script src="freedom-adapter.js?v=10.4-r13.63"></script>
+</head>
+<body>
+  <header class="freedom-header">
+    <div class="freedom-brand">
+      <img src="../../assets/plmr-logo-header.png" alt="PLMR" />
+      <div>
+        <h1>Pülümür Automation Studio</h1>
+        <p>B-Cube Freedom · Bağımsız Serbest Çizim Motoru</p>
+      </div>
+    </div>
+    <div class="freedom-selectors">
+      <label><span>Ürün</span><select id="product"><option>Pergo Rise</option><option selected>B-Cube Freedom</option></select></label>
+      <label><span>Modül</span><select id="moduleName"><option selected>Free</option></select></label>
+      <label><span>Çizim Motoru</span><select id="engine"><option selected>Freedom Independent SVG</option></select></label>
+    </div>
+    <div class="freedom-version">V13.45</div>
+  </header>
+
+  <main class="freedom-layout">
+    <aside class="freedom-input-panel">
+      <section class="freedom-card">
+        <div class="freedom-card-head"><h2>Proje Bilgileri</h2><span>Free</span></div>
+        <div class="freedom-form-grid freedom-project-grid">
+          <label><span>Müşteri</span><input data-project-key="customer" autocomplete="organization" /></label>
+          <label><span>Proje</span><input data-project-key="name" /></label>
+          <label><span>Revizyon</span><input data-project-key="revision" /></label>
+          <label><span>Çizen</span><input data-project-key="drawnBy" /></label>
+          <label class="freedom-field-wide"><span>Tarih</span><input data-project-key="date" /></label>
+        </div>
+      </section>
+
+      <section class="freedom-card">
+        <div class="freedom-card-head"><h2>Sistem Ölçüleri</h2><small>Veri giriş alanı korunmuştur; Freedom kuralları daha sonra bağlanacaktır.</small></div>
+        <div class="freedom-form-grid">
+          <label><span>Sistem Adedi</span><input data-form-key="systemCount" inputmode="numeric" /></label>
+          <label><span>Genişlik (mm)</span><input data-form-key="width" inputmode="decimal" /></label>
+          <label><span>Açılım (mm)</span><input data-form-key="opening" inputmode="decimal" /></label>
+          <label><span>Arka Yükseklik (mm)</span><input data-form-key="rearHeight" inputmode="decimal" /></label>
+          <label><span>Ön Yükseklik (mm)</span><input data-form-key="frontHeight" inputmode="decimal" /></label>
+          <label><span>Sistem Açısı (°)</span><input data-form-key="angle" inputmode="decimal" /></label>
+          <label><span>Motor</span><select data-form-key="motor"><option>YOK</option><option>VAR</option></select></label>
+          <label><span>Kumanda</span><select data-form-key="remote"><option>HAYIR</option><option>EVET</option></select></label>
+          <label><span>LED</span><select data-form-key="led"><option>HAYIR</option><option>EVET</option></select></label>
+          <label><span>Parapet H (mm)</span><input data-form-key="parapetHeight" inputmode="decimal" /></label>
+        </div>
+      </section>
+
+      <section class="freedom-card freedom-file-card">
+        <div class="freedom-card-head"><h2>Proje Dosyası</h2></div>
+        <div class="freedom-file-actions">
+          <button id="projectExportBtn" type="button" class="freedom-btn freedom-btn-primary">Proje Dosyası İndir</button>
+          <button id="projectImportBtn" type="button" class="freedom-btn freedom-btn-secondary">Proje Dosyası Aç</button>
+          <input id="projectImportInput" type="file" accept=".plmr,.json,application/json" hidden />
+          <button id="resetFreedomBtn" type="button" class="freedom-btn freedom-btn-danger">Freedom Çizimini Sıfırla</button>
+        </div>
+      </section>
+    </aside>
+
+    <section id="freedomPreviewCard" class="freedom-preview-card">
+      <div class="freedom-preview-head">
+        <div>
+          <span class="freedom-kicker">B-CUBE FREEDOM</span>
+          <h2>Serbest Çizim Önizlemesi</h2>
+        </div>
+        <div class="freedom-preview-actions">
+          <button id="undoBtn" type="button" class="freedom-icon-btn" title="Geri al">↶</button>
+          <button id="redoBtn" type="button" class="freedom-icon-btn" title="Yinele">↷</button>
+          <button id="previewProjectExportBtn" type="button" class="freedom-btn freedom-btn-secondary">Proje Dosyası</button>
+          <button id="expandPreviewBtn" type="button" class="freedom-btn freedom-btn-primary">Önizlemeyi Büyüt</button>
+        </div>
+      </div>
+
+      <div class="freedom-view-tabs" role="tablist">
+        <button type="button" data-view-tab="top" class="is-active">Üst Görünüş</button>
+        <button type="button" data-view-tab="front">Ön Görünüş</button>
+        <button type="button" data-view-tab="side">Yan Görünüş</button>
+      </div>
+
+      <div id="selectionModeBar" class="freedom-selection-bar" hidden>
+        <strong id="selectionModeText"></strong>
+        <div>
+          <button id="selectionCancelBtn" type="button" class="freedom-btn freedom-btn-secondary">İptal</button>
+          <button id="selectionCompleteBtn" type="button" class="freedom-btn freedom-btn-primary">Seçimi Tamamla</button>
+        </div>
+      </div>
+
+      <div class="freedom-canvas-shell">
+        <div class="freedom-view-panel" data-view-panel="top"><svg id="freedomTopSvg" aria-label="B-Cube Freedom üst görünüş"></svg></div>
+        <div class="freedom-view-panel" data-view-panel="front" hidden><svg id="freedomFrontSvg" aria-label="B-Cube Freedom ön görünüş"></svg></div>
+        <div class="freedom-view-panel" data-view-panel="side" hidden><svg id="freedomSideSvg" aria-label="B-Cube Freedom yan görünüş"></svg></div>
+      </div>
+
+      <div id="freedomStatus" class="freedom-status" role="status" aria-live="polite"></div>
+
+      <aside id="freedomToolbox" class="freedom-toolbox" hidden>
+        <div class="freedom-toolbox-head">
+          <div><span>FREEDOM</span><strong>TOOLBOX</strong></div>
+          <small>Üst görünüş serbest tanımlama araçları</small>
+        </div>
+        <div class="freedom-toolbox-grid">
+          <button type="button" class="freedom-toggle" data-option-key="glassTrack" aria-pressed="false"><span>Cam Kaydı</span><b class="freedom-toggle-value">HAYIR</b></button>
+          <button type="button" class="freedom-toggle" data-option-key="triangleJoinery" aria-pressed="false"><span>Üçgen Doğrama</span><b class="freedom-toggle-value">HAYIR</b></button>
+          <button type="button" class="freedom-toggle is-active" data-option-key="waterStandard" aria-pressed="true"><span>Su Çıkışı Standart mı?</span><b class="freedom-toggle-value">EVET</b></button>
+          <button id="axisCreateBtn" type="button" class="freedom-btn freedom-btn-tool freedom-tool-wide">1 · Aks Oluştur</button>
+          <button id="regionDefinitionsBtn" type="button" class="freedom-btn freedom-btn-tool freedom-tool-wide">2 · Bölge Tanımları</button>
+          <button id="supportDefinitionsBtn" type="button" class="freedom-btn freedom-btn-tool freedom-tool-wide">3 · Dikme / Duvar Bağlantı Tanımla</button>
+        </div>
+        <p class="freedom-toolbox-note">Ray sınırlarını daralt, ürün yerleştirme ve Pergo Rise’a özgü komutlar bu motora yüklenmez.</p>
+      </aside>
+    </section>
+  </main>
+
+  <dialog id="axisDialog" class="freedom-dialog">
+    <form id="axisForm" class="freedom-dialog-card">
+      <div class="freedom-dialog-head"><div><span>AŞAMA 1</span><h2>Aks Oluştur</h2></div><button id="axisDialogCancel" type="button" aria-label="Kapat">×</button></div>
+      <p>Çizim merkezi <strong>(0,0)</strong> kabul edilir. Girilen yatay ve dikey aks değerleri <strong>bölme adedidir</strong>; oluşan aks adedi değer + 1 olur.</p>
+      <div class="freedom-dialog-grid">
+        <label><span>Total Genişlik (mm)</span><input id="axisTotalWidth" type="number" min="1" step="1" required /></label>
+        <label><span>Total Açılım (mm)</span><input id="axisTotalOpening" type="number" min="1" step="1" required /></label>
+        <label><span>Yatay Aks Bölmesi</span><input id="axisHorizontalCount" type="number" min="1" max="30" step="1" required /></label>
+        <label><span>Dikey Aks Bölmesi</span><input id="axisVerticalCount" type="number" min="1" max="30" step="1" required /></label>
+      </div>
+      <p id="axisDialogError" class="freedom-dialog-error"></p>
+      <div class="freedom-dialog-actions"><button id="axisDialogCancelBottom" type="button" class="freedom-btn freedom-btn-secondary">İptal</button><button type="submit" class="freedom-btn freedom-btn-primary">Aksları Oluştur</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="regionTypeDialog" class="freedom-dialog">
+    <form id="regionTypeForm" class="freedom-dialog-card freedom-dialog-small">
+      <div class="freedom-dialog-head"><div><span>AŞAMA 2</span><h2>Bölge Türü</h2></div><button id="regionTypeCancel" type="button" aria-label="Kapat">×</button></div>
+      <p>Seçilen bölgelerin tanımını belirleyin.</p>
+      <div class="freedom-choice-list">
+        <label><input type="radio" name="regionDefinitionType" value="product" checked /><span><strong>Ürün</strong><small>Genişlik yönü ölçü kutularından seçilir.</small></span></label>
+        <label><input type="radio" name="regionDefinitionType" value="wall" /><span><strong>Duvar</strong><small>Bölgenin tamamına duvar taraması uygulanır.</small></span></label>
+        <label><input type="radio" name="regionDefinitionType" value="void" /><span><strong>Boşluk</strong><small>Teğet olmayan iç aks parçaları tıraşlanır.</small></span></label>
+      </div>
+      <div class="freedom-dialog-actions"><button id="regionTypeCancelBottom" type="button" class="freedom-btn freedom-btn-secondary">İptal</button><button type="submit" class="freedom-btn freedom-btn-primary">Devam Et</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="supportTypeDialog" class="freedom-dialog">
+    <form id="supportTypeForm" class="freedom-dialog-card freedom-dialog-small">
+      <div class="freedom-dialog-head"><div><span>AŞAMA 3</span><h2>Bağlantı Türü</h2></div><button id="supportTypeCancel" type="button" aria-label="Kapat">×</button></div>
+      <label class="freedom-dialog-field"><span>Tanımlama</span><select id="supportDefinitionMode"><option value="post">Dikme olarak tanımla</option><option value="wallConnection">Duvar bağlantısı olarak tanımla</option></select></label>
+      <label id="postProfileWrap" class="freedom-dialog-field"><span>Dikme Kesiti</span><select id="supportPostProfile"><option value="100X220">100x220 · X=100 / Y=220</option><option value="220X100">220x100 · X=220 / Y=100</option></select></label>
+      <p id="supportTypeDialogError" class="freedom-dialog-error"></p>
+      <div class="freedom-dialog-actions"><button id="supportTypeCancelBottom" type="button" class="freedom-btn freedom-btn-secondary">İptal</button><button type="submit" class="freedom-btn freedom-btn-primary">Tanımla</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="wallChoiceDialog" class="freedom-dialog">
+    <form id="wallChoiceForm" class="freedom-dialog-card">
+      <div class="freedom-dialog-head"><div><span>AŞAMA 3</span><h2>Bağlanılacak Duvarı Seç</h2></div><button id="wallChoiceCancel" type="button" aria-label="Kapat">×</button></div>
+      <p>Tek duvar bulunan noktalar otomatik atanır. Birden fazla duvar bulunan her nokta için bağlantı yüzü zorunlu olarak seçilmelidir.</p>
+      <div id="wallChoiceList" class="freedom-wall-choice-list"></div>
+      <div class="freedom-dialog-actions"><button id="wallChoiceCancelBottom" type="button" class="freedom-btn freedom-btn-secondary">İptal</button><button type="submit" class="freedom-btn freedom-btn-primary">Bağlantıları Tamamla</button></div>
+    </form>
+  </dialog>
+
+  <script src="freedom-geometry.js?v=10.4-r13.63"></script>
+  <script src="freedom-app.js?v=10.4-r13.63"></script>
+</body>
+</html>

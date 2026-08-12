@@ -1,0 +1,24 @@
+{
+  "name": "PLMR V14.28.4 — Pülümür Automation Studio",
+  "short_name": "PLMR V14.28.4",
+  "description": "Web tabanlı DXF ve PDF üretim aracı.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#eef3f8",
+  "theme_color": "#0d5d5f",
+  "icons": [
+    {
+      "src": "assets/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

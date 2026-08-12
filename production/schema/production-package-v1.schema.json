@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plmr-production-package-v1",
+  "title": "PLMR Production Package V1",
+  "type": "object",
+  "required": ["packageId", "schema", "schemaVersion", "pilotProfileId", "company", "productType", "projectInfo", "generatedFromHash", "status", "validation", "positions", "cutItems", "accessoryItems", "glassItems", "stockItems", "optimizationResult"],
+  "properties": {
+    "packageId": { "type": "string", "minLength": 1 },
+    "schema": { "const": "plmr-production-package-v1" },
+    "schemaVersion": { "const": 1 },
+    "pilotProfileId": { "type": "string" },
+    "company": { "type": "object", "required": ["id", "name"] },
+    "productType": { "const": "SLIDING" },
+    "projectInfo": { "type": "object" },
+    "sourceProjectId": { "type": "string" },
+    "sourceRevision": { "type": "string" },
+    "createdAt": { "type": "string" },
+    "generatedFromHash": { "type": "string", "pattern": "^fnv1a32:" },
+    "status": { "enum": ["DRAFT", "VALIDATION_REQUIRED", "STOCK_SHORTAGE", "READY_FOR_PRODUCTION", "READY_TO_ORDER"] },
+    "validation": { "type": "object", "required": ["errors", "warnings"] },
+    "options": { "type": "object" },
+    "positions": { "type": "array" },
+    "cutItems": { "type": "array" },
+    "accessoryItems": { "type": "array" },
+    "glassItems": { "type": "array" },
+    "stockItems": { "type": "array" },
+    "optimizationResult": { "type": "object" },
+    "purchaseNeeds": { "type": "array" },
+    "approvals": { "type": "object" },
+    "exports": { "type": "object" }
+  },
+  "additionalProperties": true
+}

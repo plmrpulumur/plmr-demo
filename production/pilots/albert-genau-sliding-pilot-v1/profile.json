@@ -1,0 +1,28 @@
+{
+  "id": "albert-genau-sliding-pilot-v1",
+  "company": { "id": "albert-genau", "name": "Albert Genau" },
+  "productType": "SLIDING",
+  "system": "SLIDEMASTER 10",
+  "supported": {
+    "type": "WITH THRESHOLD",
+    "openingType": "SIDE OPENING",
+    "glassThickness": "10 MM"
+  },
+  "defaults": {
+    "ralCode": "RAL 7016",
+    "surface": "MAT",
+    "extraRailCount": 0,
+    "horizontalAdjustmentProfile": false,
+    "insectScreen": false,
+    "shortageAcceptedForOrder": true
+  },
+  "stockPolicy": {
+    "stockLengths": [6000, 7000],
+    "availableQuantityPerLength": 80,
+    "kerf": 3,
+    "startTrim": 10,
+    "endTrim": 10,
+    "minimumReusableOffcut": 300,
+    "unit": "mm"
+  }
+}

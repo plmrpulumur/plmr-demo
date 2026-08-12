@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PLMR Çoklu Poz Ürün Çizimi</title>
+  <link rel="stylesheet" href="standalone.css?v=10.28.4-r14.28.4" />
+  <script src="../../core/accessPolicy.js?v=10.28.4-r14.28.4"></script>
+  <script src="../../core/productAccessTicket.js?v=10.28.4-r14.28.4"></script>
+  <script src="../../core/directProductAccessGuard.js?v=10.28.4-r14.28.4" data-product-param="product" data-fallback="../../index.html"></script>
+</head>
+<body>
+  <header class="app-header">
+    <a href="../../index.html" class="back-link">← PLMR</a>
+    <div><h1>Bağımsız Ürün Çizimi</h1><span class="version">V14.16 · Standalone Cephe Ürünleri</span></div>
+    <div class="header-actions"><button id="newProjectBtn" class="ghost">Yeni Proje</button><label class="file compact">.plmr Aç<input id="openInput" type="file" accept=".plmr,application/json" /></label></div>
+  </header>
+
+  <main>
+    <section class="workspace" aria-label="Çoklu poz veri girişi">
+      <div class="card">
+        <div class="section-heading"><div><span class="eyebrow">01</span><h2>Proje Bilgileri</h2></div><span class="hint">Çıktı başlıklarında kullanılır</span></div>
+        <div class="form-grid project-grid">
+          <label>Müşteri<input id="customerName" autocomplete="organization" /></label>
+          <label>Proje adı<input id="projectName" value="Bağımsız Ürün Projesi" /></label>
+          <label>Proje kodu<input id="projectCode" /></label>
+          <label>Revizyon<input id="revision" value="R00" /></label>
+          <label>Çizen<input id="designer" /></label>
+          <label>Tarih<input id="projectDate" type="date" /></label>
+        </div>
+      </div>
+
+      <div class="card collapsible-card" id="commonSettingsCard">
+        <div class="section-heading collapsible-heading">
+          <div><span class="eyebrow">02</span><h2>Ortak Ürün Ayarları</h2></div>
+          <div class="section-actions">
+            <span class="hint">Kaydet ile uygulanır</span>
+            <button id="commonSettingsExpand" type="button" class="icon-toggle" aria-expanded="true" aria-controls="commonSettingsBody" title="Ortak ürün ayarlarını aç / kapat">▾</button>
+            <button id="commonSettingsPin" type="button" class="icon-toggle" aria-pressed="false" title="Ortak ürün ayarlarını sabitle">📌</button>
+          </div>
+        </div>
+        <div id="commonSettingsBody" class="section-body">
+          <div class="form-grid common-grid">
+            <label>Varsayılan ürün<select id="productType"></select></label>
+            <label>Renk<select id="commonColor"><option value="NATURAL">Naturel</option><option value="ANTHRACITE">Antrasit</option><option value="BLACK">Siyah</option><option value="WHITE">Beyaz</option></select></label>
+            <label>Cam / dolgu<select id="commonGlass"><option value="CLEAR">Şeffaf</option><option value="SMOKED">Füme</option><option value="LAMINATED">Lamine</option><option value="FABRIC">Kumaş</option></select></label>
+            <label>Yerleşim<select id="layoutMode"></select></label>
+            <label class="wide">Genel açıklama<input id="generalDescription" /></label>
+            <label class="check"><input id="expandQuantity" type="checkbox" /> Her adedi ayrı poz olarak oluştur</label>
+          </div>
+          <div id="commonProductOptions" class="form-grid dynamic-options" aria-label="Ürüne özel ortak ayarlar"></div>
+          <div class="common-save-row">
+            <span id="commonSettingsStatus" class="hint">Kaydedilmedi</span>
+            <button id="saveCommonSettingsBtn" type="button" class="secondary save-common-btn" title="Ortak ürün ayarlarını kaydet">💾 Kaydet</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card positions-card">
+        <div class="section-heading positions-heading"><div><span class="eyebrow">03</span><h2>Poz Listesi</h2><span id="positionCount" class="count-badge">1 poz</span></div><div class="toolbar"><button id="addBtn">+ Yeni Poz</button><button id="copyLastBtn" class="secondary">Öncekini Kopyala</button><button id="bulkCreateBtn" class="secondary">Çoklu Oluştur</button><button id="importPositionsBtn" class="secondary">CSV / Excel İçe Aktar</button></div></div>
+        <div class="bulk-bar" id="bulkBar">
+          <strong><span id="selectedCount">0</span> seçili</strong>
+          <select id="bulkProduct"><option value="">Ürünü koru</option></select>
+          <input id="bulkDescription" placeholder="Açıklama uygula" />
+          <button id="applySelectedBtn" class="secondary">Açıklamayı Uygula</button>
+          <button id="bulkOptionsBtn" class="secondary">Seçenek Uygula</button>
+          <button id="deleteSelectedBtn" class="danger">Seçilenleri Sil</button>
+          <button id="renumberBtn" class="secondary">Yeniden Numaralandır</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th><input id="selectAll" type="checkbox" aria-label="Tüm pozları seç" /></th><th>Poz</th><th>Ürün</th><th>Genişlik</th><th>Yükseklik</th><th>Adet</th><th>Özet</th><th>Açıklama</th><th>İşlemler</th></tr></thead>
+            <tbody id="positionRows"></tbody>
+          </table>
+        </div>
+        <div id="validationSummary" class="validation-summary" hidden></div>
+      </div>
+
+      <div class="action-dock">
+        <button id="validateBtn" class="secondary">Tümünü Doğrula</button>
+        <button id="drawBtn">Çizimi Oluştur</button>
+        <button id="dxfBtn" class="export">DXF</button>
+        <button id="pdfBtn" class="export">PDF</button>
+        <button id="productionBtn" class="production-cta">Üretim Paketini Oluştur</button>
+        <button id="saveBtn" class="export">.plmr Kaydet</button>
+        <p id="status" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="preview-panel" aria-label="Çizim önizlemesi">
+      <div class="preview-header"><div><span class="eyebrow">04</span><h2>Üretim Önizlemesi</h2></div><span id="previewMeta">Henüz çizim yok</span></div>
+      <div id="preview" tabindex="0" aria-label="Çoklu poz çizim önizlemesi"></div>
+    </section>
+  </main>
+
+  <dialog id="detailDialog">
+    <form method="dialog" id="detailForm">
+      <div class="dialog-header"><div><span class="eyebrow">POZ DETAYI</span><h2 id="detailTitle">Poz Düzenle</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <div id="productOptions" class="form-grid detail-grid"></div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="detailSaveBtn" value="default">Kaydet ve Çiz</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="bulkDialog">
+    <form method="dialog" id="bulkForm">
+      <div class="dialog-header"><div><span class="eyebrow">HIZLI OLUŞTUR</span><h2>Çoklu Poz Oluştur</h2></div><button value="cancel" class="icon-btn">×</button></div>
+      <div class="form-grid detail-grid"><label>Poz başlangıcı<input id="bulkStartNo" value="P01" /></label><label>Adet<input id="bulkCount" type="number" min="1" max="100" value="4" /></label><label>Genişlik<input id="bulkWidth" type="number" value="1500" /></label><label>Yükseklik<input id="bulkHeight" type="number" value="2400" /></label></div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="bulkConfirmBtn" value="default">Pozları Oluştur</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="importDialog">
+    <form method="dialog" id="importForm">
+      <div class="dialog-header"><div><span class="eyebrow">DRY-RUN</span><h2>Toplu Poz İçe Aktar</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <label class="file">CSV / Excel (.xlsx)<input id="importFile" type="file" accept=".csv,.tsv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" /></label>
+      <label class="wide">CSV / TSV verisi<textarea id="importText" rows="7"></textarea></label>
+      <div class="dialog-actions"><button id="importDryRunBtn" type="button" class="secondary">Dry-run Doğrula</button><label class="check"><input id="importAllowPartial" type="checkbox" /> Yalnız geçerli satırları uygula</label></div>
+      <p id="importSummary" class="dialog-note" aria-live="polite"></p>
+      <div class="table-wrap import-preview"><table><thead><tr><th>Satır</th><th>Poz</th><th>Ürün</th><th>G</th><th>Y</th><th>Durum</th><th>Hata</th></tr></thead><tbody id="importPreviewRows"></tbody></table></div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="importApplyBtn" value="default" disabled>Geçerli Pozları Uygula</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="applyDialog">
+    <form method="dialog" id="applyForm">
+      <div class="dialog-header"><div><span class="eyebrow">TOPLU İŞLEM</span><h2>Seçilen Pozlara Uygula</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <div class="form-grid detail-grid">
+        <label>Ürün<select id="applyProduct"><option value="">Ürünü koru</option></select></label>
+        <label>Açıklama<input id="applyDescription" placeholder="Değiştirme" /></label>
+      </div>
+      <div id="applyProductOptions" class="form-grid detail-grid dynamic-options"></div>
+      <p class="dialog-note">Boş bırakılan alanlar değiştirilmez. Ürün değiştirilirse uyumsuz eski ürün seçenekleri temizlenir.</p>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="applyConfirmBtn" value="default">Seçilenlere Uygula</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="productionDialog" class="production-dialog">
+    <div class="production-shell">
+      <header class="production-hero">
+        <div>
+          <span class="production-kicker">ALBERT GENAU · ÜRETİM PİLOTU</span>
+          <h2>SLIDEMASTER 10 Üretim Merkezi</h2>
+          <p>Kanonik Sürme Project Model’den kesim, cam, stok ve sipariş workbook’u üretir.</p>
+        </div>
+        <div class="production-hero-actions">
+          <span id="productionStatusBadge" class="production-status">DRAFT</span>
+          <button id="productionCloseBtn" type="button" class="production-close" aria-label="Kapat">×</button>
+        </div>
+      </header>
+
+      <section class="production-controls">
+        <label>RAL Kodu<input id="productionRal" value="RAL 7016" /></label>
+        <label>Yüzey<select id="productionSurface"><option value="MAT">Mat</option><option value="PARLAK">Parlak</option><option value="TEKSTÜREL">Tekstürel</option></select></label>
+        <label>Ekstra ray <span class="info-only">yalnız bilgi</span><input id="productionExtraRail" type="number" min="0" max="20" value="0" /></label>
+        <label class="production-check"><input id="productionAdjustment" type="checkbox" /> 33×22 yatay ayar profili</label>
+        <label class="production-check disabled"><input id="productionInsect" type="checkbox" disabled /> Sineklik · pilotta pasif</label>
+        <button id="productionGenerateBtn" type="button" class="production-primary">Paketi Yenile</button>
+      </section>
+
+      <section id="productionKpis" class="production-kpis"></section>
+      <nav id="productionTabs" class="production-tabs" aria-label="Üretim bölümleri">
+        <button type="button" data-tab="summary" class="active">Özet</button>
+        <button type="button" data-tab="cuts">Kesim Listesi</button>
+        <button type="button" data-tab="glass">Cam Sipariş</button>
+        <button type="button" data-tab="stock">Pilot Stok</button>
+        <button type="button" data-tab="optimization">Optimizasyon</button>
+        <button type="button" data-tab="purchase">Satın Alma</button>
+        <button type="button" data-tab="rules">Kurallar</button>
+      </nav>
+      <main id="productionContent" class="production-content"></main>
+      <footer class="production-footer">
+        <div id="productionFooterNote">Makrolar, ActiveX ve harici Excel bağlantıları kullanılmaz.</div>
+        <div class="production-footer-actions">
+          <button id="productionJsonBtn" type="button" class="secondary">Production JSON</button>
+          <button id="productionXlsxBtn" type="button" class="production-primary">Sipariş Workbook XLSX</button>
+        </div>
+      </footer>
+    </div>
+  </dialog>
+
+  <script src="../../blocks/filteredBlocks.js?v=10.28.4-r14.28.4"></script><script src="../../src/peri01ExcelBridge.js?v=10.28.4-r14.28.4"></script><script src="../../src/peri01Geometry.js?v=10.28.4-r14.28.4"></script>
+  <script src="../../export/layerNamespaceManager.js?v=10.28.4-r14.28.4"></script><script src="../../export/drawingEntityValidator.js?v=10.28.4-r14.28.4"></script><script src="../../export/exportService.js?v=10.28.4-r14.28.4"></script><script src="../../export/pdfFontData.js?v=10.28.4-r14.28.4"></script><script src="../../export/vectorPdfEngine.js?v=10.28.4-r14.28.4"></script><script src="../../src/modernDxfTemplate.js?v=10.28.4-r14.28.4"></script><script src="../../src/dxfModernEngine.js?v=10.28.4-r14.28.4"></script>
+  <script src="../product-registry.js?v=10.28.4-r14.28.4"></script><script src="../../core/coordinateTransformService.js?v=10.28.4-r14.28.4"></script><script src="../../core/sceneGraph.js?v=10.28.4-r14.28.4"></script><script src="../product-adapter-utils.js?v=10.28.4-r14.28.4"></script><script src="../product-adapter-factory.js?v=10.28.4-r14.28.4"></script>
+  <script src="../sliding/sliding-adapter.js?v=10.28.4-r14.28.4"></script><script src="../guillotine/guillotine-adapter.js?v=10.28.4-r14.28.4"></script><script src="../zip-screen/zip-screen-adapter.js?v=10.28.4-r14.28.4"></script><script src="facade-product-adapters.js?v=10.28.4-r14.28.4"></script>
+  <script src="../../persistence/schemaRegistryCenter.js?v=10.28.4-r14.28.4"></script><script src="../../ai/assistantIntentRouter.js?v=10.28.4-r14.28.4"></script><script src="../../ai/projectScanner.js?v=10.28.4-r14.28.4"></script><script src="../../ai/drawingCopilot.js?v=10.28.4-r14.28.4"></script><script src="../../ai/naturalLanguageDraft.js?v=10.28.4-r14.28.4"></script><script src="../../ai/geometryValidator.js?v=10.28.4-r14.28.4"></script><script src="../../import/xlsxLite.js?v=10.28.4-r14.28.4"></script><script src="../../import/bulkPositionImport.js?v=10.28.4-r14.28.4"></script>
+  <script src="../../production/productionProfileRegistry.js?v=10.28.4-r14.28.4"></script><script src="../../production/productionPackageModel.js?v=10.28.4-r14.28.4"></script><script src="../../production/optimization/deterministicCutOptimizer.js?v=10.28.4-r14.28.4"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/config.js?v=10.28.4-r14.28.4"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/stock.js?v=10.28.4-r14.28.4"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/rules.js?v=10.28.4-r14.28.4"></script><script src="../../production/export/xlsxWorkbookWriter.js?v=10.28.4-r14.28.4"></script>
+  <script src="standalone-project.js?v=10.28.4-r14.28.4"></script><script src="standalone-layout.js?v=10.28.4-r14.28.4"></script><script src="../../core/constraintEngine.js?v=10.28.4-r14.28.4"></script><script src="../../export/printComposer.js?v=10.28.4-r14.28.4"></script><script src="standalone-export.js?v=10.28.4-r14.28.4"></script><script src="standalone-app.js?v=10.28.4-r14.28.4"></script><script src="standalone-production-ui.js?v=10.28.4-r14.28.4"></script><script src="../../import/bulkImportController.js?v=10.28.4-r14.28.4"></script>
+</body>
+</html>
