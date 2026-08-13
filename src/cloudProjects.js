@@ -137,6 +137,8 @@
   let dirty = false;
   let dirtyGeneration = 0;
   let authBusy = false;
+  let authBootstrapInProgress = true;
+  let authBootstrapComplete = false;
   let authEpoch = 0;
   let uiBound = false;
   let dirtyTrackingBound = false;
@@ -399,6 +401,16 @@
     if (!ui.authMessage) return;
     ui.authMessage.textContent = message || '';
     ui.authMessage.classList.toggle('is-error', Boolean(isError));
+  }
+
+  function syncLoginInteractivity() {
+    const blocked = Boolean(authBootstrapInProgress || authBusy);
+    [ui.loginUsername, ui.loginPassword, ui.rememberMe, ui.savePassword, ui.loginBtn].forEach(control => {
+      if (!control) return;
+      control.disabled = blocked;
+      control.setAttribute('aria-disabled', blocked ? 'true' : 'false');
+    });
+    if (ui.loginForm) ui.loginForm.setAttribute('aria-busy', blocked ? 'true' : 'false');
   }
 
   function setSaveState(label, mode) {
@@ -734,12 +746,12 @@
     return result.data.user;
   }
 
-  async function handleAuthenticated(session) {
+  async function handleAuthenticated(session, options = {}) {
     const previousUserId = String(currentSession && currentSession.user && currentSession.user.id || '');
     const nextUserId = String(session && session.user && session.user.id || '');
     const sameAuthenticatedUser = Boolean(previousUserId && previousUserId === nextUserId);
     currentSession = session;
-    setAuthMessage(t('authLoading'), false);
+    if (options.showLoading !== false) setAuthMessage(t('authLoading'), false);
     try {
       verifiedUser = await verifyAuthenticatedUser(session);
       await loadProfile();
@@ -790,6 +802,11 @@
   async function submitLogin(event) {
     event.preventDefault();
     if (authBusy) return;
+    if (authBootstrapInProgress || !authBootstrapComplete) {
+      setAuthMessage(t('authLoading'), false);
+      syncLoginInteractivity();
+      return;
+    }
     const username = normalizeUsername(ui.loginUsername && ui.loginUsername.value);
     const pin = String(ui.loginPassword && ui.loginPassword.value || '').trim();
     if (!username || !/^\d{4}$/.test(pin)) {
@@ -797,6 +814,7 @@
       return;
     }
     authBusy = true;
+    syncLoginInteractivity();
     explicitLoginInProgress = true;
     const loginEpoch = ++authEpoch;
     if (ui.loginBtn) ui.loginBtn.disabled = true;
@@ -815,7 +833,8 @@
       const expectedUsername = normalizeUsername(result.username || username);
       if (!sessionData.access_token || !sessionData.refresh_token || !expectedUserId) throw new Error('INVALID_LOGIN');
 
-      await client.auth.signOut({ scope: 'local' }).catch(() => {});
+      // setSession replaces the browser session directly. A pre-login signOut()
+      // emits a SIGNED_OUT event and can race the new SIGNED_IN transition.
       if (loginEpoch !== authEpoch) return;
 
       const sessionResult = await client.auth.setSession({
@@ -843,7 +862,7 @@
       localStorage.setItem(SAVE_PASSWORD_KEY, savePin ? '1' : '0');
       if (savePin) await storeBrowserCredential(username, pin);
 
-      await handleAuthenticated(authenticatedSession);
+      await handleAuthenticated(authenticatedSession, { showLoading: false, source: 'manual-login' });
       if (!currentProfile || normalizeUsername(currentProfile.username) !== expectedUsername) {
         await client.auth.signOut({ scope: 'local' }).catch(() => {});
         throw new Error('LOGIN_PROFILE_MISMATCH');
@@ -857,7 +876,7 @@
     } finally {
       explicitLoginInProgress = false;
       authBusy = false;
-      if (ui.loginBtn) ui.loginBtn.disabled = false;
+      syncLoginInteractivity();
     }
   }
 
@@ -1847,7 +1866,7 @@
 
   function handleVisibilityRefresh() {
     if (document.visibilityState !== 'visible' || !currentSession || explicitLoginInProgress) return;
-    window.setTimeout(() => handleAuthenticated(currentSession), 0);
+    window.setTimeout(() => handleAuthenticated(currentSession, { showLoading: false, source: 'visibility' }), 0);
   }
 
   async function init() {
@@ -1866,15 +1885,33 @@
     setupCloudProjectCommands();
     bindUi();
     applyLoginLanguage();
-    await restoreLoginPreferences();
+    void restoreLoginPreferences();
     void probeBackendHealth();
+    authBootstrapInProgress = true;
+    authBootstrapComplete = false;
+    syncLoginInteractivity();
     setAuthMessage(t('authLoading'), false);
 
     if (authSubscription && typeof authSubscription.unsubscribe === 'function') authSubscription.unsubscribe();
     const authState = client.auth.onAuthStateChange((authEvent, session) => {
       const eventEpoch = authEpoch;
+      // Capture ownership at event emission time. Supabase can emit SIGNED_IN /
+      // SIGNED_OUT while a manual login transition is still owned by submitLogin().
+      // Checking explicitLoginInProgress only inside setTimeout is too late because
+      // the manual path may have already completed before the deferred callback runs.
+      const eventOwnedByBootstrapOrLogin = Boolean(authBootstrapInProgress || explicitLoginInProgress);
       window.setTimeout(async () => {
-        if (explicitLoginInProgress || eventEpoch !== authEpoch) return;
+        if (eventOwnedByBootstrapOrLogin || authBootstrapInProgress || explicitLoginInProgress || eventEpoch !== authEpoch) return;
+        const eventUserId = String(session && session.user && session.user.id || '');
+        const activeUserId = String(currentSession && currentSession.user && currentSession.user.id || '');
+        if (session && eventUserId && activeUserId === eventUserId && currentProfile && verifiedUser
+            && (authEvent === 'SIGNED_IN' || authEvent === 'TOKEN_REFRESHED')) {
+          // Supabase may emit SIGNED_IN after setSession() has already completed the
+          // manual bootstrap. Refresh the in-memory tokens without rebuilding the
+          // profile/organization UI a second time.
+          currentSession = session;
+          return;
+        }
         if (session && !rememberPreference() && sessionStorage.getItem(SESSION_ONLY_KEY) !== '1') {
           await client.auth.signOut({ scope: 'local' });
           return;
@@ -1890,19 +1927,25 @@
       document.addEventListener('visibilitychange', handleVisibilityRefresh);
     }
 
-    const sessionResult = await client.auth.getSession();
-    if (sessionResult.error) {
-      setAppAccess(false);
-      setAuthMessage(friendlyError(sessionResult.error, 'loginFailed'), true);
-      return;
-    }
-    if (sessionResult.data.session && !rememberPreference() && sessionStorage.getItem(SESSION_ONLY_KEY) !== '1') {
-      await client.auth.signOut({ scope: 'local' });
-      await handleSignedOut();
-    } else if (sessionResult.data.session) {
-      await handleAuthenticated(sessionResult.data.session);
-    } else {
-      await handleSignedOut();
+    try {
+      const sessionResult = await client.auth.getSession();
+      if (sessionResult.error) {
+        setAppAccess(false);
+        setAuthMessage(friendlyError(sessionResult.error, 'loginFailed'), true);
+        return;
+      }
+      if (sessionResult.data.session && !rememberPreference() && sessionStorage.getItem(SESSION_ONLY_KEY) !== '1') {
+        await client.auth.signOut({ scope: 'local' });
+        await handleSignedOut();
+      } else if (sessionResult.data.session) {
+        await handleAuthenticated(sessionResult.data.session, { showLoading: true, source: 'bootstrap' });
+      } else {
+        await handleSignedOut();
+      }
+    } finally {
+      authBootstrapInProgress = false;
+      authBootstrapComplete = true;
+      syncLoginInteractivity();
     }
   }
 

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const build = '10.29-r29';
+  const build = '10.30-r30';
   const key = 'plmr_loaded_build';
   const cachePrefix = 'pulumur-pwa-';
 
@@ -14,12 +14,13 @@
           .catch(() => {});
       }
       if ('serviceWorker' in navigator) {
-        const reloadKey = `plmr_sw_build_reload_${build}`;
         navigator.serviceWorker.addEventListener('controllerchange', () => {
+          // A service-worker update must never interrupt an in-progress login or
+          // authenticated workspace. Dynamic runtime assets are network-first and
+          // versioned, so the current page can finish safely without a forced reload.
+          window.PULUMUR_SW_UPDATED_BUILD = build;
           try {
-            if (sessionStorage.getItem(reloadKey) === '1') return;
-            sessionStorage.setItem(reloadKey, '1');
-            window.location.reload();
+            window.dispatchEvent(new CustomEvent('plmr:service-worker-updated', { detail: { build } }));
           } catch (_) {}
         }, { once: true });
         navigator.serviceWorker.getRegistrations()

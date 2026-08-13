@@ -1,10 +1,10 @@
 (function (root) {
   'use strict';
 
-  const RELEASE = 'PLMR V.29';
+  const RELEASE = 'PLMR V.30';
   const PRODUCT_INPUT_SCHEMA = 'p3dv-main-product-input-v14.04';
-  const RUNTIME_BUILD = '10.29-r29';
-  const RUNTIME_CONTRACT = 'plmr-p3dv-host-bridge-v29';
+  const RUNTIME_BUILD = '10.30-r30';
+  const RUNTIME_CONTRACT = 'plmr-p3dv-host-bridge-v30';
   function embedUrlForProduct(productId, suffix) {
     const group = PRODUCT_TO_GROUP[String(productId || '')] || PRODUCT_TO_GROUP[DEFAULT_PRODUCT_ID];
     return `modules/p3dv/index.html?embedded=1&host=plmr-v29&v=${encodeURIComponent(RUNTIME_BUILD)}&productGroup=${encodeURIComponent(group)}${suffix || ''}`;
