@@ -1195,7 +1195,7 @@
     }
 
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10.28.6-r14.28.6').catch(() => {}), { once: true });
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10.29-r29').catch(() => {}), { once: true });
     }
   }
 
@@ -9902,7 +9902,7 @@ Pergola native 2D'de:
 - DXF teknik CAD çıktısıdır. Mevcut teknik çizim exportları model alanında mm ve 1:1 ölçü mantığını kullanır.
 
 8) DEMO KISITLAMALARI
-- Kapı, Sabit Doğrama ve Katlanır Cam görünür fakat pasiftir.
+- Sürme, Giyotin, Zip Perde, Kapı, Sabit Doğrama ve Katlanır Cam görünür fakat pasiftir.
 - Proje Kontrol Merkezi proje yönetimi işlemleri demo kapsamında pasiftir.
 - Internal hızlı test kontrolleri kullanıcı arayüzünde gösterilmez.`;
 
@@ -9942,7 +9942,7 @@ For native Pergola 2D:
 - DXF is the technical CAD output. Current technical exports use millimetres and 1:1 model-space measurement logic.
 
 8) DEMO LIMITS
-- Door, Fixed Joinery and Folding Glass remain visible but disabled.
+- Sliding, Guillotine, Zip Screen, Door, Fixed Joinery and Folding Glass remain visible but disabled.
 - Project Control Center project-management actions are disabled in the demo.
 - Internal quick-test controls are not shown in the user interface.`;
 

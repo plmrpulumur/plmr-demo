@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = 'PLMR V14.28.6';
+  const VERSION = 'PLMR V.29';
   const PRODUCT_IDS = Object.freeze({
     sliding: 'SLIDING',
     guillotine: 'GUILLOTINE',
