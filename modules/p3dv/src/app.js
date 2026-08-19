@@ -1,8 +1,8 @@
 (function () {
   const p3dvEmbeddedHostMode = (() => { try { return new URLSearchParams(window.location.search).get('embedded') === '1' || Boolean(window.frameElement && window.frameElement.dataset && window.frameElement.dataset.p3dvEmbeddedHost === 'true'); } catch (_) { return false; } })();
   const P3DV_PRODUCT_INPUT_SCHEMA = 'p3dv-main-product-input-v14.04';
-  const P3DV_HOST_BUILD = '10.29-r29';
-  const P3DV_HOST_CONTRACT = 'plmr-p3dv-host-bridge-v29';
+  const P3DV_HOST_BUILD = '10.32-r32';
+  const P3DV_HOST_CONTRACT = 'plmr-p3dv-host-bridge-v32';
   if (p3dvEmbeddedHostMode && document && document.body) document.body.classList.add('p3dv-host-embedded');
 
   // V3.86 demo default: keep internal Galaxy identity, expose Bioclimatic (Tilt) as the initial product.

@@ -1,7 +1,7 @@
 (function () {
   'use strict';
 
-  const build = '10.30-r30';
+  const build = '10.32-r32';
   const key = 'plmr_loaded_build';
   const cachePrefix = 'pulumur-pwa-';
 

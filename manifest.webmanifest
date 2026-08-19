@@ -1,6 +1,6 @@
 {
-  "name": "PLMR V.30 — Pülümür Automation Studio",
-  "short_name": "PLMR V.30",
+  "name": "PLMR V.32 — Pülümür Automation Studio",
+  "short_name": "PLMR V.32",
   "description": "Web tabanlı DXF ve PDF üretim aracı.",
   "start_url": "./index.html",
   "scope": "./",

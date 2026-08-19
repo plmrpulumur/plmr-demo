@@ -79,7 +79,7 @@
       deleteProject: 'Sil', deleteProjectConfirm: 'Bu proje ve tüm revizyonları kalıcı olarak silinecek. Devam edilsin mi?',
       projectDeleted: 'Proje ve revizyonları silindi:', deleteProjectFailed: 'Proje silinemedi.', systemAdminRequired: 'Bu işlem yalnız Sistem Yöneticisi tarafından yapılabilir.',
       roleSystemAdmin: 'Sistem Yöneticisi', roleCompanyAdmin: 'Firma Yöneticisi', roleDesigner: 'Tasarımcı', organizationInactive: 'Firma hesabı pasif.', licenseExpired: 'Firma lisans süresi sona ermiş.', licenseNotStarted: 'Firma lisansı henüz başlamamış.',
-      sessionRevoked: 'PIN değişikliği nedeniyle oturum kapatıldı. Lütfen tekrar giriş yap.', loginRateLimited: 'Çok fazla hatalı deneme yapıldı. Geçici kilit süresi dolunca tekrar dene.',
+      sessionRevoked: 'PIN değişikliği nedeniyle oturum kapatıldı. Lütfen tekrar giriş yap.', sessionReplaced: 'Bu kullanıcı başka bir tarayıcıda giriş yaptığı için bu oturum kapatıldı.', loginRateLimited: 'Çok fazla hatalı deneme yapıldı. Geçici kilit süresi dolunca tekrar dene.',
       conflictTitle: 'Bu proje başka bir sekmede değiştirildi. Yerel çalışman otomatik olarak ezilmedi.',
       conflictReload: 'Sunucudakini yükle', conflictRevision: 'Yerel çalışmayı yeni revizyon yap', conflictCopy: 'Yerel çalışmayı kopya olarak kaydet',
       conflictCancelled: 'Çakışma çözülmedi; yerel değişiklikler korunuyor.', changesDuringSave: 'Kayıt tamamlandı; kayıt sırasında yapılan yeni değişiklikler henüz kaydedilmedi.',
@@ -115,7 +115,7 @@
       deleteProject: 'Delete', deleteProjectConfirm: 'This project and all of its revisions will be permanently deleted. Continue?',
       projectDeleted: 'Project and revisions deleted:', deleteProjectFailed: 'The project could not be deleted.', systemAdminRequired: 'This action is available only to the System Administrator.',
       roleSystemAdmin: 'System Administrator', roleCompanyAdmin: 'Company Administrator', roleDesigner: 'Designer', organizationInactive: 'The company account is inactive.', licenseExpired: 'The company license has expired.', licenseNotStarted: 'The company license has not started yet.',
-      sessionRevoked: 'Your session was closed because the PIN changed. Sign in again.', loginRateLimited: 'Too many incorrect attempts. Try again after the temporary lock expires.',
+      sessionRevoked: 'Your session was closed because the PIN changed. Sign in again.', sessionReplaced: 'This session was closed because the same user signed in from another browser.', loginRateLimited: 'Too many incorrect attempts. Try again after the temporary lock expires.',
       conflictTitle: 'This project changed in another tab. Your local work was not overwritten.',
       conflictReload: 'Load server version', conflictRevision: 'Save local work as a new revision', conflictCopy: 'Save local work as a copy',
       conflictCancelled: 'The conflict is unresolved; local changes are preserved.', changesDuringSave: 'Save completed; changes made during the save are still unsaved.',
@@ -146,6 +146,9 @@
   let visibilityBound = false;
   let initialized = false;
   let explicitLoginInProgress = false;
+  let activeSessionMonitorTimer = null;
+  let activeSessionCheckInFlight = false;
+  let signedOutNoticeKey = '';
   let suppressDirty = false;
   let historicalMode = false;
   let historicalCurrentRevision = 1;
@@ -165,6 +168,7 @@
     getAccessToken: () => String(currentSession && currentSession.access_token || ''),
     signOutLocal: async options => {
       const opts = options || {};
+      signedOutNoticeKey = '';
       sessionStorage.removeItem(SESSION_ONLY_KEY);
       if (opts.clearSavedUsername) localStorage.removeItem(SAVED_USERNAME_KEY);
       if (opts.newUsername) localStorage.setItem(SAVED_USERNAME_KEY, normalizeUsername(opts.newUsername));
@@ -177,6 +181,7 @@
   const SESSION_ONLY_KEY = 'plmr_auth_session_only';
   const SAVED_USERNAME_KEY = 'plmr_auth_username';
   const SAVE_PASSWORD_KEY = 'plmr_auth_save_password';
+  const ACTIVE_SESSION_CHECK_MS = 8000;
 
   function accessInput(requestedProduct) {
     return {
@@ -736,6 +741,70 @@
     return true;
   }
 
+  function stopActiveSessionMonitor() {
+    if (activeSessionMonitorTimer !== null) {
+      window.clearInterval(activeSessionMonitorTimer);
+      activeSessionMonitorTimer = null;
+    }
+  }
+
+  async function readActiveSessionStatus() {
+    if (!client || !client.auth || !currentSession) return { valid: true, reason: 'NO_ACTIVE_SESSION' };
+    const result = await client.rpc('current_session_status_v1');
+    if (result.error) {
+      const raw = String(result.error.message || result.error || '');
+      // Staged deployment compatibility: V.31 backends do not have the V.32 status RPC.
+      // Do not destroy a valid local session because a migration is temporarily missing.
+      if (/current_session_status_v1|does not exist|schema cache/i.test(raw)) {
+        if (window.PulumurBackendCompatibility) {
+          syncBackendStatus(window.PulumurBackendCompatibility.markFallback('single_active_browser_session', result.error));
+        }
+        return { valid: true, reason: 'STATUS_RPC_UNAVAILABLE' };
+      }
+      throw result.error;
+    }
+    const row = Array.isArray(result.data) ? result.data[0] : result.data;
+    if (!row || typeof row.is_valid !== 'boolean') return { valid: true, reason: 'STATUS_UNKNOWN' };
+    return { valid: row.is_valid === true, reason: String(row.reason || '') };
+  }
+
+  async function forceLocalSessionEnd(reason) {
+    const code = String(reason || 'SESSION_REVOKED');
+    signedOutNoticeKey = code === 'SESSION_REPLACED' ? 'sessionReplaced' : 'sessionRevoked';
+    stopActiveSessionMonitor();
+    authEpoch += 1;
+    if (client && client.auth) await client.auth.signOut({ scope: 'local' }).catch(() => {});
+    await handleSignedOut();
+  }
+
+  async function verifyActiveBrowserSession(source = 'monitor') {
+    if (!currentSession || explicitLoginInProgress || activeSessionCheckInFlight) return true;
+    activeSessionCheckInFlight = true;
+    try {
+      const status = await readActiveSessionStatus();
+      if (status.valid) return true;
+      await forceLocalSessionEnd(status.reason || 'SESSION_REVOKED');
+      return false;
+    } catch (error) {
+      // A transient network failure must not log the user out. Normal authenticated
+      // operations remain protected by RLS/current_session_is_valid_v2 on the server.
+      if (window.PulumurRuntimeMonitor) window.PulumurRuntimeMonitor.record(`auth.single_session.${source}`, error);
+      return true;
+    } finally {
+      activeSessionCheckInFlight = false;
+    }
+  }
+
+  function startActiveSessionMonitor() {
+    stopActiveSessionMonitor();
+    if (!currentSession) return;
+    activeSessionMonitorTimer = window.setInterval(() => {
+      if (document.visibilityState === 'visible' && !authBootstrapInProgress && !explicitLoginInProgress) {
+        void verifyActiveBrowserSession('interval');
+      }
+    }, ACTIVE_SESSION_CHECK_MS);
+  }
+
   async function verifyAuthenticatedUser(session) {
     if (!client || !client.auth || typeof client.auth.getUser !== 'function') throw new Error('AUTH_VERIFIER_UNAVAILABLE');
     const result = await client.auth.getUser(String(session && session.access_token || ''));
@@ -754,11 +823,18 @@
     if (options.showLoading !== false) setAuthMessage(t('authLoading'), false);
     try {
       verifiedUser = await verifyAuthenticatedUser(session);
+      const activeSessionStatus = await readActiveSessionStatus();
+      if (!activeSessionStatus.valid) {
+        await forceLocalSessionEnd(activeSessionStatus.reason || 'SESSION_REVOKED');
+        return;
+      }
       await loadProfile();
       await loadEffectiveLimits();
       setAppAccess(true);
       if (!sameAuthenticatedUser) { setQuickDrawingMode(false); setWorkspaceActive(false); }
+      signedOutNoticeKey = '';
       setAuthMessage('', false);
+      startActiveSessionMonitor();
       refreshProjectHeader();
       if (window.PulumurActivity) await window.PulumurActivity.identify();
       // V10.5: Recovery disabled by default
@@ -767,12 +843,14 @@
       console.error(error);
       verifiedUser = null;
       currentAccessDecision = null;
+      stopActiveSessionMonitor();
       setAppAccess(false);
       setAuthMessage(friendlyError(error, 'profileMissing'), true);
     }
   }
 
   async function handleSignedOut() {
+    stopActiveSessionMonitor();
     if (window.PulumurRecovery) window.PulumurRecovery.cancel();
     currentSession = null;
     currentProfile = null;
@@ -793,7 +871,7 @@
     setQuickDrawingMode(false);
     setWorkspaceActive(false);
     setAppAccess(false);
-    setAuthMessage('', false);
+    setAuthMessage(signedOutNoticeKey ? t(signedOutNoticeKey) : '', Boolean(signedOutNoticeKey));
     if (ui.loginPassword) ui.loginPassword.value = '';
     const savedUsername = localStorage.getItem(SAVED_USERNAME_KEY) || '';
     if (ui.loginUsername && savedUsername) ui.loginUsername.value = savedUsername;
@@ -813,6 +891,7 @@
       setAuthMessage(t('loginFailed'), true);
       return;
     }
+    signedOutNoticeKey = '';
     authBusy = true;
     syncLoginInteractivity();
     explicitLoginInProgress = true;
@@ -833,9 +912,19 @@
       const expectedUsername = normalizeUsername(result.username || username);
       if (!sessionData.access_token || !sessionData.refresh_token || !expectedUserId) throw new Error('INVALID_LOGIN');
 
-      // setSession replaces the browser session directly. A pre-login signOut()
-      // emits a SIGNED_OUT event and can race the new SIGNED_IN transition.
+      // If the browser still owns a different user's persisted session, clear only
+      // that local stale identity before installing the freshly verified login tokens.
+      // explicitLoginInProgress + authEpoch own this transition, so the resulting
+      // SIGNED_OUT event cannot rebuild the signed-out UI over the new session.
       if (loginEpoch !== authEpoch) return;
+      const existingSessionResult = await client.auth.getSession();
+      if (existingSessionResult.error) throw existingSessionResult.error;
+      const existingSession = existingSessionResult.data && existingSessionResult.data.session || null;
+      const existingUserId = String(existingSession && existingSession.user && existingSession.user.id || '').trim();
+      if (existingUserId && existingUserId !== expectedUserId) {
+        await client.auth.signOut({ scope: 'local' });
+        if (loginEpoch !== authEpoch) return;
+      }
 
       const sessionResult = await client.auth.setSession({
         access_token: sessionData.access_token,
@@ -1788,6 +1877,7 @@
     if (ui.loginForm) ui.loginForm.addEventListener('submit', submitLogin);
     if (ui.logoutBtn) ui.logoutBtn.addEventListener('click', async () => {
       if (dirty && !window.confirm(t('confirmDiscard'))) return;
+      signedOutNoticeKey = '';
       if (window.PulumurActivity) {
         await window.PulumurActivity.log('site_logout');
         await window.PulumurActivity.end();
@@ -1866,7 +1956,15 @@
 
   function handleVisibilityRefresh() {
     if (document.visibilityState !== 'visible' || !currentSession || explicitLoginInProgress) return;
-    window.setTimeout(() => handleAuthenticated(currentSession, { showLoading: false, source: 'visibility' }), 0);
+    window.setTimeout(async () => {
+      if (!await verifyActiveBrowserSession('visibility')) return;
+      if (currentSession) await handleAuthenticated(currentSession, { showLoading: false, source: 'visibility' });
+    }, 0);
+  }
+
+  function handleWindowFocusSessionCheck() {
+    if (!currentSession || explicitLoginInProgress) return;
+    void verifyActiveBrowserSession('focus');
   }
 
   async function init() {
@@ -1925,6 +2023,7 @@
     if (!visibilityBound) {
       visibilityBound = true;
       document.addEventListener('visibilitychange', handleVisibilityRefresh);
+      window.addEventListener('focus', handleWindowFocusSessionCheck);
     }
 
     try {
