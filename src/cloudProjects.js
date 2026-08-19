@@ -146,6 +146,7 @@
   let visibilityBound = false;
   let initialized = false;
   let explicitLoginInProgress = false;
+  let explicitLogoutInProgress = false;
   let activeSessionMonitorTimer = null;
   let activeSessionCheckInFlight = false;
   let signedOutNoticeKey = '';
@@ -169,11 +170,18 @@
     signOutLocal: async options => {
       const opts = options || {};
       signedOutNoticeKey = '';
+      const transitionEpoch = ++authEpoch;
+      explicitLogoutInProgress = true;
       sessionStorage.removeItem(SESSION_ONLY_KEY);
       if (opts.clearSavedUsername) localStorage.removeItem(SAVED_USERNAME_KEY);
       if (opts.newUsername) localStorage.setItem(SAVED_USERNAME_KEY, normalizeUsername(opts.newUsername));
-      if (window.PulumurActivity) await window.PulumurActivity.end().catch(() => {});
-      if (client && client.auth) await client.auth.signOut({ scope: 'local' });
+      try {
+        if (window.PulumurActivity) await window.PulumurActivity.end().catch(() => {});
+        if (client && client.auth) await clearLocalSupabaseSession('bridge-signout');
+        if (transitionEpoch === authEpoch) await handleSignedOut();
+      } finally {
+        explicitLogoutInProgress = false;
+      }
     },
   });
 
@@ -182,6 +190,55 @@
   const SAVED_USERNAME_KEY = 'plmr_auth_username';
   const SAVE_PASSWORD_KEY = 'plmr_auth_save_password';
   const ACTIVE_SESSION_CHECK_MS = 8000;
+  const AUTH_STORAGE_KEY = String(CONFIG.authStorageKey || 'plmr_supabase_auth_v1');
+
+  function legacySupabaseAuthStoragePrefix() {
+    try {
+      const host = new URL(String(CONFIG.url || '')).hostname;
+      const projectRef = host.split('.')[0] || '';
+      return projectRef ? `sb-${projectRef}-auth-token` : '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function clearLegacySupabaseAuthStorage() {
+    const prefix = legacySupabaseAuthStoragePrefix();
+    if (!prefix || prefix === AUTH_STORAGE_KEY) return;
+    [localStorage, sessionStorage].forEach(storage => {
+      const remove = [];
+      for (let index = 0; index < storage.length; index += 1) {
+        const key = String(storage.key(index) || '');
+        if (key === prefix || key.startsWith(`${prefix}.`) || key.startsWith(`${prefix}-`)) remove.push(key);
+      }
+      remove.forEach(key => storage.removeItem(key));
+    });
+  }
+
+  async function clearLocalSupabaseSession(reason = 'auth-transition') {
+    stopActiveSessionMonitor();
+    if (!client || !client.auth) return;
+    const before = await client.auth.getSession();
+    if (before.error) throw before.error;
+    if (before.data && before.data.session) {
+      const signedOut = await client.auth.signOut({ scope: 'local' });
+      if (signedOut && signedOut.error) throw signedOut.error;
+    }
+    const after = await client.auth.getSession();
+    if (after.error) throw after.error;
+    if (after.data && after.data.session) {
+      const retry = await client.auth.signOut({ scope: 'local' });
+      if (retry && retry.error) throw retry.error;
+      const finalCheck = await client.auth.getSession();
+      if (finalCheck.error) throw finalCheck.error;
+      if (finalCheck.data && finalCheck.data.session) throw new Error('LOCAL_SESSION_RESET_FAILED');
+    }
+    currentSession = null;
+    currentProfile = null;
+    currentOrganization = null;
+    verifiedUser = null;
+    currentAccessDecision = null;
+  }
 
   function accessInput(requestedProduct) {
     return {
@@ -773,7 +830,7 @@
     signedOutNoticeKey = code === 'SESSION_REPLACED' ? 'sessionReplaced' : 'sessionRevoked';
     stopActiveSessionMonitor();
     authEpoch += 1;
-    if (client && client.auth) await client.auth.signOut({ scope: 'local' }).catch(() => {});
+    if (client && client.auth) await clearLocalSupabaseSession('forced-session-end').catch(() => {});
     await handleSignedOut();
   }
 
@@ -900,6 +957,15 @@
     setAuthMessage(t('loginBusy'), false);
     try {
       if (!window.PulumurAdminUsersApi) throw new Error('ADMIN_USERS_API_MISSING');
+      // V.33: every explicit login starts from a deterministic empty local auth
+      // state. This prevents same-user stale refresh/session state from racing the
+      // freshly issued login tokens. The manual transition owns SIGNED_OUT via
+      // explicitLoginInProgress + authEpoch, so the login UI is not rebuilt mid-flow.
+      await clearLocalSupabaseSession('explicit-login');
+      if (loginEpoch !== authEpoch) return;
+      const resetCheck = await client.auth.getSession();
+      if (resetCheck.error) throw resetCheck.error;
+      if (resetCheck.data && resetCheck.data.session) throw new Error('LOCAL_SESSION_RESET_FAILED');
       const result = await window.PulumurAdminUsersApi.invoke('login', { username, pin }, { auth: false });
       if (result.backend_warning || result.rate_limit_mode === 'memory-fallback') {
         const status = window.PulumurBackendCompatibility
@@ -912,19 +978,7 @@
       const expectedUsername = normalizeUsername(result.username || username);
       if (!sessionData.access_token || !sessionData.refresh_token || !expectedUserId) throw new Error('INVALID_LOGIN');
 
-      // If the browser still owns a different user's persisted session, clear only
-      // that local stale identity before installing the freshly verified login tokens.
-      // explicitLoginInProgress + authEpoch own this transition, so the resulting
-      // SIGNED_OUT event cannot rebuild the signed-out UI over the new session.
       if (loginEpoch !== authEpoch) return;
-      const existingSessionResult = await client.auth.getSession();
-      if (existingSessionResult.error) throw existingSessionResult.error;
-      const existingSession = existingSessionResult.data && existingSessionResult.data.session || null;
-      const existingUserId = String(existingSession && existingSession.user && existingSession.user.id || '').trim();
-      if (existingUserId && existingUserId !== expectedUserId) {
-        await client.auth.signOut({ scope: 'local' });
-        if (loginEpoch !== authEpoch) return;
-      }
 
       const sessionResult = await client.auth.setSession({
         access_token: sessionData.access_token,
@@ -1878,12 +1932,28 @@
     if (ui.logoutBtn) ui.logoutBtn.addEventListener('click', async () => {
       if (dirty && !window.confirm(t('confirmDiscard'))) return;
       signedOutNoticeKey = '';
-      if (window.PulumurActivity) {
-        await window.PulumurActivity.log('site_logout');
-        await window.PulumurActivity.end();
+      const logoutEpoch = ++authEpoch;
+      explicitLogoutInProgress = true;
+      stopActiveSessionMonitor();
+      try {
+        if (window.PulumurActivity) {
+          await window.PulumurActivity.log('site_logout');
+          await window.PulumurActivity.end();
+        }
+        sessionStorage.removeItem(SESSION_ONLY_KEY);
+        await clearLocalSupabaseSession('explicit-logout');
+        if (logoutEpoch !== authEpoch) return;
+        const sessionCheck = await client.auth.getSession();
+        if (sessionCheck.error) throw sessionCheck.error;
+        if (sessionCheck.data && sessionCheck.data.session) throw new Error('LOCAL_SESSION_RESET_FAILED');
+        await handleSignedOut();
+      } catch (error) {
+        console.error(error);
+        await handleSignedOut();
+        setAuthMessage(friendlyError(error, 'loginFailed'), true);
+      } finally {
+        explicitLogoutInProgress = false;
       }
-      sessionStorage.removeItem(SESSION_ONLY_KEY);
-      await client.auth.signOut({ scope: 'local' });
     });
     const commandNames = cloudCommandNames();
     if (ui.newCloudProjectBtn) ui.newCloudProjectBtn.addEventListener('click', () => executeCloudProjectCommand(commandNames.PROJECT_CREATE_START, undefined, 'ui:new-cloud-project'));
@@ -1975,8 +2045,14 @@
       setAuthMessage('Supabase bağlantı bileşeni yüklenemedi.', true);
       return;
     }
+    clearLegacySupabaseAuthStorage();
     client = supabaseFactory.createClient(CONFIG.url, CONFIG.publishableKey, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storageKey: AUTH_STORAGE_KEY
+      }
     });
     window.PulumurSupabase = client;
     if (window.PulumurActivity) void window.PulumurActivity.init(client);
@@ -1997,9 +2073,9 @@
       // SIGNED_OUT while a manual login transition is still owned by submitLogin().
       // Checking explicitLoginInProgress only inside setTimeout is too late because
       // the manual path may have already completed before the deferred callback runs.
-      const eventOwnedByBootstrapOrLogin = Boolean(authBootstrapInProgress || explicitLoginInProgress);
+      const eventOwnedByBootstrapOrLogin = Boolean(authBootstrapInProgress || explicitLoginInProgress || explicitLogoutInProgress);
       window.setTimeout(async () => {
-        if (eventOwnedByBootstrapOrLogin || authBootstrapInProgress || explicitLoginInProgress || eventEpoch !== authEpoch) return;
+        if (eventOwnedByBootstrapOrLogin || authBootstrapInProgress || explicitLoginInProgress || explicitLogoutInProgress || eventEpoch !== authEpoch) return;
         const eventUserId = String(session && session.user && session.user.id || '');
         const activeUserId = String(currentSession && currentSession.user && currentSession.user.id || '');
         if (session && eventUserId && activeUserId === eventUserId && currentProfile && verifiedUser

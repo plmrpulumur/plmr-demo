@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
 
-  const RELEASE = 'PLMR V.32';
+  const RELEASE = 'PLMR V.33';
   const SHEET = Object.freeze({ width: 1600, height: 1150 });
   // The sheet furniture follows the native Pergo Rise/Pergola preview. Only
   // these five product-specific view boxes change between Technical2D adapters.

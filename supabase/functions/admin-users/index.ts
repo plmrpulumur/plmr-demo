@@ -25,6 +25,24 @@ function validPin(value: string) {
   return /^\d{4}$/.test(value)
 }
 
+function validUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+}
+
+function jwtSessionId(accessToken: string) {
+  try {
+    const payloadPart = accessToken.split('.')[1] ?? ''
+    if (!payloadPart) return ''
+    const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+    const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, '=')
+    const payload = JSON.parse(atob(padded)) as Record<string, unknown>
+    const sessionId = text(payload.session_id)
+    return validUuid(sessionId) ? sessionId : ''
+  } catch {
+    return ''
+  }
+}
+
 async function deriveAuthPassword(username: string, pin: string) {
   const pepper = Deno.env.get('PLMR_PIN_PEPPER') ?? ''
   if (!pepper) throw new Error('PIN_PEPPER_MISSING')
@@ -67,7 +85,7 @@ Deno.serve(async (req: Request) => {
   }
 
   const action = text(body.action)
-  if (action === 'health') return json({ ok: true, version: '11.2', function: 'admin-users' })
+  if (action === 'health') return json({ ok: true, version: '12.0', function: 'admin-users' })
 
   const adminClient = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
@@ -178,12 +196,38 @@ Deno.serve(async (req: Request) => {
       return await failedLogin('IDENTITY_MISMATCH')
     }
 
+    // V.32 single-active-browser contract. Supabase JWT session_id is stable for
+    // the refresh-token chain, so the newest successful login becomes the one
+    // authoritative browser session for this user.
+    const activeSessionId = jwtSessionId(loginResult.data.session.access_token)
+    if (!activeSessionId) {
+      await authClient.auth.signOut({ scope: 'local' }).catch(() => {})
+      return json({ error: 'SESSION_ID_MISSING' }, 500)
+    }
+
+    // Do not replace a previously valid browser session until the new login has
+    // completed the mandatory rate-limit/audit commit. A temporary audit failure
+    // must never lock the user out of the older browser.
     try {
       await recordAttempt(true, 'LOGIN_SUCCESS')
     } catch {
-      await authClient.auth.signOut().catch(() => {})
+      await authClient.auth.signOut({ scope: 'local' }).catch(() => {})
       return json({ error: 'LOGIN_RATE_LIMIT_UNAVAILABLE' }, 503)
     }
+
+    const activateResult = await adminClient
+      .from('profiles')
+      .update({ active_session_id: activeSessionId })
+      .eq('id', profile.id)
+    if (activateResult.error) {
+      await authClient.auth.signOut({ scope: 'local' }).catch(() => {})
+      return json({ error: activateResult.error.message || 'ACTIVE_SESSION_COMMIT_FAILED' }, 500)
+    }
+
+    // Revoke every older refresh-token chain while preserving the session that
+    // just authenticated. The DB session_id check remains authoritative even if
+    // refresh-token revocation is temporarily unavailable.
+    const revokeOthers = await adminClient.auth.admin.signOut(loginResult.data.session.access_token, 'others')
 
     return json({
       ok: true,
@@ -196,6 +240,9 @@ Deno.serve(async (req: Request) => {
         access_token: loginResult.data.session.access_token,
         refresh_token: loginResult.data.session.refresh_token,
       },
+      active_session_id: activeSessionId,
+      refresh_tokens_revoked: !revokeOthers.error,
+      warning: revokeOthers.error ? 'OLDER_REFRESH_TOKEN_REVOCATION_FAILED' : undefined,
     })
   }
 
