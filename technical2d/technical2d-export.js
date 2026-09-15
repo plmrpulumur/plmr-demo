@@ -1,7 +1,7 @@
 (function (root) {
   'use strict';
 
-  const VERSION = 'PLMR V.33';
+  const VERSION = 'PLMR V.34';
   const MODEL_UNITS = 'mm';
   const MODEL_SCALE = 1;
   const LAYERS = Object.freeze({

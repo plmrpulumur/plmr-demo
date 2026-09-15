@@ -5536,7 +5536,11 @@ body.v13-9-premium .drawing-control-notes {
 body.v13-9-premium .drawing-control-notes-list { font-size: 9px; gap: 5px 20px; }
 
 body.v13-9-premium .backend-warning-banner { position: fixed; z-index: 99; }
-body.v13-9-premium .project-start-screen { height: calc(100vh - 72px); overflow: hidden; }
+/* Welcome is content-sized; the drawing workspace keeps its own viewport sizing. */
+body.v13-9-premium .project-start-screen { height: auto; overflow: visible; }
+.project-start-actions .welcome-logout-btn { min-height: 40px; margin-top: 4px; }
+.project-start-actions .welcome-logout-btn:focus-visible { outline: 3px solid var(--navy); outline-offset: 3px; }
+.auth-card #retrySessionBtn { width: 100%; min-height: 42px; }
 
 @media (max-height: 820px) and (min-width: 1181px) {
   body.v13-9-premium .app-header { height: 64px; min-height: 64px; padding-block: 6px; }
@@ -7658,16 +7662,24 @@ body.v13-8-premium.v13-10-premium.v13-28-premium #product option[data-demo-disab
   position: relative;
 }
 .cloud-project-actions::before {
-  content: "DEMO · PROJE YÖNETİMİ PASİF";
+  content: attr(data-demo-label);
   display: block;
   width: 100%;
   margin: 0 0 5px;
   color: #8a989e;
-  font-size: 8px;
+  font-size: 10px;
   font-weight: 900;
   letter-spacing: .06em;
   text-align: center;
 }
+.studio-control-title > span { white-space: pre-line; }
+.cloud-project-actions[data-demo-label=""]::before { display: none; }
+.plmr-premium-preview { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 16px; }
+.plmr-premium-preview > span { color: #506879; font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+.plmr-premium-preview > button:disabled { min-height: 32px; padding: 6px 10px; color: #596b78; background: #eef2f5; border: 1px solid #d4dee4; border-radius: 8px; cursor: not-allowed; opacity: 1; }
+.admin-access-mode { min-width: 158px; max-width: 260px; }
+.admin-access-mode .soft-btn { margin-top: 6px; }
+.js-user-mode-audit { white-space: pre-line; font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
 
 .studio-side-rail .studio-control-title,
 .cloud-project-bar .cloud-project-identity {

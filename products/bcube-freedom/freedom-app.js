@@ -70,7 +70,7 @@
 
   function setStatus(text, tone) {
     const node = $('freedomStatus');
-    node.textContent = text;
+    node.textContent = window.PulumurProductPresentation ? window.PulumurProductPresentation.text(text) : text;
     node.dataset.tone = tone || 'info';
   }
 
@@ -293,7 +293,7 @@
     if (ui.mode === 'choose-dimensions') renderDimensionChoices(svg, map);
     if (ui.mode === 'select-points') renderPointSelection(svg, map);
 
-    svg.appendChild(svgElement('text', { x: 68, y: 40, class: 'freedom-view-caption' }, 'B-CUBE FREEDOM · FREE · ÜST GÖRÜNÜŞ'));
+    svg.appendChild(svgElement('text', { x: 68, y: 40, class: 'freedom-view-caption' }, 'ROLLING ROOF · SERBEST ÇİZİM · ÜST GÖRÜNÜŞ'));
     svg.appendChild(svgElement('text', { x: 1134, y: 40, 'text-anchor': 'end', class: 'freedom-coordinate-caption' }, 'Başlangıç / merkez: (0,0)'));
   }
 
@@ -803,9 +803,9 @@
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     const customer = String(state.project.customer || 'MUSTERI').replace(/[^A-Z0-9_-]+/gi, '-').toUpperCase();
-    const project = String(state.project.name || 'B-CUBE-FREEDOM').replace(/[^A-Z0-9_-]+/gi, '-').toUpperCase();
+    const project = String(state.project.name || 'ROLLING-ROOF').replace(/[^A-Z0-9_-]+/gi, '-').toUpperCase();
     link.href = url;
-    link.download = `${customer}-${project}-${state.project.revision || 'R01'}-FREEDOM.plmr`;
+    link.download = `${customer}-${project}-${state.project.revision || 'R01'}-ROLLING-ROOF.plmr`;
     document.body.appendChild(link);
     link.click();
     link.remove();
@@ -850,7 +850,7 @@
   }
 
   function resetFreedomProject() {
-    if (!window.confirm('B-Cube Freedom çizimi ve tüm tanımlar sıfırlansın mı?')) return;
+    if (!window.confirm('Rolling Roof çizimi ve tüm tanımlar sıfırlansın mı?')) return;
     history.undo.push(deepClone(state));
     history.redo = [];
     state = createDefaultState();

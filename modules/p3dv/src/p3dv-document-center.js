@@ -1,6 +1,341 @@
 (function () {
   'use strict';
 
+  // Presentation only: existing language preference; no engineering or quotation state.
+  const DOCUMENT_EN = Object.freeze({
+    "Hücre metni tek PDF sayfasına sığmıyor. Metni kısaltın veya satırlara bölün.": "Cell text cannot fit on one PDF page. Shorten it or split it into rows.",
+    "Tablo yapıştırmak için filtreyi temizleyin.": "Clear the filter before pasting a table.",
+    "Belge Çalışma Alanı": "Document Workspace",
+    "Değişiklikler yalnız bu belgeye uygulanır; çizim ve kesim optimizasyonu değişmez.": "Changes apply only to this document; the drawing and cut optimization stay unchanged.",
+    "Tablolar": "Tables",
+    "Ara / Filtrele": "Search / Filter",
+    "Sütun": "Column",
+    "Satır ekle": "Add row",
+    "Geri al": "Undo",
+    "Yinele": "Redo",
+    "Tabloyu sıfırla": "Reset table",
+    "Tabloyu kopyala": "Copy table",
+    "CSV indir": "Download CSV",
+    "Önceki": "Previous",
+    "Sonraki": "Next",
+    "Belge notları": "Document notes",
+    "Taslağı indir": "Download draft",
+    "Taslak dosyası aç": "Open draft file",
+    "Taslak dosyası bu cihazdan indirilir; buluta kaydedilmez.": "The draft downloads as a file; it is not saved to the cloud.",
+    "Projeden yeniden oluştur": "Regenerate from project",
+    "Geçerli bir sayı girin.": "Enter a valid number.",
+    "Sayı izin verilen aralıkta değil.": "The number is outside the allowed range.",
+    "Metin değeri geçersiz.": "Invalid text value.",
+    "Hücre en fazla 240 karakter olabilir.": "A cell can contain up to 240 characters.",
+    "Bir tabloda en fazla 500 satır olabilir.": "A table can contain up to 500 rows.",
+    "Yapıştırılacak alan tablo sınırlarını aşıyor.": "The pasted range exceeds the table limits.",
+    "Yapıştırılan tablo biçimi geçersiz.": "Invalid pasted table format.",
+    "Taslak kaynağı geçersiz.": "Invalid draft source.",
+    "Taslak bu proje ve belge seçimiyle eşleşmiyor.": "This draft does not match the current project and document selection.",
+    "Proje değişti. Belgeyi projeden yeniden oluşturun.": "The project changed. Regenerate the document from the project.",
+    "Oturum değişti. Belge alanını yeniden açın.": "The session changed. Reopen the document workspace.",
+    "Taslak dosyası en fazla 5 MB olabilir.": "A draft file can be up to 5 MB.",
+    "Taslak dosyası geçersiz.": "Invalid draft file.",
+    "Taslak sütunları geçersiz.": "Invalid draft columns.",
+    "Belge notu en fazla 2000 karakter olabilir.": "Document notes can contain up to 2000 characters.",
+    "Belge doğrulaması için güvenli HTTPS bağlantısı gerekir.": "A secure HTTPS connection is required for document validation.",
+    "İşlem tamamlanamadı.": "The operation could not be completed.",
+    "Önce işaretli hücreyi düzeltin.": "Correct the highlighted cell first.",
+    "Belge değişikliği uygulandı.": "Document change applied.",
+    "Bu seçimde düzenlenebilir tablo yok.": "There are no editable tables in this selection.",
+    "satır": "rows",
+    "Toplam adet": "Total quantity",
+    "Toplam boy (mm)": "Total length (mm)",
+    "Tüm sütunlar": "All columns",
+    "Artan sırala": "Sort ascending",
+    "Azalan sırala": "Sort descending",
+    "Sütun genişliği": "Column width",
+    "Satır işlemleri": "Row actions",
+    "Satırı çoğalt": "Duplicate row",
+    "Yukarı taşı": "Move up",
+    "Aşağı taşı": "Move down",
+    "Satırı sil": "Delete row",
+    "Satır bulunamadı.": "No rows found.",
+    "Kaydedilmemiş belge değişiklikleri kapatılsın mı?": "Close with unsaved document changes?",
+    "Bu tablo üretilen ilk verilere dönsün mü?": "Reset this table to the originally generated data?",
+    "Taslak dosyası indirildi.": "Draft file downloaded.",
+    "Tablo kopyalandı.": "Table copied.",
+    "Belge değişiklikleri yeni proje verileriyle değiştirilsin mi?": "Replace document changes with the latest project data?",
+    "Belge projeden yeniden oluşturuldu.": "Document regenerated from project.",
+    "Tablo yapıştırıldı.": "Table pasted.",
+    "Mevcut belge taslak dosyasıyla değiştirilsin mi?": "Replace the current document with the draft file?",
+    "Taslak dosyası açıldı.": "Draft file opened.",
+    "Birim Fiyat": "Unit price",
+    "Birim Ağırlık": "Unit weight",
+    "Boy (mm)": "Length (mm)",
+    "Kesim Boyu (mm)": "Cut length (mm)",
+    "Stok Boyu (mm)": "Stock length (mm)",
+    "Tahmini Kalan (mm)": "Estimated remainder (mm)",
+    "Tabloları İncele": "Review tables",
+    "Tablolar Hazırlanıyor": "Preparing tables",
+    "Belge düzenlemeleri": "Document edits",
+    "Belge seçimi değişti. Alanı yeniden açın.": "Document availability changed. Reopen the workspace.",
+
+    "Fiyat Teklifi": "Quotation",
+    "Üretim Formu": "Production Form",
+    "Ürün Listesi": "Product List",
+    "Kesim Listesi": "Cut List",
+    "Aksesuar Listesi": "Accessory List",
+    "Kesim Optimizasyonu": "Cut Optimization",
+    "Stok Profilleri": "Stock Profiles",
+    "P3DV Ürünü": "P3DV Product",
+    "Parlak": "Glossy",
+    "Texture": "Texture",
+    "Mat": "Matte",
+    "Default teknik renk": "Default technical color",
+    "Default": "Default",
+    "Ön sıra": "Front row",
+    "Arka sıra": "Rear row",
+    "Motor": "Motor",
+    "Kumanda": "Remote",
+    "Parapet H": "Parapet Height",
+    "Cam Kaydı": "Glass Track",
+    "Kumaş": "Fabric",
+    "Kumaş Profilleri": "Fabric Profiles",
+    "Üçgen Doğrama": "Triangular Frame",
+    "Su Çıkışı": "Water Outlet",
+    "Su Çıkışı Konumu": "Water Outlet Position",
+    "Ek Bilgiler": "Additional Information",
+    "Dikme / taşıyıcı": "Post / support",
+    "Rolling Roof Ön / Arka Oluk Profili": "Rolling Roof Front / Rear Gutter Profile",
+    "Rolling Roof Yan Kayıt Profili": "Rolling Roof Side Beam Profile",
+    "Rolling Roof Lamel Profili": "Rolling Roof Lamella Profile",
+    "Rolling Roof Dikme Profili": "Rolling Roof Post Profile",
+    "Rolling Roof LED Profili": "Rolling Roof LED Profile",
+    "LED opsiyonu": "LED option",
+    "Eco-Bioclimatic Ön Kayıt / Oluk": "Eco-Bioclimatic Front Beam / Gutter",
+    "Eco-Bioclimatic Arka Kayıt": "Eco-Bioclimatic Rear Beam",
+    "Eco-Bioclimatic Yan Kayıt / Oluk": "Eco-Bioclimatic Side Beam / Gutter",
+    "Eco-Bioclimatic Lamel Profili": "Eco-Bioclimatic Lamella Profile",
+    "Eco-Bioclimatic Dikme Profili": "Eco-Bioclimatic Post Profile",
+    "Bioclimatic Birleşik Ön / Arka Kayıt + Oluk": "Bioclimatic Combined Front / Rear Beam + Gutter",
+    "Bioclimatic Birleşik Sol / Sağ Kayıt + Oluk": "Bioclimatic Combined Left / Right Beam + Gutter",
+    "Bioclimatic Lamel Profili": "Bioclimatic Lamella Profile",
+    "Bioclimatic Dikme Profili": "Bioclimatic Post Profile",
+    "Pergola Arka Mekanizma Profili": "Pergola Rear Mechanism Profile",
+    "Pergola Ön Kafa Profili": "Pergola Front Head Profile",
+    "Pergola Ray Profili": "Pergola Rail Profile",
+    "Pergola Kumaş Taşıyıcı Profili": "Pergola Fabric Support Profile",
+    "Pergola Dikme Profili": "Pergola Post Profile",
+    "Pergola LED Profili": "Pergola LED Profile",
+    "Paslanmaz bağlantı vidası": "Stainless Steel Fastener",
+    "Taşıyıcı ve çerçeve bağlantıları": "Support and frame connections",
+    "Köşe / birleşim bağlantı plakası": "Corner / Joint Connection Plate",
+    "Demo montaj seti": "Demo assembly kit",
+    "EPDM fitil / conta": "EPDM Seal / Gasket",
+    "Panel ve profil sızdırmazlığı": "Panel and profile sealing",
+    "Seçili motor opsiyonu": "Selected motor option",
+    "Seçili kumanda opsiyonu": "Selected remote option",
+    "Rolling Roof oluk kapağı": "Rolling Roof Gutter Cap",
+    "Ön/arka oluk kapakları": "Front / rear gutter caps",
+    "Lamel burç seti": "Lamella Bushing Set",
+    "Panel hareket seti": "Panel motion kit",
+    "Drenaj çıkış adaptörü": "Drain Outlet Adapter",
+    "Su tahliyesi": "Water drainage",
+    "Eco-Bioclimatic hareket kolu seti": "Eco-Bioclimatic Motion Arm Set",
+    "Lamel hareketi": "Lamella motion",
+    "Oluk drenaj parçası": "Gutter Drain Part",
+    "Bioclimatic birleşik profil köşe kapağı": "Bioclimatic Combined Profile Corner Cap",
+    "Birleşik kayıt + oluk uçları": "Combined beam + gutter ends",
+    "Bioclimatic drenaj adaptörü": "Bioclimatic Drain Adapter",
+    "Dört cephe drenajı": "Four-sided drainage",
+    "Pergola ray arabası": "Pergola Rail Carriage",
+    "Ray mekanizması": "Rail mechanism",
+    "Kumaş bağlantı seti": "Fabric Connection Set",
+    "Kumaş taşıyıcı bağlantıları": "Fabric support connections",
+    "Fi70 drenaj bağlantısı": "Fi70 Drain Connection",
+    "Yan Ürün": "Attached Product",
+    "Demo Müşteri": "Demo Customer",
+    "P3DV Satış Demosu": "P3DV Sales Demo",
+    "P3DV Kullanıcısı": "P3DV User",
+    "P3DV · DOCUMENT CENTER": "P3DV · DOCUMENT CENTER",
+    "PLMR · P3DV Demo Dokümanı · Üretim doğruluğu prototip seviyesindedir.": "PLMR · P3DV Demo Document · Production accuracy is at prototype level.",
+    "Bu proje için listelenecek veri bulunamadı.": "No data available for this project.",
+    "Satış Teklifi · Demo": "Sales Quotation · Demo",
+    "Satış Teklifi · devam": "Sales Quotation · continued",
+    "Profil Adı": "Profile Name",
+    "Profil Kodu": "Profile Code",
+    "Profil Kesit": "Profile Section",
+    "Profil": "Profile",
+    "Boy": "Length",
+    "Adet": "Qty",
+    "Yüzey / RAL": "Finish / RAL",
+    "Toplam Kg": "Total kg",
+    "Kontrol": "Check",
+    "Sipariş ve Üretim · Demo": "Order and Production · Demo",
+    "Ürün": "Product",
+    "Ölçü": "Dimensions",
+    "Renk": "Color",
+    "Proje Ürünleri · Ana Sistem + Yan Ürünler": "Project Products · Main System + Attached Products",
+    "Kesim Boyu": "Cut Length",
+    "Açı": "Angle",
+    "Açıklama": "Description",
+    "Dinamik Demo Kesim Verisi": "Dynamic Demo Cut Data",
+    "Ürüne Bağlı Demo Aksesuarlar": "Product-Specific Demo Accessories",
+    "Aksesuar": "Accessory",
+    "Kod": "Code",
+    "Birim": "Unit",
+    "Stok Boyu": "Stock Length",
+    "Kullanılacak Adet": "Required Qty",
+    "Tahmini Kalan": "Estimated Remainder",
+    "Stoktan Kullanılacak Profiller": "Required Stock Profiles",
+    "Stok Yerleşimi · devam": "Stock Layout · continued",
+    "Görsel Stok Yerleşimi · Demo": "Visual Stock Layout · Demo",
+    "Perspektif": "Perspective",
+    "Ön Görünüş": "Front View",
+    "Yan Görünüş": "Side View",
+    "Üst Görünüş": "Top View",
+    "3D Görselleştirme": "3D Visualization",
+    "Perspektif + Ön": "Perspective + Front",
+    "Yan + Üst": "Side + Top",
+    "2D Teknik Görünüş": "2D Technical View",
+    "PLMR Web DXF / 2D": "PLMR Technical Drawing",
+    "Canonical Technical 2D": "Technical Drawing",
+    "MÜŞTERİ": "CUSTOMER",
+    "P3DV Çözüm Merkezi": "P3DV Solution Center",
+    "Teklif ve proje dokümantasyonu": "Quotation and project documentation",
+    "Müşteri": "Customer",
+    "Müşteri logosu eklenmedi": "No customer logo added",
+    "Demo Fiyat": "Demo Price",
+    "SATICI / FİRMA": "SELLER / COMPANY",
+    "Teklif No": "Quotation No.",
+    "Teklif Tarihi": "Quotation Date",
+    "Ana Sistem": "Main System",
+    "Sistem Rengi": "System Color",
+    "Standart sistem · Ek opsiyon seçilmedi": "Standard system · No additional options selected",
+    "SEÇİLEN OPSİYONLAR": "SELECTED OPTIONS",
+    "Teklif kalemleri devam ediyor.": "Quotation items continued.",
+    "Teklif Kalemleri": "Quotation Items",
+    "Teklif Notu": "Quotation Note",
+    "Ana sistem ve projeye eklenen yan ürünler birlikte gösterilir. Fiyatlar P3DV satış demosu için ölçü ve ürün tipine bağlı dinamik prototip değerlerdir; üretim / sipariş fiyatı değildir.": "The main system and attached products are shown together. Prices are dynamic prototype estimates for the P3DV sales demo, based on dimensions and product type; they are not production or order prices.",
+    "DEMO FİYAT ÖZETİ": "DEMO PRICE SUMMARY",
+    "Ara toplam": "Subtotal",
+    "KDV (Demo %20)": "VAT (Demo 20%)",
+    "GENEL TOPLAM": "GRAND TOTAL",
+    "Teklif kalemleri sonraki sayfada devam eder.": "Quotation items continue on the next page.",
+    "Proje / Müşteri": "Project / Customer",
+    "Sipariş No": "Order No.",
+    "Tarih": "Date",
+    "Genişlik": "Width",
+    "Açılım": "Projection",
+    "Yükseklik": "Height",
+    "Panel Rengi": "Panel Color",
+    "Kullanıcı": "User",
+    "Optimizasyon için kesim parçası bulunamadı.": "No cut pieces available for optimization.",
+    "FIRE": "WASTE",
+    "PLMR Pergola Web DXF motorundan canlı üretilen 2D görünüş": "Live 2D technical view of the Pergola project",
+    "Canonical Technical 2D capture oluşturulamadı.": "The technical 2D view could not be captured.",
+    "ÖN GÖRÜNÜŞ": "FRONT VIEW",
+    "YAN GÖRÜNÜŞ": "SIDE VIEW",
+    "ÜST GÖRÜNÜŞ": "TOP VIEW",
+    "Teknik Not": "Technical Note",
+    "Bu sayfa P3DV kanonik ölçülerinden üretilen demo teknik görünüşüdür. Ölçü ve modül bölünmeleri proje girdileri değiştiğinde güncellenir; CAD/imalat paftası doğruluğu bu prototip kapsamının dışındadır.": "This demo technical view uses the project dimensions. Dimensions and module divisions update with project inputs. CAD and manufacturing drawing accuracy is outside the scope of this prototype.",
+    "3D görüntü alınamadı": "The 3D view could not be captured",
+    "Technical 2D PDF model units 1:1 mm değil.": "The technical 2D model must use millimeters at 1:1 scale.",
+    "Technical 2D PDF drawing entity seti boş.": "The technical 2D drawing is empty.",
+    "DXF model: 1:1 mm": "DXF model: 1:1 mm",
+    "Doküman veri köprüsü hazır değil.": "Document data is not ready.",
+    "Önce geçerli bir proje/çizim oluşturun.": "Create a valid project or drawing first.",
+    "Bu ürün için aktif en az bir doküman seçin.": "Select at least one available document for this product.",
+    "P3DV PDF motoru yüklenemedi.": "The PDF renderer could not be loaded.",
+    "TECHNICAL2D_VECTOR_PDF_UNAVAILABLE: Canlı Technical 2D shared vector PDF kaynağı oluşturulamadı.": "TECHNICAL2D_VECTOR_PDF_UNAVAILABLE: The technical 2D vector drawing is unavailable.",
+    "Doküman seçin": "Select documents",
+    "Dokümanları Seç": "Select Documents",
+    "Tek PDF · çoklu bölüm": "One PDF · multiple sections",
+    "Kapat": "Close",
+    "Hepsi": "All",
+    "PDF Hazırlanıyor": "Preparing PDF",
+    "PDF Oluşturuldu": "PDF Created",
+    "PDF Oluştur": "Create PDF",
+    "PDF oluşturulamadı.": "The PDF could not be created.",
+    "PDF zaten hazırlanıyor.": "A PDF is already being prepared.",
+    "adet": "pcs",
+    "set": "set",
+    "Sayfa {page} / {total}": "Page {page} / {total}",
+    "{count} doküman seçildi": "{count} documents selected",
+    "{title} · devam": "{title} · continued",
+    "Modül {number}": "Module {number}",
+    "Poz {number}": "Position {number}",
+    "Ort. fire {value}": "Avg. waste {value}",
+    "{product} · Sistem {number}": "{product} · System {number}",
+    "{code} · Stok {stock} · Çubuk {index}": "{code} · Stock {stock} · Bar {index}",
+    "Verim %{efficiency} · Fire {waste}": "Efficiency {efficiency}% · Waste {waste}",
+    "{count} parça · kullanılan {used} · kalan {remaining}": "{count} pieces · used {used} · remaining {remaining}",
+    "Görsel örnek sınırı: {count} ek stok çubuğu özet tabloda hesaba dahil edilmiştir.": "Preview limit: {count} additional stock bars are included in the summary.",
+    "Bu sayfadaki yaklaşık profil ağırlığı: {weight}": "Approximate profile weight on this page: {weight}",
+    "tum-dokumanlar": "all-documents",
+    "{count}-dokuman": "{count}-documents",
+    "{product} · Teknik 2D görünüş": "{product} · Technical 2D view",
+    "Ortak görünüş ölçeği: {scale} px/mm · DXF model: 1:1 mm": "Shared view scale: {scale} px/mm · DXF model: 1:1 mm",
+    "Vektör teknik çizim · {count} çizim öğesi": "Vector technical drawing · {count} drawing entities"
+});
+  const DOCUMENT_TR = Object.freeze({
+    "P3DV · DOCUMENT CENTER": "P3DV · DOKÜMAN MERKEZİ",
+    "PLMR Web DXF / 2D": "PLMR Teknik Çizim",
+    "Canonical Technical 2D": "Teknik Çizim",
+    "Default teknik renk": "Varsayılan teknik renk",
+    "Default": "Varsayılan",
+    "Texture": "Dokulu",
+    "FIRE": "FİRE"
+});
+  let documentLanguage = null;
+  let generationActive = false;
+  let languageObserver = null;
+  let buttonStatus = 'Tabloları İncele';
+
+  function activeLanguage() {
+    try {
+      if (window.parent && window.parent !== window) {
+        const host = window.parent.document.documentElement.lang;
+        if (/^(tr|en)(-|$)/i.test(host)) return host.toLowerCase().startsWith('en') ? 'en' : 'tr';
+      }
+    } catch (_) { /* Cross-origin standalone embedding uses the local preference. */ }
+    try {
+      const saved = window.localStorage && window.localStorage.getItem('pulumur_lang');
+      if (saved === 'en' || saved === 'tr') return saved;
+    } catch (_) { /* Storage can be disabled. */ }
+    return typeof document !== 'undefined' && document.documentElement && /^en(?:-|$)/i.test(document.documentElement.lang || '') ? 'en' : 'tr';
+  }
+
+  function t(key, values, language = documentLanguage || activeLanguage()) {
+    const catalog = language === 'en' ? DOCUMENT_EN : DOCUMENT_TR;
+    const template = Object.prototype.hasOwnProperty.call(catalog, key) ? catalog[key] : key;
+    return String(template).replace(/\{([a-z]+)\}/g, (match, name) => values && Object.prototype.hasOwnProperty.call(values, name) ? String(values[name]) : match);
+  }
+
+  function ui(key, values) { return t(key, values, activeLanguage()); }
+
+  // Only generated row fields use this formatter. User names, option values,
+  // IDs, profile codes and free-form annotations are never catalog inputs.
+  function generatedText(value) {
+    const text = String(value == null ? '' : value);
+    let match = text.match(/^(Modül|Poz) (\d+)(?: · (.*))?$/);
+    if (match) return t(match[1] === 'Modül' ? 'Modül {number}' : 'Poz {number}', { number: match[2] }) + (match[3] ? ' · ' + t(match[3]) : '');
+    match = text.match(/^(.*) · Sistem (\d+)$/);
+    if (match) return t('{product} · Sistem {number}', { product: match[1], number: match[2] });
+    match = text.match(/^Ort\. fire (.*)$/);
+    if (match) return t('Ort. fire {value}', { value: match[1] });
+    match = text.match(/^(.*) · (Parlak|Texture|Mat)$/);
+    if (match) return match[1] + ' · ' + t(match[2]);
+    return t(text);
+  }
+
+  function tableValue(row, column, value) {
+    if (row.documentUserFields && row.documentUserFields.includes(column.value)) return value;
+    if (column.value === 'name') {
+      if (row.kind === 'attached') return value;
+      if (row.code === 'AKS-MTR-01') return t('Motor') + String(value).slice('Motor'.length);
+      if (row.code === 'AKS-KMD-01') return t('Kumanda') + String(value).slice('Kumanda'.length);
+      return generatedText(value);
+    }
+    return ['profile', 'note', 'surface', 'unit', 'color'].includes(column.value) ? generatedText(value) : value;
+  }
+
   const DOCUMENTS = Object.freeze([
     { id: 'quote', label: 'Fiyat Teklifi' },
     { id: 'production', label: 'Üretim Formu' },
@@ -34,9 +369,19 @@
   let anchorButton = null;
   let busy = false;
 
-  const nf0 = new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 });
-  const nf1 = new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const money = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const numberFormats = Object.fromEntries(['tr', 'en'].map((language) => {
+    const locale = language === 'en' ? 'en-GB' : 'tr-TR';
+    return [language, {
+      integer: new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }),
+      decimal: new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+      currency: new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+    }];
+  }));
+  // Only the captured export language affects formatting. Read-only data callers
+  // retain the original TR representation and all numeric calculation values.
+  const nf0 = { format: (value) => numberFormats[documentLanguage || 'tr'].integer.format(value) };
+  const nf1 = { format: (value) => numberFormats[documentLanguage || 'tr'].decimal.format(value) };
+  const money = { format: (value) => numberFormats[documentLanguage || 'tr'].currency.format(value) };
 
   function bridge() {
     return window.__P3DV_DOCUMENT_BRIDGE__ || null;
@@ -64,7 +409,7 @@
   }
 
   function productLabel(group) {
-    return PRODUCT_LABELS[group] || String(group || 'P3DV Ürünü');
+    return window.PulumurProductPresentation ? window.PulumurProductPresentation.name(group) : PRODUCT_LABELS[group] || String(group || 'P3DV Ürünü');
   }
 
   function finishText(value) {
@@ -96,7 +441,7 @@
   }
 
   function todayText() {
-    return new Intl.DateTimeFormat('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
+    return new Intl.DateTimeFormat(documentLanguage === 'en' ? 'en-GB' : 'tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date());
   }
 
   function projectNumber(model) {
@@ -209,7 +554,8 @@
       const safeQty = Math.max(0, Math.round(safeNumber(qty)));
       const safeLength = Math.max(1, round5(length));
       if (!safeQty || !safeLength) return;
-      pieces.push({ profile, code, length: safeLength, qty: safeQty, gram: safeNumber(gram), section, stock: safeNumber(stock, 6000), note: note || '' });
+      const displayProfile = window.PulumurProductPresentation ? window.PulumurProductPresentation.text(profile) : profile;
+      pieces.push({ profile: displayProfile, code, length: safeLength, qty: safeQty, gram: safeNumber(gram), section, stock: safeNumber(stock, 6000), note: note || '' });
     };
 
     if (model.productGroup === 'b-cube') {
@@ -272,7 +618,9 @@
 
   function accessoryRows(model, modules, counts) {
     const rows = [];
-    const add = (name, code, qty, unit, note) => { if (qty > 0) rows.push({ name, code, qty: Math.round(qty), unit, note }); };
+    const add = (name, code, qty, unit, note) => {
+      if (qty > 0) rows.push({ name, code, qty: Math.round(qty), unit, note });
+    };
     const moduleCount = modules.length;
     const panelCount = counts.panelCount;
     const postCount = counts.postCount;
@@ -284,15 +632,15 @@
     if (motor && !/^(yok|-|no)$/i.test(motor)) add(`Motor · ${motor}`, 'AKS-MTR-01', moduleCount, 'adet', 'Seçili motor opsiyonu');
     if (remote && !/^(yok|-|no)$/i.test(remote)) add(`Kumanda · ${remote}`, 'AKS-KMD-01', Math.max(1, Math.ceil(moduleCount / 2)), 'adet', 'Seçili kumanda opsiyonu');
     if (model.productGroup === 'b-cube') {
-      add('Freedom oluk kapağı', 'BCF-AKS-KPK', moduleCount * 4, 'adet', 'Ön/arka oluk kapakları');
+      add('Rolling Roof oluk kapağı', 'BCF-AKS-KPK', moduleCount * 4, 'adet', 'Ön/arka oluk kapakları');
       add('Lamel burç seti', 'BCF-AKS-BRC', panelCount * 2, 'set', 'Panel hareket seti');
       add('Drenaj çıkış adaptörü', 'BCF-AKS-DRN', moduleCount * 2, 'adet', 'Su tahliyesi');
     } else if (model.productGroup === 'bio-rise') {
       add('Eco-Bioclimatic hareket kolu seti', 'BR-AKS-HRK', moduleCount * 2, 'set', 'Lamel hareketi');
       add('Oluk drenaj parçası', 'BR-AKS-DRN', moduleCount * 2, 'adet', 'Su tahliyesi');
     } else if (model.productGroup === 'b-cube-galaxy') {
-      add('Galaxy birleşik profil köşe kapağı', 'GX-AKS-KPK', moduleCount * 4, 'adet', 'Birleşik kayıt + oluk uçları');
-      add('Galaxy drenaj adaptörü', 'GX-AKS-DRN', moduleCount * 4, 'adet', 'Dört cephe drenajı');
+      add('Bioclimatic birleşik profil köşe kapağı', 'GX-AKS-KPK', moduleCount * 4, 'adet', 'Birleşik kayıt + oluk uçları');
+      add('Bioclimatic drenaj adaptörü', 'GX-AKS-DRN', moduleCount * 4, 'adet', 'Dört cephe drenajı');
     } else {
       const railCount = modules.reduce((s, m) => s + (m.railCount || 0), 0);
       add('Pergola ray arabası', 'PR-AKS-RAY', railCount * 2, 'adet', 'Ray mekanizması');
@@ -543,7 +891,7 @@
     drawBrandLogo(ctx, brandLogo, PAGE.margin, 43, 150, 34);
     font(ctx, 650, 11);
     ctx.fillStyle = COLORS.blue2;
-    ctx.fillText('P3DV · DOCUMENT CENTER', PAGE.margin, 101);
+    ctx.fillText(t('P3DV · DOCUMENT CENTER'), PAGE.margin, 101);
 
     font(ctx, 800, 34);
     ctx.fillStyle = COLORS.ink;
@@ -580,9 +928,9 @@
     ctx.stroke();
     font(ctx, 500, 12);
     ctx.fillStyle = COLORS.muted;
-    ctx.fillText('PLMR · P3DV Demo Dokümanı · Üretim doğruluğu prototip seviyesindedir.', PAGE.margin, footerY);
+    ctx.fillText(t('PLMR · P3DV Demo Dokümanı · Üretim doğruluğu prototip seviyesindedir.'), PAGE.margin, footerY);
     ctx.textAlign = 'right';
-    ctx.fillText(`Sayfa ${pageNo} / ${totalPages}`, PAGE.width - PAGE.margin, footerY);
+    ctx.fillText(t('Sayfa {page} / {total}', { page: pageNo, total: totalPages }), PAGE.width - PAGE.margin, footerY);
     ctx.textAlign = 'left';
     return { x: PAGE.margin, y: PAGE.header + 8, w: PAGE.width - PAGE.margin * 2, h: PAGE.height - PAGE.header - PAGE.footer - 28 };
   }
@@ -636,12 +984,60 @@
     return { title, kicker, type: 'table', columns, rows, ...options };
   }
 
+  function documentLines(ctx, value, width) {
+    const lines = [];
+    for (const paragraph of String(value == null ? '' : value).replace(/\r\n?/g, '\n').split('\n')) {
+      let line = '';
+      for (const char of paragraph) {
+        if (line && ctx.measureText(line + char).width > width) {
+          const at = line.lastIndexOf(' ');
+          if (at > 0) { lines.push(line.slice(0, at + 1)); line = line.slice(at + 1); }
+          else { lines.push(line); line = ''; }
+          if (line && ctx.measureText(line + char).width > width) { lines.push(line); line = ''; }
+        }
+        line += char;
+      }
+      lines.push(line);
+    }
+    return lines;
+  }
+
+  function measuredTableHeight(ctx, row, columns, base) {
+    const total = columns.reduce((sum, col) => sum + col.width, 0);
+    let lines = 1;
+    columns.forEach(col => {
+      if (col.icon) return;
+      font(ctx, col.bold ? 700 : 500, col.size || 12);
+      const value = typeof col.value === 'function' ? col.value(row) : row[col.value];
+      lines = Math.max(lines, documentLines(ctx, tableValue(row, col, value), (PAGE.width - PAGE.margin * 2) * col.width / total - 16).length);
+    });
+    return Math.max(base, 48 + (lines - 1) * 17);
+  }
+
+  function partitionRows(rows, heights, budget) {
+    const parts = []; let part = { rows: [], rowHeights: [] }, used = 0;
+    rows.forEach((row, i) => {
+      if (heights[i] > budget) throw new Error('DOCUMENT_ROW_TOO_TALL');
+      if (part.rows.length && used + heights[i] > budget) { parts.push(part); part = { rows: [], rowHeights: [] }; used = 0; }
+      part.rows.push(row); part.rowHeights.push(heights[i]); used += heights[i];
+    });
+    if (part.rows.length) parts.push(part);
+    return parts;
+  }
+
   function splitTableDescriptors(title, kicker, columns, rows, options = {}) {
+    if (rows.some(row => row.documentRow)) {
+      const ctx = document.createElement('canvas').getContext('2d');
+      const heights = rows.map(row => measuredTableHeight(ctx, row, columns, options.rowHeight || 72));
+      // Native page body, table heading, optional production header and footer space.
+      const budget = PAGE.height - PAGE.header - PAGE.footer - 28 - 58 - (options.productionHeader ? 187 + 50 : 24);
+      return partitionRows(rows, heights, budget).map((part, index) => tablePageDescriptor(title, index ? t('{title} · devam', { title: kicker }) : kicker, columns, part.rows, { ...options, rowHeights: part.rowHeights }));
+    }
     const perPage = options.rowsPerPage || 14;
     if (!rows.length) return [tablePageDescriptor(title, kicker, columns, [{ empty: true }], options)];
     const pages = [];
     for (let i = 0; i < rows.length; i += perPage) {
-      pages.push(tablePageDescriptor(title, pages.length ? `${kicker} · devam` : kicker, columns, rows.slice(i, i + perPage), options));
+      pages.push(tablePageDescriptor(title, pages.length ? t('{title} · devam', { title: kicker }) : kicker, columns, rows.slice(i, i + perPage), options));
     }
     return pages;
   }
@@ -650,7 +1046,7 @@
     const columns = descriptor.columns;
     const rows = descriptor.rows;
     const headerH = 58;
-    const rowH = descriptor.rowHeight || 72;
+
     const totalWeight = columns.reduce((s, c) => s + c.width, 0);
     const colWidths = columns.map((c) => box.w * c.width / totalWeight);
     fillRound(ctx, box.x, box.y, box.w, headerH, 9, COLORS.navy);
@@ -663,19 +1059,21 @@
     });
     let y = box.y + headerH;
     rows.forEach((row, rowIndex) => {
+      const rowH = descriptor.rowHeights ? descriptor.rowHeights[rowIndex] : (descriptor.rowHeight || 72);
       ctx.fillStyle = rowIndex % 2 ? COLORS.soft : COLORS.white;
       ctx.fillRect(box.x, y, box.w, rowH);
       ctx.strokeStyle = COLORS.line; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(box.x, y + rowH); ctx.lineTo(box.x + box.w, y + rowH); ctx.stroke();
       let cellX = box.x;
       columns.forEach((col, colIndex) => {
-        const value = row.empty ? (colIndex === 0 ? 'Bu proje için listelenecek veri bulunamadı.' : '') : (typeof col.value === 'function' ? col.value(row) : row[col.value]);
+        const value = row.empty ? (colIndex === 0 ? t('Bu proje için listelenecek veri bulunamadı.') : '') : (typeof col.value === 'function' ? col.value(row) : row[col.value]);
         if (col.icon && !row.empty) {
           drawProfileIcon(ctx, row.section, cellX + 8, y + 10, colWidths[colIndex] - 16, rowH - 20);
         } else {
           font(ctx, col.bold ? 700 : 500, col.size || 12);
           ctx.fillStyle = col.color || COLORS.text;
-          const lines = wrapLines(ctx, value == null ? '-' : String(value), colWidths[colIndex] - 16, col.maxLines || 2);
+          const rendered = value == null ? '-' : String(tableValue(row, col, value));
+          const lines = descriptor.rowHeights ? documentLines(ctx, rendered, colWidths[colIndex] - 16) : wrapLines(ctx, rendered, colWidths[colIndex] - 16, col.maxLines || 2);
           lines.forEach((line, li) => ctx.fillText(line, cellX + 8, y + 28 + li * 17));
         }
         if (colIndex < columns.length - 1) {
@@ -689,13 +1087,27 @@
 
   function quoteDescriptors(data) {
     const rows = data.quote && Array.isArray(data.quote.items) ? data.quote.items : [];
+    if (rows.some(row => row.documentRow)) {
+      const ctx = document.createElement('canvas').getContext('2d');
+      const widths = [.30, .27, .17, .08, .18];
+      const heights = rows.map(row => {
+        let lines = 1;
+        quoteRowValues(row).forEach((value, index) => {
+          font(ctx, index === 0 || index === 4 ? 700 : 550, index === 4 ? 11 : 12);
+          lines = Math.max(lines, documentLines(ctx, value, (PAGE.width - PAGE.margin * 2) * widths[index] - 14).length);
+        });
+        return Math.max(61, 46 + (lines - 1) * 17);
+      });
+      const parts = partitionRows(rows, heights, 580);
+      return parts.map((part, i) => ({title:t('Fiyat Teklifi'), kicker:t(i ? 'Satış Teklifi · devam' : 'Satış Teklifi · Demo'), type:'quote', ...part, isFirst:i === 0, isLast:i === parts.length - 1}));
+    }
     const perPage = 8;
-    if (!rows.length) return [{ title: 'Fiyat Teklifi', kicker: 'Satış Teklifi · Demo', type: 'quote', rows: [], isFirst: true, isLast: true }];
+    if (!rows.length) return [{ title: t('Fiyat Teklifi'), kicker: t('Satış Teklifi · Demo'), type: 'quote', rows: [], isFirst: true, isLast: true }];
     const pages = [];
     for (let i = 0; i < rows.length; i += perPage) {
       pages.push({
-        title: 'Fiyat Teklifi',
-        kicker: i ? 'Satış Teklifi · devam' : 'Satış Teklifi · Demo',
+        title: t('Fiyat Teklifi'),
+        kicker: i ? t('Satış Teklifi · devam') : t('Satış Teklifi · Demo'),
         type: 'quote',
         rows: rows.slice(i, i + perPage),
         isFirst: i === 0,
@@ -709,68 +1121,68 @@
     const productionRows = data.production.map((row, index) => ({ ...row, index: index + 1 }));
     const cols = [
       { label: '#', width: .05, value: 'index' },
-      { label: 'Profil Adı', width: .21, value: 'profile', bold: true },
-      { label: 'Profil Kodu', width: .11, value: 'code' },
-      { label: 'Profil Kesit', width: .13, icon: true },
-      { label: 'Boy', width: .09, value: (r) => mm(r.length) },
-      { label: 'Adet', width: .06, value: 'qty' },
-      { label: 'Yüzey / RAL', width: .13, value: 'surface' },
+      { label: t('Profil Adı'), width: .21, value: 'profile', bold: true },
+      { label: t('Profil Kodu'), width: .11, value: 'code' },
+      { label: t('Profil Kesit'), width: .13, icon: true },
+      { label: t('Boy'), width: .09, value: (r) => mm(r.length) },
+      { label: t('Adet'), width: .06, value: 'qty' },
+      { label: t('Yüzey / RAL'), width: .13, value: 'surface' },
       { label: 'g/m', width: .07, value: (r) => nf1.format(r.gram) },
-      { label: 'Toplam Kg', width: .08, value: (r) => nf1.format(r.totalKg) },
-      { label: 'Kontrol', width: .07, value: () => '□  □  □' }
+      { label: t('Toplam Kg'), width: .08, value: (r) => nf1.format(r.totalKg) },
+      { label: t('Kontrol'), width: .07, value: () => '□  □  □' }
     ];
-    return splitTableDescriptors('Üretim Formu', 'Sipariş ve Üretim · Demo', cols, productionRows, { rowsPerPage: 10, rowHeight: 92, productionHeader: true });
+    return splitTableDescriptors(t('Üretim Formu'), t('Sipariş ve Üretim · Demo'), cols, productionRows, { rowsPerPage: 10, rowHeight: 92, productionHeader: true });
   }
 
   function productListDescriptors(data) {
     const cols = [
-      { label: 'Ürün', width: .47, value: 'name', bold: true, maxLines: 2 },
-      { label: 'Ölçü', width: .27, value: 'size', maxLines: 2 },
-      { label: 'Renk', width: .18, value: 'color', maxLines: 1 },
-      { label: 'Adet', width: .08, value: 'qty', maxLines: 1 }
+      { label: t('Ürün'), width: .47, value: 'name', bold: true, maxLines: 2 },
+      { label: t('Ölçü'), width: .27, value: 'size', maxLines: 2 },
+      { label: t('Renk'), width: .18, value: 'color', maxLines: 1 },
+      { label: t('Adet'), width: .08, value: 'qty', maxLines: 1 }
     ];
-    return splitTableDescriptors('Ürün Listesi', 'Proje Ürünleri · Ana Sistem + Yan Ürünler', cols, data.productRows, { rowsPerPage: 17, rowHeight: 64 });
+    return splitTableDescriptors(t('Ürün Listesi'), t('Proje Ürünleri · Ana Sistem + Yan Ürünler'), cols, data.productRows, { rowsPerPage: 17, rowHeight: 64 });
   }
 
   function cutListDescriptors(data) {
-    const rows = data.cuts.map((cut, index) => ({ ...cut, index: index + 1, angle: cut.section === 'panel' ? '90°' : '90° / demo' }));
+    const rows = data.cuts.map((cut, index) => ({ ...cut, index: index + 1, angle: cut.angle ?? (cut.section === 'panel' ? '90°' : '90° / demo') }));
     const cols = [
       { label: '#', width: .06, value: 'index' },
-      { label: 'Profil', width: .27, value: 'profile', bold: true },
-      { label: 'Profil Kodu', width: .15, value: 'code' },
-      { label: 'Kesim Boyu', width: .14, value: (r) => mm(r.length) },
-      { label: 'Adet', width: .09, value: 'qty' },
-      { label: 'Açı', width: .12, value: 'angle' },
-      { label: 'Açıklama', width: .17, value: 'note' }
+      { label: t('Profil'), width: .27, value: 'profile', bold: true },
+      { label: t('Profil Kodu'), width: .15, value: 'code' },
+      { label: t('Kesim Boyu'), width: .14, value: (r) => mm(r.length) },
+      { label: t('Adet'), width: .09, value: 'qty' },
+      { label: t('Açı'), width: .12, value: 'angle' },
+      { label: t('Açıklama'), width: .17, value: 'note' }
     ];
-    return splitTableDescriptors('Kesim Listesi', 'Dinamik Demo Kesim Verisi', cols, rows, { rowsPerPage: 15, rowHeight: 70 });
+    return splitTableDescriptors(t('Kesim Listesi'), t('Dinamik Demo Kesim Verisi'), cols, rows, { rowsPerPage: 15, rowHeight: 70 });
   }
 
   function accessoryDescriptors(data) {
     const rows = data.accessories.map((row, index) => ({ ...row, index: index + 1 }));
     const cols = [
       { label: '#', width: .06, value: 'index' },
-      { label: 'Aksesuar', width: .30, value: 'name', bold: true },
-      { label: 'Kod', width: .18, value: 'code' },
-      { label: 'Adet', width: .10, value: 'qty' },
-      { label: 'Birim', width: .12, value: 'unit' },
-      { label: 'Açıklama', width: .24, value: 'note' }
+      { label: t('Aksesuar'), width: .30, value: 'name', bold: true },
+      { label: t('Kod'), width: .18, value: 'code' },
+      { label: t('Adet'), width: .10, value: 'qty' },
+      { label: t('Birim'), width: .12, value: 'unit' },
+      { label: t('Açıklama'), width: .24, value: 'note' }
     ];
-    return splitTableDescriptors('Aksesuar Listesi', 'Ürüne Bağlı Demo Aksesuarlar', cols, rows, { rowsPerPage: 16, rowHeight: 70 });
+    return splitTableDescriptors(t('Aksesuar Listesi'), t('Ürüne Bağlı Demo Aksesuarlar'), cols, rows, { rowsPerPage: 16, rowHeight: 70 });
   }
 
   function stockDescriptors(data) {
     const rows = data.stock.map((row, index) => ({ ...row, index: index + 1 }));
     const cols = [
       { label: '#', width: .06, value: 'index' },
-      { label: 'Profil', width: .27, value: 'profile', bold: true },
-      { label: 'Profil Kodu', width: .15, value: 'code' },
-      { label: 'Stok Boyu', width: .13, value: (r) => mm(r.stock) },
-      { label: 'Kullanılacak Adet', width: .13, value: 'qty' },
-      { label: 'Tahmini Kalan', width: .14, value: (r) => mm(r.remaining) },
-      { label: 'Açıklama', width: .12, value: 'note' }
+      { label: t('Profil'), width: .27, value: 'profile', bold: true },
+      { label: t('Profil Kodu'), width: .15, value: 'code' },
+      { label: t('Stok Boyu'), width: .13, value: (r) => mm(r.stock) },
+      { label: t('Kullanılacak Adet'), width: .13, value: 'qty' },
+      { label: t('Tahmini Kalan'), width: .14, value: (r) => mm(r.remaining) },
+      { label: t('Açıklama'), width: .12, value: 'note' }
     ];
-    return splitTableDescriptors('Stoktan Kullanılacak Profiller', 'Stok Profilleri', cols, rows, { rowsPerPage: 15, rowHeight: 72 });
+    return splitTableDescriptors(t('Stoktan Kullanılacak Profiller'), t('Stok Profilleri'), cols, rows, { rowsPerPage: 15, rowHeight: 72 });
   }
 
   function optimizationDescriptors(data) {
@@ -780,29 +1192,29 @@
     const descriptors = [];
     for (let i = 0; i < visible.length; i += 7) {
       descriptors.push({
-        title: 'Kesim Optimizasyonu',
-        kicker: i ? 'Stok Yerleşimi · devam' : 'Görsel Stok Yerleşimi · Demo',
+        title: t('Kesim Optimizasyonu'),
+        kicker: i ? t('Stok Yerleşimi · devam') : t('Görsel Stok Yerleşimi · Demo'),
         type: 'optimization',
         rows: visible.slice(i, i + 7), totalBars: bars.length, hiddenBars: Math.max(0, bars.length - maxVisualBars)
       });
     }
-    return descriptors.length ? descriptors : [{ title: 'Kesim Optimizasyonu', kicker: 'Görsel Stok Yerleşimi · Demo', type: 'optimization', rows: [], totalBars: 0, hiddenBars: 0 }];
+    return descriptors.length ? descriptors : [{ title: t('Kesim Optimizasyonu'), kicker: t('Görsel Stok Yerleşimi · Demo'), type: 'optimization', rows: [], totalBars: 0, hiddenBars: 0 }];
   }
 
   function viewDescriptors(data, views) {
     const byPreset = new Map((views || []).map((v) => [v.preset, v]));
     const ordered = [
-      { preset: 'perspective', label: 'Perspektif' }, { preset: 'front', label: 'Ön Görünüş' },
-      { preset: 'side', label: 'Yan Görünüş' }, { preset: 'top', label: 'Üst Görünüş' }
+      { preset: 'perspective', label: t('Perspektif') }, { preset: 'front', label: t('Ön Görünüş') },
+      { preset: 'side', label: t('Yan Görünüş') }, { preset: 'top', label: t('Üst Görünüş') }
     ].map((item) => ({ ...item, view: byPreset.get(item.preset) }));
     return [
-      { title: '3D Görselleştirme', kicker: 'Perspektif + Ön', type: '3d', views: ordered.slice(0, 2) },
-      { title: '3D Görselleştirme', kicker: 'Yan + Üst', type: '3d', views: ordered.slice(2, 4) }
+      { title: t('3D Görselleştirme'), kicker: t('Perspektif + Ön'), type: '3d', views: ordered.slice(0, 2) },
+      { title: t('3D Görselleştirme'), kicker: t('Yan + Üst'), type: '3d', views: ordered.slice(2, 4) }
     ];
   }
 
   function twoDDescriptors(data, view2d) {
-    return [{ title: '2D Teknik Görünüş', kicker: data.model.productGroup === 'pergo-rise' ? 'PLMR Web DXF / 2D' : 'Canonical Technical 2D', type: '2d', data, view: view2d || null }];
+    return [{ title: t('2D Teknik Görünüş'), kicker: data.model.productGroup === 'pergo-rise' ? t('PLMR Web DXF / 2D') : t('Canonical Technical 2D'), type: '2d', data, view: view2d || null }];
   }
 
   function buildDescriptors(selection, data, views, view2d) {
@@ -819,6 +1231,17 @@
       if (doc.id === 'optimization') descriptors.push(...optimizationDescriptors(data));
       if (doc.id === 'stock') descriptors.push(...stockDescriptors(data));
     });
+    if (data.documentNotes) {
+      const rows = [];
+      // Bounded blocks allow native pagination even for a 2,000-character note.
+      let block = '', breaks = 0;
+      for (const char of data.documentNotes) {
+        block += char; if (char === '\n') breaks++;
+        if (block.length >= 200 || breaks >= 30) { rows.push({note:block,documentRow:true,documentUserFields:['note']}); block = ''; breaks = 0; }
+      }
+      if (block) rows.push({note:block,documentRow:true,documentUserFields:['note']});
+      descriptors.push(...splitTableDescriptors(t('Belge notları'), t('Belge düzenlemeleri'), [{label:t('Belge notları'),width:1,value:'note'}], rows, {rowHeight:50}));
+    }
     return descriptors;
   }
 
@@ -826,7 +1249,7 @@
     fillRound(ctx, x, y, w, h, 8, COLORS.white);
     strokeRound(ctx, x, y, w, h, 8, '#d7e0eb');
     font(ctx, 800, 12); ctx.fillStyle = COLORS.faint; ctx.textAlign = 'center';
-    ctx.fillText('MÜŞTERİ', x + w / 2, y + h / 2 + 4);
+    ctx.fillText(t('MÜŞTERİ'), x + w / 2, y + h / 2 + 4);
     ctx.textAlign = 'left';
   }
 
@@ -838,30 +1261,35 @@
     if (side === 'seller') {
       drawBrandLogo(ctx, brandLogo, x + 18, y + 38, 126, 27);
       font(ctx, 650, 12); ctx.fillStyle = COLORS.text;
-      ctx.fillText(ellipsizeText(ctx, name || 'P3DV Çözüm Merkezi', w - 180), x + 164, y + 60);
+      ctx.fillText(ellipsizeText(ctx, name || t('P3DV Çözüm Merkezi'), w - 180), x + 164, y + 60);
       font(ctx, 500, 11); ctx.fillStyle = COLORS.muted;
-      ctx.fillText('Teklif ve proje dokümantasyonu', x + 18, y + 91);
+      ctx.fillText(t('Teklif ve proje dokümantasyonu'), x + 18, y + 91);
     } else {
       drawCustomerPlaceholder(ctx, x + 18, y + 38, 92, 48);
       font(ctx, 750, 15); ctx.fillStyle = COLORS.ink;
-      ctx.fillText(ellipsizeText(ctx, name || 'Müşteri', w - 142), x + 126, y + 61);
+      ctx.fillText(ellipsizeText(ctx, name || t('Müşteri'), w - 142), x + 126, y + 61);
       font(ctx, 500, 11); ctx.fillStyle = COLORS.muted;
-      ctx.fillText('Müşteri logosu eklenmedi', x + 126, y + 83);
+      ctx.fillText(t('Müşteri logosu eklenmedi'), x + 126, y + 83);
     }
     return h;
   }
 
-  function drawQuoteLineTable(ctx, x, y, w, rows) {
+  function quoteRowValues(row) {
+    const amount = row.documentLineTotal == null ? (row.kind === 'system' ? safeNumber(row.price) : safeNumber(row.price) * Math.max(1, safeNumber(row.qty, 1))) : row.documentLineTotal;
+    return [tableValue(row, {value:'name'}, row.name) || '-', row.size || '-', tableValue(row, {value:'color'}, row.color) || '-', String(row.qty || 1), row.documentRow ? new Intl.NumberFormat(documentLanguage === 'en' ? 'en-GB' : 'tr-TR', {style:'currency', currency:'EUR', minimumFractionDigits:2, maximumFractionDigits:2}).format(amount) : money.format(amount)];
+  }
+
+  function drawQuoteLineTable(ctx, x, y, w, rows, rowHeights) {
     const columns = [
-      { label: 'Ürün', width: .30 },
-      { label: 'Ölçü', width: .27 },
-      { label: 'Renk', width: .17 },
-      { label: 'Adet', width: .08 },
-      { label: 'Demo Fiyat', width: .18 }
+      { label: t('Ürün'), width: .30 },
+      { label: t('Ölçü'), width: .27 },
+      { label: t('Renk'), width: .17 },
+      { label: t('Adet'), width: .08 },
+      { label: t('Demo Fiyat'), width: .18 }
     ];
     const totalWeight = columns.reduce((sum, col) => sum + col.width, 0);
     const widths = columns.map((col) => w * col.width / totalWeight);
-    const headerH = 46, rowH = 61;
+    const headerH = 46;
     fillRound(ctx, x, y, w, headerH, 8, COLORS.navy);
     let cx = x;
     columns.forEach((column, index) => {
@@ -871,19 +1299,22 @@
     });
     let yy = y + headerH;
     (rows || []).forEach((row, rowIndex) => {
+      const rowH = rowHeights ? rowHeights[rowIndex] : 61;
       ctx.fillStyle = rowIndex % 2 ? COLORS.soft : COLORS.white;
       ctx.fillRect(x, yy, w, rowH);
       ctx.strokeStyle = COLORS.line; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(x, yy + rowH); ctx.lineTo(x + w, yy + rowH); ctx.stroke();
-      const values = [
-        row.name || '-', row.size || '-', row.color || '-', String(row.qty || 1),
-        money.format(row.kind === 'system' ? safeNumber(row.price) : safeNumber(row.price) * Math.max(1, safeNumber(row.qty, 1)))
-      ];
+      const values = quoteRowValues(row);
       let cellX = x;
       values.forEach((value, index) => {
         font(ctx, index === 0 || index === 4 ? 700 : 550, index === 4 ? 11 : 12);
         ctx.fillStyle = index === 4 ? COLORS.navy : COLORS.text;
-        if (index === 3 || index === 4) {
+        if (rowHeights) {
+          const lines = documentLines(ctx, value, widths[index] - 14);
+          ctx.textAlign = index >= 3 ? 'right' : 'left';
+          lines.forEach((line, li) => ctx.fillText(line, index >= 3 ? cellX + widths[index] - 7 : cellX + 7, yy + 26 + li * 17));
+          ctx.textAlign = 'left';
+        } else if (index === 3 || index === 4) {
           ctx.textAlign = 'right';
           ctx.fillText(ellipsizeText(ctx, value, widths[index] - 14), cellX + widths[index] - 7, yy + 36);
           ctx.textAlign = 'left';
@@ -899,7 +1330,7 @@
       });
       yy += rowH;
     });
-    return headerH + (rows || []).length * rowH;
+    return headerH + (rowHeights ? rowHeights.reduce((sum, h) => sum + h, 0) : (rows || []).length * 61);
   }
 
   function drawQuote(ctx, box, data, descriptor, brandLogo) {
@@ -907,13 +1338,13 @@
     if (descriptor.isFirst) {
       const gap = 18;
       const partyW = (box.w - gap) / 2;
-      drawQuotePartyCard(ctx, box.x, y, partyW, 'SATICI / FİRMA', 'P3DV Çözüm Merkezi', 'seller', brandLogo);
-      drawQuotePartyCard(ctx, box.x + partyW + gap, y, partyW, 'MÜŞTERİ', data.customer, 'customer', brandLogo);
+      drawQuotePartyCard(ctx, box.x, y, partyW, t('SATICI / FİRMA'), t('P3DV Çözüm Merkezi'), 'seller', brandLogo);
+      drawQuotePartyCard(ctx, box.x + partyW + gap, y, partyW, t('MÜŞTERİ'), t(data.customer), 'customer', brandLogo);
       y += 130;
 
       const meta = [
-        ['Teklif No', data.projectNo], ['Teklif Tarihi', data.date],
-        ['Ana Sistem', data.product], ['Sistem Rengi', data.compactSystemColor]
+        [t('Teklif No'), data.projectNo], [t('Teklif Tarihi'), data.date],
+        [t('Ana Sistem'), data.product], [t('Sistem Rengi'), generatedText(data.compactSystemColor)]
       ];
       const metaGap = 12;
       const metaW = (box.w - metaGap * 3) / 4;
@@ -928,9 +1359,9 @@
 
       const visibleOptions = quoteDisplayOptions(data.options).slice(0, 8);
       const optionText = visibleOptions.length
-        ? visibleOptions.map((item) => `${item.label}: ${item.value}`).join('  ·  ')
-        : 'Standart sistem · Ek opsiyon seçilmedi';
-      font(ctx, 700, 12); ctx.fillStyle = COLORS.muted; ctx.fillText('SEÇİLEN OPSİYONLAR', box.x, y + 14);
+        ? visibleOptions.map((item) => `${t(item.label)}: ${item.value}`).join('  ·  ')
+        : t('Standart sistem · Ek opsiyon seçilmedi');
+      font(ctx, 700, 12); ctx.fillStyle = COLORS.muted; ctx.fillText(t('SEÇİLEN OPSİYONLAR'), box.x, y + 14);
       font(ctx, 550, 12); ctx.fillStyle = COLORS.text;
       const optionLines = wrapLines(ctx, optionText, box.w, 2);
       optionLines.forEach((line, index) => ctx.fillText(line, box.x, y + 38 + index * 17));
@@ -938,15 +1369,15 @@
     } else {
       fillRound(ctx, box.x, y, box.w, 66, 10, COLORS.softBlue);
       font(ctx, 750, 14); ctx.fillStyle = COLORS.navy;
-      ctx.fillText(`${data.projectNo} · ${data.customer}`, box.x + 18, y + 27);
+      ctx.fillText(`${data.projectNo} · ${t(data.customer)}`, box.x + 18, y + 27);
       font(ctx, 500, 12); ctx.fillStyle = COLORS.muted;
-      ctx.fillText('Teklif kalemleri devam ediyor.', box.x + 18, y + 49);
+      ctx.fillText(t('Teklif kalemleri devam ediyor.'), box.x + 18, y + 49);
       y += 86;
     }
 
-    font(ctx, 800, 19); ctx.fillStyle = COLORS.ink; ctx.fillText('Teklif Kalemleri', box.x, y + 18);
+    font(ctx, 800, 19); ctx.fillStyle = COLORS.ink; ctx.fillText(t('Teklif Kalemleri'), box.x, y + 18);
     y += 34;
-    const used = drawQuoteLineTable(ctx, box.x, y, box.w, descriptor.rows || []);
+    const used = drawQuoteLineTable(ctx, box.x, y, box.w, descriptor.rows || [], descriptor.rowHeights);
     y += used + 24;
 
     if (descriptor.isLast) {
@@ -956,15 +1387,16 @@
       const rightW = box.w - leftW - 18;
       fillRound(ctx, box.x, y, leftW, summaryH, 12, COLORS.soft);
       strokeRound(ctx, box.x, y, leftW, summaryH, 12, COLORS.line);
-      font(ctx, 800, 16); ctx.fillStyle = COLORS.ink; ctx.fillText('Teklif Notu', box.x + 20, y + 34);
-      drawTextBlock(ctx, 'Ana sistem ve projeye eklenen yan ürünler birlikte gösterilir. Fiyatlar P3DV satış demosu için ölçü ve ürün tipine bağlı dinamik prototip değerlerdir; üretim / sipariş fiyatı değildir.', box.x + 20, y + 66, leftW - 40, 22, 6, COLORS.text, 500, 13);
+      font(ctx, 800, 16); ctx.fillStyle = COLORS.ink; ctx.fillText(t('Teklif Notu'), box.x + 20, y + 34);
+      drawTextBlock(ctx, t('Ana sistem ve projeye eklenen yan ürünler birlikte gösterilir. Fiyatlar P3DV satış demosu için ölçü ve ürün tipine bağlı dinamik prototip değerlerdir; üretim / sipariş fiyatı değildir.'), box.x + 20, y + 66, leftW - 40, 22, 6, COLORS.text, 500, 13);
 
       fillRound(ctx, rightX, y, rightW, summaryH, 12, COLORS.navy);
-      font(ctx, 700, 12); ctx.fillStyle = '#cbd5e1'; ctx.fillText('DEMO FİYAT ÖZETİ', rightX + 22, y + 32);
+      font(ctx, 700, 12); ctx.fillStyle = '#cbd5e1'; ctx.fillText(t('DEMO FİYAT ÖZETİ'), rightX + 22, y + 32);
+      const quoteMoney = data.quote.items.some(row => row.documentRow) ? new Intl.NumberFormat(documentLanguage === 'en' ? 'en-GB' : 'tr-TR', {style:'currency',currency:'EUR',minimumFractionDigits:2,maximumFractionDigits:2}) : money;
       const totals = [
-        ['Ara toplam', money.format(data.quote.subtotal)],
-        ['KDV (Demo %20)', money.format(data.quote.vat)],
-        ['GENEL TOPLAM', money.format(data.quote.total)]
+        [t('Ara toplam'), quoteMoney.format(data.quote.subtotal)],
+        [t('KDV (Demo %20)'), quoteMoney.format(data.quote.vat)],
+        [t('GENEL TOPLAM'), quoteMoney.format(data.quote.total)]
       ];
       totals.forEach((line, index) => {
         const yy = y + 76 + index * 50;
@@ -978,7 +1410,7 @@
     } else {
       fillRound(ctx, box.x, y, box.w, 54, 9, COLORS.softBlue);
       font(ctx, 650, 12); ctx.fillStyle = COLORS.navy;
-      ctx.fillText('Teklif kalemleri sonraki sayfada devam eder.', box.x + 18, y + 33);
+      ctx.fillText(t('Teklif kalemleri sonraki sayfada devam eder.'), box.x + 18, y + 33);
     }
   }
 
@@ -986,9 +1418,9 @@
     const h = 165;
     fillRound(ctx, box.x, box.y, box.w, h, 12, COLORS.softBlue);
     const items = [
-      ['Proje / Müşteri', `${data.projectName} · ${data.customer}`], ['Ürün', data.product], ['Sipariş No', data.projectNo], ['Tarih', data.date],
-      ['Genişlik', mm(data.model.width)], ['Açılım', mm(data.model.depth)], ['Yükseklik', mm(data.model.height)], ['Sistem Rengi', data.systemColor],
-      ['Panel Rengi', data.panelColor], ['Kullanıcı', data.salesperson]
+      [t('Proje / Müşteri'), `${t(data.projectName)} · ${t(data.customer)}`], [t('Ürün'), data.product], [t('Sipariş No'), data.projectNo], [t('Tarih'), data.date],
+      [t('Genişlik'), mm(data.model.width)], [t('Açılım'), mm(data.model.depth)], [t('Yükseklik'), mm(data.model.height)], [t('Sistem Rengi'), generatedText(data.systemColor)],
+      [t('Panel Rengi'), generatedText(data.panelColor)], [t('Kullanıcı'), t(data.salesperson)]
     ];
     const colW = box.w / 2;
     items.forEach((item, index) => {
@@ -1003,14 +1435,14 @@
   function drawOptimization(ctx, box, descriptor) {
     const rows = descriptor.rows || [];
     if (!rows.length) {
-      font(ctx, 600, 18); ctx.fillStyle = COLORS.muted; ctx.fillText('Optimizasyon için kesim parçası bulunamadı.', box.x, box.y + 40); return;
+      font(ctx, 600, 18); ctx.fillStyle = COLORS.muted; ctx.fillText(t('Optimizasyon için kesim parçası bulunamadı.'), box.x, box.y + 40); return;
     }
     let y = box.y;
     rows.forEach((bar) => {
       fillRound(ctx, box.x, y, box.w, 137, 12, COLORS.soft);
       strokeRound(ctx, box.x, y, box.w, 137, 12, COLORS.line);
-      font(ctx, 750, 15); ctx.fillStyle = COLORS.ink; ctx.fillText(`${bar.code} · Stok ${mm(bar.stock)} · Çubuk ${bar.index}`, box.x + 18, y + 28);
-      ctx.textAlign = 'right'; font(ctx, 700, 14); ctx.fillStyle = bar.efficiency >= 85 ? COLORS.green : COLORS.amber; ctx.fillText(`Verim %${nf1.format(bar.efficiency)} · Fire ${mm(bar.fire)}`, box.x + box.w - 18, y + 28); ctx.textAlign = 'left';
+      font(ctx, 750, 15); ctx.fillStyle = COLORS.ink; ctx.fillText(t('{code} · Stok {stock} · Çubuk {index}', { code: bar.code, stock: mm(bar.stock), index: bar.index }), box.x + 18, y + 28);
+      ctx.textAlign = 'right'; font(ctx, 700, 14); ctx.fillStyle = bar.efficiency >= 85 ? COLORS.green : COLORS.amber; ctx.fillText(t('Verim %{efficiency} · Fire {waste}', { efficiency: nf1.format(bar.efficiency), waste: mm(bar.fire) }), box.x + box.w - 18, y + 28); ctx.textAlign = 'left';
       const barX = box.x + 18, barY = y + 55, barW = box.w - 36, barH = 48;
       fillRound(ctx, barX, barY, barW, barH, 6, '#e2e8f0');
       let cursor = barX;
@@ -1028,13 +1460,13 @@
       const fireW = barW * bar.fire / bar.stock;
       if (fireW > 0) {
         ctx.fillStyle = '#cbd5e1'; ctx.fillRect(barX + barW - fireW, barY, fireW, barH);
-        if (fireW > 45) { font(ctx, 700, 10); ctx.fillStyle = COLORS.text; ctx.fillText('FIRE', barX + barW - fireW + 5, barY + 30); }
+        if (fireW > 45) { font(ctx, 700, 10); ctx.fillStyle = COLORS.text; ctx.fillText(t('FIRE'), barX + barW - fireW + 5, barY + 30); }
       }
-      font(ctx, 500, 12); ctx.fillStyle = COLORS.muted; ctx.fillText(`${usedSegments.length} parça · kullanılan ${mm(bar.used)} · kalan ${mm(bar.fire)}`, box.x + 18, y + 126);
+      font(ctx, 500, 12); ctx.fillStyle = COLORS.muted; ctx.fillText(t('{count} parça · kullanılan {used} · kalan {remaining}', { count: usedSegments.length, used: mm(bar.used), remaining: mm(bar.fire) }), box.x + 18, y + 126);
       y += 154;
     });
     if (descriptor.hiddenBars > 0 && y < box.y + box.h - 50) {
-      font(ctx, 600, 13); ctx.fillStyle = COLORS.muted; ctx.fillText(`Görsel örnek sınırı: ${descriptor.hiddenBars} ek stok çubuğu özet tabloda hesaba dahil edilmiştir.`, box.x, y + 10);
+      font(ctx, 600, 13); ctx.fillStyle = COLORS.muted; ctx.fillText(t('Görsel örnek sınırı: {count} ek stok çubuğu özet tabloda hesaba dahil edilmiştir.', { count: descriptor.hiddenBars }), box.x, y + 10);
     }
   }
 
@@ -1080,21 +1512,21 @@
         const dw = img.width * scale, dh = img.height * scale;
         ctx.drawImage(img, imageBox.x + (imageBox.w - dw) / 2, imageBox.y + (imageBox.h - dh) / 2, dw, dh);
         font(ctx, 600, 12); ctx.fillStyle = COLORS.muted;
-        ctx.fillText(descriptor.view.source === 'canonical-technical2d' ? `${data.product} · canonical Technical 2D state` : 'PLMR Pergola Web DXF motorundan canlı üretilen 2D görünüş', box.x + 22, box.y + box.h - 22);
+        ctx.fillText(descriptor.view.source === 'canonical-technical2d' ? t('{product} · Teknik 2D görünüş', { product: data.product }) : t('PLMR Pergola Web DXF motorundan canlı üretilen 2D görünüş'), box.x + 22, box.y + box.h - 22);
         return;
       }
     }
-    if (['b-cube','b-cube-galaxy','bio-rise'].includes(String(data.model.productGroup || ''))) throw new Error('Canonical Technical 2D capture oluşturulamadı.');
+    if (['b-cube','b-cube-galaxy','bio-rise'].includes(String(data.model.productGroup || ''))) throw new Error(t('Canonical Technical 2D capture oluşturulamadı.'));
     const widths = data.modules.map((m) => m.width);
     const topH = 430;
-    drawTechnicalView(ctx, box.x, box.y, box.w, topH, 'ÖN GÖRÜNÜŞ', safeNumber(data.model.width), safeNumber(data.model.height), widths);
+    drawTechnicalView(ctx, box.x, box.y, box.w, topH, t('ÖN GÖRÜNÜŞ'), safeNumber(data.model.width), safeNumber(data.model.height), widths);
     const gap = 22;
-    drawTechnicalView(ctx, box.x, box.y + topH + gap, (box.w - gap) / 2, 420, 'YAN GÖRÜNÜŞ', safeNumber(data.model.depth), safeNumber(data.model.height), null);
-    drawTechnicalView(ctx, box.x + (box.w + gap) / 2, box.y + topH + gap, (box.w - gap) / 2, 420, 'ÜST GÖRÜNÜŞ', safeNumber(data.model.width), safeNumber(data.model.depth), widths);
+    drawTechnicalView(ctx, box.x, box.y + topH + gap, (box.w - gap) / 2, 420, t('YAN GÖRÜNÜŞ'), safeNumber(data.model.depth), safeNumber(data.model.height), null);
+    drawTechnicalView(ctx, box.x + (box.w + gap) / 2, box.y + topH + gap, (box.w - gap) / 2, 420, t('ÜST GÖRÜNÜŞ'), safeNumber(data.model.width), safeNumber(data.model.depth), widths);
     const y = box.y + topH + gap + 455;
     fillRound(ctx, box.x, y, box.w, 160, 10, COLORS.softBlue);
-    font(ctx, 800, 16); ctx.fillStyle = COLORS.navy; ctx.fillText('Teknik Not', box.x + 20, y + 34);
-    drawTextBlock(ctx, 'Bu sayfa P3DV kanonik ölçülerinden üretilen demo teknik görünüşüdür. Ölçü ve modül bölünmeleri proje girdileri değiştiğinde güncellenir; CAD/imalat paftası doğruluğu bu prototip kapsamının dışındadır.', box.x + 20, y + 68, box.w - 40, 24, 4, COLORS.text, 500, 14);
+    font(ctx, 800, 16); ctx.fillStyle = COLORS.navy; ctx.fillText(t('Teknik Not'), box.x + 20, y + 34);
+    drawTextBlock(ctx, t('Bu sayfa P3DV kanonik ölçülerinden üretilen demo teknik görünüşüdür. Ölçü ve modül bölünmeleri proje girdileri değiştiğinde güncellenir; CAD/imalat paftası doğruluğu bu prototip kapsamının dışındadır.'), box.x + 20, y + 68, box.w - 40, 24, 4, COLORS.text, 500, 14);
   }
 
   function loadImage(dataUrl) {
@@ -1125,7 +1557,7 @@
         const dw = img.width * scale, dh = img.height * scale;
         ctx.drawImage(img, imageBox.x + (imageBox.w - dw) / 2, imageBox.y + (imageBox.h - dh) / 2, dw, dh);
       } else {
-        font(ctx, 600, 16); ctx.fillStyle = COLORS.muted; ctx.fillText('3D görüntü alınamadı', imageBox.x + 20, imageBox.y + 50);
+        font(ctx, 600, 16); ctx.fillStyle = COLORS.muted; ctx.fillText(t('3D görüntü alınamadı'), imageBox.x + 20, imageBox.y + 50);
       }
       y += 548;
     }
@@ -1150,7 +1582,7 @@
       if (descriptor.productionHeader) {
         const total = descriptor.rows.reduce((sum, row) => sum + safeNumber(row.totalKg), 0);
         font(ctx, 700, 13); ctx.fillStyle = COLORS.muted; ctx.textAlign = 'right';
-        ctx.fillText(`Bu sayfadaki yaklaşık profil ağırlığı: ${kg(total)}`, box.x + box.w, Math.min(PAGE.height - PAGE.footer - 28, tableBox.y + 58 + descriptor.rows.length * (descriptor.rowHeight || 72) + 30));
+        ctx.fillText(t('Bu sayfadaki yaklaşık profil ağırlığı: {weight}', { weight: kg(total) }), box.x + box.w, Math.min(PAGE.height - PAGE.footer - 28, tableBox.y + 58 + (descriptor.rowHeights ? descriptor.rowHeights.reduce((sum, h) => sum + h, 0) : descriptor.rows.length * (descriptor.rowHeight || 72)) + 30));
         ctx.textAlign = 'left';
       }
     }
@@ -1159,8 +1591,8 @@
 
   function pdfFileName(data, selection) {
     const slug = data.product.toLowerCase().replace(/[^a-z0-9ğüşöçıİĞÜŞÖÇ]+/gi, '-').replace(/^-|-$/g, '');
-    const suffix = selection.size === DOCUMENTS.length ? 'tum-dokumanlar' : selection.size === 1 ? Array.from(selection)[0] : `${selection.size}-dokuman`;
-    return `P3DV.v3.86-${slug}-${data.model.width}x${data.model.depth}-${suffix}.pdf`;
+    const suffix = selection.size === DOCUMENTS.length ? t('tum-dokumanlar') : selection.size === 1 ? Array.from(selection)[0] : t('{count}-dokuman', { count: selection.size });
+    return `PLMR.V35-${slug}-${data.model.width}x${data.model.depth}-${suffix}.pdf`;
   }
 
 
@@ -1175,10 +1607,10 @@
     const engine = window.PulumurVectorPdfEngine;
     if (!view || !engine || typeof engine.flattenDrawing !== 'function' || typeof engine.drawDrawing !== 'function') return false;
     const drawing = view.drawing;
-    if (String(view.modelUnits || drawing.units || '') !== 'mm' || Number(view.modelScale == null ? drawing.modelScale : view.modelScale) !== 1) throw new Error('Technical 2D PDF model units 1:1 mm değil.');
+    if (String(view.modelUnits || drawing.units || '') !== 'mm' || Number(view.modelScale == null ? drawing.modelScale : view.modelScale) !== 1) throw new Error(t('Technical 2D PDF model units 1:1 mm değil.'));
     const flat = engine.flattenDrawing(drawing);
     const bounds = flat && flat.bounds || drawing.bounds;
-    if (!bounds || !Array.isArray(flat.entities) || !flat.entities.length) throw new Error('Technical 2D PDF drawing entity seti boş.');
+    if (!bounds || !Array.isArray(flat.entities) || !flat.entities.length) throw new Error(t('Technical 2D PDF drawing entity seti boş.'));
     const pageW = 210, pageH = 297;
     const margin = 12, top = 28, bottom = 20;
     const boxW = pageW - margin * 2, boxH = pageH - top - bottom;
@@ -1193,17 +1625,17 @@
     pdf.setFillColor(255,255,255); pdf.rect(0,0,pageW,pageH,'F');
     // Keep the existing PLMR document identity as vector text; only the Technical2D geometry changed from raster to shared vector drawing.
     pdf.setTextColor(23,37,84); pdf.setFont('helvetica','bold'); pdf.setFontSize(8.5); pdf.text('PLMR', margin, 7.5);
-    pdf.setFontSize(12); pdf.text('2D Teknik Görünüş', margin, 13);
+    pdf.setFontSize(12); pdf.text(t('2D Teknik Görünüş'), margin, 13);
     pdf.setFont('helvetica','normal'); pdf.setFontSize(7.5); pdf.setTextColor(75,85,99);
-    pdf.text(`${data.product} · canonical/shared vector Technical 2D`, margin, 18);
+    pdf.text(t('{product} · Teknik 2D görünüş', { product: data.product }), margin, 18);
     const technicalScale = Number(view.technicalScale);
-    const sourceLabel = Number.isFinite(technicalScale) && technicalScale > 0 ? `Ortak görünüş ölçeği: ${technicalScale.toFixed(6)} px/mm · DXF model: 1:1 mm` : 'DXF model: 1:1 mm';
+    const sourceLabel = Number.isFinite(technicalScale) && technicalScale > 0 ? t('Ortak görünüş ölçeği: {scale} px/mm · DXF model: 1:1 mm', { scale: technicalScale.toFixed(6) }) : t('DXF model: 1:1 mm');
     pdf.text(sourceLabel, margin, 22);
-    pdf.text(`Sayfa ${pageIndex + 1}/${pageTotal}`, pageW - margin, 8, { align:'right' });
+    pdf.text(t('Sayfa {page} / {total}', { page: pageIndex + 1, total: pageTotal }), pageW - margin, 8, { align:'right' });
     pdf.setDrawColor(180,186,196); pdf.setLineWidth(0.18); pdf.rect(margin, top - 2, boxW, boxH + 4);
     engine.drawDrawing(pdf, drawing, transform, { flat, fontName: 'helvetica' });
     pdf.setFont('helvetica','normal'); pdf.setFontSize(7); pdf.setTextColor(100,110,125);
-    pdf.text(`Kaynak: ${view.source || 'canonical-technical2d'} · ${drawing.schema || '-'} · ${flat.entities.length} entity`, margin, pageH - 8);
+    pdf.text(t('Vektör teknik çizim · {count} çizim öğesi', { count: flat.entities.length }), margin, pageH - 8);
     pdf.__plmrLastVectorTechnical2D = { source: view.source || '', schema: drawing.schema || '', entityCount: flat.entities.length, modelUnits: 'mm', modelScale: 1, technicalScale: Number.isFinite(technicalScale) ? technicalScale : null, pageScale: scale };
     return true;
   }
@@ -1222,29 +1654,88 @@
     return new Set(Array.from(selection || []).filter((id) => DOCUMENTS.some((doc) => doc.id === id) && availability[id] !== false));
   }
 
-  async function generate(selection) {
+  function documentOwner() {
+    try {
+      const access = (window.parent && window.parent !== window ? window.parent : window).PulumurAccessContext;
+      const context = access && typeof access.getContext === 'function' ? access.getContext() : null;
+      return {userId:String(context && context.userId || ''), organizationId:String(context && context.organizationId || ''), epoch:access && typeof access.getSessionEpoch === 'function' ? access.getSessionEpoch() : null};
+    } catch (_) { return {userId:'',organizationId:'',epoch:null}; }
+  }
+
+  function workspaceSource() {
     const api = bridge();
-    if (!api || typeof api.readModel !== 'function') throw new Error('Doküman veri köprüsü hazır değil.');
+    if (!api || typeof api.readModel !== 'function' || typeof api.isReady !== 'function' || !api.isReady()) throw new Error('SOURCE_CHANGED');
+    const owner = documentOwner();
+    return JSON.parse(JSON.stringify({model:api.readModel(), reportProducts:typeof api.readReportProducts === 'function' ? api.readReportProducts() : [], authScope:{userId:owner.userId,organizationId:owner.organizationId}}));
+  }
+
+  async function prepareWorkspace(selection) {
+    const Core = window.PulumurDocumentWorkspace;
+    if (!Core) throw new Error('DOCUMENT_WORKSPACE_UNAVAILABLE');
+    const owner = documentOwner(), ownerKey = Core.stable(owner);
+    const selected = Array.from(sanitizeSelection(selection));
+    if (!selected.length) throw new Error(ui('Bu ürün için aktif en az bir doküman seçin.'));
+    const source = workspaceSource(), sourceKey = await Core.fingerprint(source);
+    const data = buildDocumentData(source.model, source.reportProducts);
+    const workspace = new Core.Workspace(data, selected, sourceKey);
+    const ownerValid = () => Core.stable(documentOwner()) === ownerKey;
+    async function validate() {
+      if (!ownerValid()) throw new Error('SESSION_CHANGED');
+      if (Core.stable(Array.from(sanitizeSelection(selected))) !== Core.stable(selected)) throw new Error('SELECTION_CHANGED');
+      const current = workspaceSource();
+      if (await Core.fingerprint(current) !== sourceKey || Core.stable(workspaceSource()) !== Core.stable(current)) throw new Error('SOURCE_CHANGED');
+      if (!ownerValid()) throw new Error('SESSION_CHANGED');
+    }
+    await validate();
+    return {
+      workspace, translate:ui, language:activeLanguage, ownerValid,
+      displayCell(id, row, key) {
+        const index = workspace.original.sheets[id].findIndex(item => item.id === row.sourceId);
+        const sourceRows = id === 'quote' ? data.quote.items : data[{production:'production','product-list':'productRows','cut-list':'cuts',accessories:'accessories',stock:'stock'}[id]];
+        return tableValue({...sourceRows[index], ...row.values, documentUserFields:row.userFields}, {value:key}, row.values[key]);
+      },
+      async exportPDF(current) {
+        if (current !== workspace) throw new Error('SOURCE_MISMATCH');
+        // Snapshot before the first await so edits cannot race PDF generation.
+        const reviewed = current.applyTo(data);
+        return generate(new Set(selected), {data:reviewed,validate});
+      },
+      regenerate:() => prepareWorkspace(new Set(selected))
+    };
+  }
+
+  async function generate(selection, review) {
+    if (generationActive) throw new Error(ui('PDF zaten hazırlanıyor.'));
+    generationActive = true;
+    documentLanguage = activeLanguage();
+    try { return await generateDocument(selection, review); }
+    finally { documentLanguage = null; generationActive = false; }
+  }
+
+  async function generateDocument(selection, review) {
+    if (review) await review.validate();
+    const api = bridge();
+    if (!api || typeof api.readModel !== 'function') throw new Error(t('Doküman veri köprüsü hazır değil.'));
     const safeSelection = sanitizeSelection(selection);
     const model = api.readModel();
-    if (typeof api.isReady === 'function' && !api.isReady()) throw new Error('Önce geçerli bir proje/çizim oluşturun.');
+    if (typeof api.isReady === 'function' && !api.isReady()) throw new Error(t('Önce geçerli bir proje/çizim oluşturun.'));
     const reportProducts = typeof api.readReportProducts === 'function' ? api.readReportProducts() : [];
-    const data = buildDocumentData(model, reportProducts);
+    const data = review ? review.data : buildDocumentData(model, reportProducts);
     let views = [];
     let view2d = null;
     if (safeSelection.has('3d')) views = typeof api.captureViews === 'function' ? await Promise.resolve(api.captureViews()) : [];
     if (safeSelection.has('2d')) view2d = typeof api.capture2DView === 'function' ? await Promise.resolve(api.capture2DView()) : null;
     const descriptors = buildDescriptors(safeSelection, data, views, view2d);
-    if (!descriptors.length) throw new Error('Bu ürün için aktif en az bir doküman seçin.');
+    if (!descriptors.length) throw new Error(t('Bu ürün için aktif en az bir doküman seçin.'));
     const Pdf = window.jspdf && window.jspdf.jsPDF;
-    if (!Pdf) throw new Error('P3DV PDF motoru yüklenemedi.');
+    if (!Pdf) throw new Error(t('P3DV PDF motoru yüklenemedi.'));
     const pdf = new Pdf({ orientation: 'p', unit: 'mm', format: 'a4' });
     for (let i = 0; i < descriptors.length; i += 1) {
       if (i > 0) pdf.addPage();
       const descriptor = descriptors[i];
       const vector2D = descriptor.type === '2d' ? drawVector2DPage(pdf, descriptor, data, i, descriptors.length) : false;
       if (descriptor.type === '2d' && descriptor.view && ['canonical-technical2d','pergola-canonical-drawing'].includes(String(descriptor.view.source || '')) && !vector2D) {
-        throw new Error('TECHNICAL2D_VECTOR_PDF_UNAVAILABLE: Canlı Technical 2D shared vector PDF kaynağı oluşturulamadı.');
+        throw new Error(t('TECHNICAL2D_VECTOR_PDF_UNAVAILABLE: Canlı Technical 2D shared vector PDF kaynağı oluşturulamadı.'));
       }
       if (!vector2D) {
         const canvas = await renderDescriptor(descriptor, data, i + 1, descriptors.length);
@@ -1252,12 +1743,14 @@
       }
       await new Promise((resolve) => requestAnimationFrame(resolve));
     }
+    if (review) await review.validate();
     pdf.save(pdfFileName(data, safeSelection));
     return { pages: descriptors.length, data, selection: Array.from(safeSelection) };
   }
 
   function updatePanelState() {
     if (!panel) return;
+    refreshPanelLanguage();
     const availability = documentAvailability();
     const boxes = Array.from(panel.querySelectorAll('input[data-doc-id]'));
     boxes.forEach((box) => {
@@ -1277,7 +1770,7 @@
     }
     if (button) button.disabled = busy || selected.length === 0;
     const count = panel.querySelector('#p3dvDocumentSelectedCount');
-    if (count) count.textContent = selected.length ? `${selected.length} doküman seçildi` : 'Doküman seçin';
+    if (count) count.textContent = selected.length ? ui('{count} doküman seçildi', { count: selected.length }) : ui('Doküman seçin');
   }
 
   function selectionFromPanel() {
@@ -1302,6 +1795,36 @@
     panel.style.top = `${Math.min(preferredTop, maxTop)}px`;
   }
 
+  function refreshPanelLanguage() {
+    if (!panel) return;
+    panel.setAttribute('aria-label', ui('Dokümanları Seç'));
+    panel.setAttribute('lang', activeLanguage());
+    panel.querySelectorAll('[data-doc-copy]').forEach((node) => { node.textContent = ui(node.dataset.docCopy); });
+    const closeButton = panel.querySelector('.p3dv-document-close');
+    if (closeButton) closeButton.setAttribute('aria-label', ui('Kapat'));
+    const label = panel.querySelector('.p3dv-document-create-label');
+    if (label) label.textContent = ui(buttonStatus);
+  }
+
+  function observeLanguage() {
+    const refresh = () => { updatePanelState(); position(); };
+    window.addEventListener('storage', (event) => { if (event.key === 'pulumur_lang' || event.key === null) refresh(); });
+    if (typeof MutationObserver === 'function') {
+      languageObserver = new MutationObserver(refresh);
+      languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      try {
+        if (window.parent && window.parent !== window) languageObserver.observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+      } catch (_) { /* Cross-origin hosts cannot share their DOM. */ }
+      window.addEventListener('pagehide', () => { languageObserver.disconnect(); });
+      window.addEventListener('pageshow', (event) => {
+        if (!event.persisted) return;
+        languageObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['lang'] });
+        try { if (window.parent && window.parent !== window) languageObserver.observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ['lang'] }); } catch (_) {}
+        refresh();
+      });
+    }
+  }
+
   function ensurePanel() {
     if (panel) return panel;
     panel = document.createElement('div');
@@ -1309,21 +1832,23 @@
     panel.id = 'p3dvDocumentCenter';
     panel.hidden = true;
     panel.setAttribute('role', 'dialog');
-    panel.setAttribute('aria-label', 'Dokümanları Seç');
+    panel.setAttribute('aria-label', ui('Dokümanları Seç'));
     panel.innerHTML = `
       <div class="p3dv-document-center-head">
-        <div><strong>Dokümanları Seç</strong><span>Tek PDF · çoklu bölüm</span></div>
-        <button type="button" class="p3dv-document-close" aria-label="Kapat">×</button>
+        <div><strong data-doc-copy="Dokümanları Seç"></strong><span data-doc-copy="Tek PDF · çoklu bölüm"></span></div>
+        <button type="button" class="p3dv-document-close" aria-label="${ui('Kapat')}">×</button>
       </div>
       <div class="p3dv-document-grid">
-        ${DOCUMENTS.map((doc) => `<label class="p3dv-document-option"><input type="checkbox" data-doc-id="${doc.id}"><span class="p3dv-document-check"></span><b>${doc.label}</b></label>`).join('')}
-        <label class="p3dv-document-option p3dv-document-all"><input type="checkbox" id="p3dvDocumentAll"><span class="p3dv-document-check"></span><b>Hepsi</b></label>
+        ${DOCUMENTS.map((doc) => `<label class="p3dv-document-option"><input type="checkbox" data-doc-id="${doc.id}"><span class="p3dv-document-check"></span><b data-doc-copy="${doc.label}"></b></label>`).join('')}
+        <label class="p3dv-document-option p3dv-document-all"><input type="checkbox" id="p3dvDocumentAll"><span class="p3dv-document-check"></span><b data-doc-copy="Hepsi"></b></label>
       </div>
       <div class="p3dv-document-center-foot">
-        <span id="p3dvDocumentSelectedCount">Doküman seçin</span>
-        <button type="button" id="p3dvDocumentCreate" disabled><span class="p3dv-document-create-label">PDF Oluştur</span><span class="p3dv-document-spinner" aria-hidden="true"></span></button>
+        <span id="p3dvDocumentSelectedCount"></span>
+        <button type="button" id="p3dvDocumentCreate" disabled><span class="p3dv-document-create-label"></span><span class="p3dv-document-spinner" aria-hidden="true"></span></button>
       </div>`;
     document.body.appendChild(panel);
+    refreshPanelLanguage();
+    observeLanguage();
     panel.querySelector('.p3dv-document-close').addEventListener('click', close);
     panel.querySelectorAll('input[data-doc-id]').forEach((box) => box.addEventListener('change', updatePanelState));
     panel.querySelector('#p3dvDocumentAll').addEventListener('change', (event) => {
@@ -1339,18 +1864,18 @@
       const label = panel.querySelector('.p3dv-document-create-label');
       panel.classList.add('is-busy');
       createButton.disabled = true;
-      label.textContent = 'PDF Hazırlanıyor';
+      buttonStatus = 'Tablolar Hazırlanıyor'; label.textContent = ui(buttonStatus);
       try {
-        const result = await generate(selection);
-        panel.dataset.lastPageCount = String(result.pages);
-        panel.dataset.lastSelection = result.selection.join(',');
-        label.textContent = 'PDF Oluşturuldu';
-        setTimeout(() => { if (!busy && label) label.textContent = 'PDF Oluştur'; }, 1000);
+        const session = await prepareWorkspace(selection);
+        if (!window.P3DVDocumentWorkspaceUI) throw new Error('DOCUMENT_WORKSPACE_UNAVAILABLE');
+        window.P3DVDocumentWorkspaceUI.open(session);
+        panel.hidden = true;
+        if (anchorButton) anchorButton.setAttribute('aria-expanded', 'false');
       } catch (error) {
-        console.error('P3DV Doküman Merkezi PDF hatası', error);
-        window.alert(error && error.message ? error.message : 'PDF oluşturulamadı.');
-        label.textContent = 'PDF Oluştur';
+        console.error('P3DV document workspace error', error);
+        window.alert(error && error.message ? error.message : ui('İşlem tamamlanamadı.'));
       } finally {
+        buttonStatus = 'Tabloları İncele';
         busy = false;
         panel.classList.remove('is-busy');
         updatePanelState();
@@ -1369,7 +1894,7 @@
   function open(button) {
     const api = bridge();
     if (!api || typeof api.isReady !== 'function' || !api.isReady()) {
-      window.alert('Önce geçerli bir proje/çizim oluşturun.');
+      window.alert(ui('Önce geçerli bir proje/çizim oluşturun.'));
       return;
     }
     anchorButton = button || document.getElementById('toolbarPdfBtn');
@@ -1385,6 +1910,7 @@
     open,
     close,
     generateFromSelection: async (ids) => generate(new Set((ids || []).filter((id) => DOCUMENTS.some((doc) => doc.id === id)))),
+    prepareWorkspaceForSelection: (ids) => prepareWorkspace(new Set(ids || [])),
     documentIds: DOCUMENTS.map((item) => item.id),
     availabilityForTest: () => ({ ...documentAvailability() }),
     refreshAvailability: () => updatePanelState(),

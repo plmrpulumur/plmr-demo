@@ -11,7 +11,7 @@
   }
   const adapter = {
     id: 'BCUBE_FREEDOM',
-    label: 'B-Cube Freedom',
+    label: 'Rolling Roof',
     aliases: ['BCUBE_FREEDOM'],
     legacyProductTypes: ['B-Cube Freedom', 'B CUBE FREEDOM', 'FREEDOM', 'B_CUBE_FREEDOM'],
     schemaVersion: 1,
@@ -24,14 +24,14 @@
     },
     validateProject(project) {
       const errors = [];
-      if (!project || typeof project !== 'object') errors.push('Freedom proje verisi bulunamadı.');
-      if (project && project.schema && project.schema !== SCHEMA) errors.push(`Desteklenmeyen Freedom şeması: ${project.schema}`);
+      if (!project || typeof project !== 'object') errors.push('Rolling Roof proje verisi bulunamadı.');
+      if (project && project.schema && project.schema !== SCHEMA) errors.push(`Desteklenmeyen Rolling Roof şeması: ${project.schema}`);
       return { valid: errors.length === 0, errors };
     },
     migrateProject(project) {
       const source = clone(project || {});
       const candidate = source.projectType || source.productType || source.product_type || 'BCUBE_FREEDOM';
-      if (registry.migrateProductType(candidate, 'BCUBE_FREEDOM') !== 'BCUBE_FREEDOM') throw new Error('B-Cube Freedom projesi bekleniyordu.');
+      if (registry.migrateProductType(candidate, 'BCUBE_FREEDOM') !== 'BCUBE_FREEDOM') throw new Error('Rolling Roof projesi bekleniyordu.');
       return this.createDefaultProject({ ...source, schema: SCHEMA, productType: 'BCUBE_FREEDOM' });
     },
     buildStandaloneGeometry() { return unsupported('GEOMETRY'); },

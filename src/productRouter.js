@@ -14,7 +14,9 @@
     moduleSelect.innerHTML = '';
     const option = document.createElement('option');
     option.value = navigation.moduleName;
-    option.textContent = navigation.moduleName === 'Standalone' ? 'Bağımsız Çizim' : navigation.moduleName;
+    option.textContent = window.PulumurProductPresentation
+      ? window.PulumurProductPresentation.moduleName(navigation.moduleName, document.documentElement.lang)
+      : navigation.moduleName;
     option.selected = true;
     moduleSelect.appendChild(option);
   }

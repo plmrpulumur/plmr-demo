@@ -12,7 +12,30 @@
     ? RevisionCore.createWriteCoordinator({ maxCompleted: 64 })
     : null;
   const supabaseFactory = window.supabase;
-  const DEMO_PROJECT_UI_LOCKED = true;
+  function capability(name) {
+    if (!AccessPolicy || typeof AccessPolicy.evaluateCapability !== 'function') return { allowed: false, mode: 'DEMO', modeVerified: false };
+    return AccessPolicy.evaluateCapability(accessInput(), name);
+  }
+
+  function canManageProjects() { return capability('project_access').allowed; }
+  function requireProjectAccess(silent = false) {
+    if (canManageProjects()) return true;
+    if (!silent) window.alert(t('projectAccessRequired'));
+    return false;
+  }
+
+  async function readAccessContext(context, profile) {
+    let timeout;
+    try {
+      const result = await Promise.race([client.rpc('get_user_access_context_v1'), new Promise(resolve => { timeout = window.setTimeout(() => resolve({ error: true }), 2500); })]);
+      if (!ownsAuth(context) || result.error) return null;
+      const value = result.data;
+      if (!value || value.user_id !== profile.id || value.organization_id !== profile.organization_id ||
+        !['DEMO','FULL','PREMIUM'].includes(value.mode) || !Number.isSafeInteger(value.version) || value.version < 0) return null;
+      return { user_id: value.user_id, organization_id: value.organization_id, mode: value.mode, version: value.version };
+    } catch (_) { return null; } // Missing/unreachable staged backend stays Demo.
+    finally { window.clearTimeout(timeout); }
+  }
 
   function cloudCommandNames() {
     const catalog = window.PulumurProjectCommands && window.PulumurProjectCommands.COMMANDS;
@@ -31,7 +54,7 @@
     cloudProjectBar: $('cloudProjectBar'), cloudProjectCode: $('cloudProjectCode'), cloudRevision: $('cloudRevision'),
     cloudSaveState: $('cloudSaveState'), cloudUserName: $('cloudUserName'), cloudCompanyCode: $('cloudCompanyCode'), cloudRoleBadge: $('cloudRoleBadge'),
     newCloudProjectBtn: $('newCloudProjectBtn'), saveCloudProjectBtn: $('saveCloudProjectBtn'),
-    newRevisionBtn: $('newRevisionBtn'), openCloudProjectsBtn: $('openCloudProjectsBtn'), revisionHistoryBtn: $('revisionHistoryBtn'), logoutBtn: $('logoutBtn'),
+    newRevisionBtn: $('newRevisionBtn'), openCloudProjectsBtn: $('openCloudProjectsBtn'), revisionHistoryBtn: $('revisionHistoryBtn'), logoutBtn: $('logoutBtn'), startLogoutBtn: $('startLogoutBtn'), retrySessionBtn: $('retrySessionBtn'),
     projectsDialog: $('projectsDialog'), projectsSearch: $('projectsSearch'), projectsTableBody: $('projectsTableBody'),
     projectsEmpty: $('projectsEmpty'), projectsRefreshBtn: $('projectsRefreshBtn'), projectsCloseBtn: $('projectsCloseBtn'),
     newRevisionDialog: $('newRevisionDialog'), newRevisionForm: $('newRevisionForm'), newRevisionCloseBtn: $('newRevisionCloseBtn'),
@@ -54,13 +77,16 @@
 
   const TEXT = {
     tr: {
+      loginSubmit: 'Giriş Yap', loginTitle: 'Kullanıcı girişi', loginSubtitle: 'Kullanıcı Girişi ve Proje Yönetimi', loginPreferences: 'Giriş tercihleri', projectStartLabel: 'Proje başlangıcı',
+      logout: 'Çıkış', retrySignOut: 'Çıkışı tekrar dene', sessionCleanupFailed: 'Oturum kapatma işlemi doğrulanamadı. Tekrar deneyin.',
       authLoading: 'Oturum kontrol ediliyor…', loginBusy: 'Giriş yapılıyor…', loginFailed: 'Kullanıcı adı veya PIN kodu hatalı.',
       loginUsername: 'Kullanıcı Adı', loginPassword: 'PIN Kodu', rememberMe: 'Beni hatırla', savePassword: 'PIN Kodumu kaydet',
       authNote: 'Kullanıcı adı ve 4 haneli PIN kodu yönetici tarafından tanımlanır. PIN kaydı desteklenen cihazlarda tarayıcının parola yöneticisiyle yapılır.',
       profileMissing: 'Kullanıcı profili bulunamadı. Yönetici profil kaydını kontrol etmeli.',
       setupMissing: 'Altyapı hazır değil. Supabase kurulumunu kontrol et.',
       newProject: 'Yeni proje', unsaved: 'Kaydedilmedi', saving: 'Kaydediliyor…', saved: 'Kaydedildi',
-      startTitle: 'PLMR Demo · Hızlı Çizim ile başlayın', startText: 'Demo kullanımının aktif başlangıç yolu Hızlı Çizim’dir. Diğer proje yönetimi seçenekleri bu sürümde bilinçli olarak pasiftir.',
+      projectAccessRequired: 'Proje yönetimi için doğrulanmış Full veya Premium erişimi gerekir.', fullStartTitle: 'PLMR · Projenize başlayın', fullStartText: 'Yeni bir proje oluşturun, kayıtlı çalışmanızı açın veya hızlı çizimle başlayın.',
+      startTitle: 'PLMR Demo · Hızlı Çizim ile başlayın', startText: 'Hızlı Çizim ile ürünleri yapılandırın ve teknik çıktıları inceleyin. Proje yönetimi tam sürümde kullanılabilir.',
       quickDrawing: 'Hızlı Çizim', quickTemporary: 'Geçici', quickStarted: 'Hızlı çizim açıldı.', quickConvert: 'Projeye Dönüştür', quickConvertTitle: 'Hızlı Çizimi Projeye Dönüştür', quickConvertRequired: 'Buluta kaydetmek için hızlı çizimi önce projeye dönüştürün.',
       newProjectDialogTitle: 'Yeni Proje', editProjectDialogTitle: 'Proje Bilgilerini Düzenle', projectInfoUpdated: 'Proje bilgileri güncellendi.',
       projectCodeUnavailable: 'Proje kodu oluşturulamadı. Firma ve kullanıcı kodlarını kontrol edin.', projectFieldsRequired: 'Müşteri adı ve proje adı zorunludur.',
@@ -90,13 +116,16 @@
       recoveryRestored: 'Kurtarma kaydı geri yüklendi. Değişiklikler henüz buluta kaydedilmedi.'
     },
     en: {
+      loginSubmit: 'Sign in', loginTitle: 'User sign-in', loginSubtitle: 'Sign in and manage your projects', loginPreferences: 'Sign-in preferences', projectStartLabel: 'Project start',
+      logout: 'Logout', retrySignOut: 'Retry sign out', sessionCleanupFailed: 'Sign-out could not be confirmed. Please retry.',
       authLoading: 'Checking session…', loginBusy: 'Signing in…', loginFailed: 'Incorrect username or PIN.',
       loginUsername: 'Username', loginPassword: 'PIN Code', rememberMe: 'Remember me', savePassword: 'Save my PIN',
       authNote: 'The username and 4-digit PIN are assigned by the company administrator. PIN saving uses the browser password manager on supported devices.',
       profileMissing: 'User profile was not found. The administrator must check the profile record.',
       setupMissing: 'Infrastructure is not ready. Check the Supabase setup.',
       newProject: 'New project', unsaved: 'Not saved', saving: 'Saving…', saved: 'Saved',
-      startTitle: 'PLMR Demo · Start with Quick Drawing', startText: 'Quick Drawing is the active demo entry path. Other project-management options are intentionally disabled in this build.',
+      projectAccessRequired: 'Project management requires verified Full or Premium access.', fullStartTitle: 'PLMR · Start your project', fullStartText: 'Create a project, open saved work or start with a quick drawing.',
+      startTitle: 'PLMR Demo · Start with Quick Drawing', startText: 'Use Quick Drawing to configure products and review technical outputs. Project management is available in the full version.',
       quickDrawing: 'Quick Drawing', quickTemporary: 'Temporary', quickStarted: 'Quick drawing opened.', quickConvert: 'Convert to Project', quickConvertTitle: 'Convert Quick Drawing to Project', quickConvertRequired: 'Convert the quick drawing to a project before saving it to the cloud.',
       newProjectDialogTitle: 'New Project', editProjectDialogTitle: 'Edit Project Information', projectInfoUpdated: 'Project information updated.',
       projectCodeUnavailable: 'The project code could not be created. Check the company and user codes.', projectFieldsRequired: 'Customer name and project name are required.',
@@ -148,7 +177,11 @@
   let explicitLoginInProgress = false;
   let explicitLogoutInProgress = false;
   let activeSessionMonitorTimer = null;
-  let activeSessionCheckInFlight = false;
+  let activeSessionCheckInFlight = null;
+  let authHydrationInFlight = null;
+  let logoutInFlight = null;
+  let tokenInstallInFlight = null;
+  let authCleanupFailed = false;
   let signedOutNoticeKey = '';
   let suppressDirty = false;
   let historicalMode = false;
@@ -167,22 +200,7 @@
   window.PulumurCloudAuth = Object.freeze({
     getSession: () => currentSession,
     getAccessToken: () => String(currentSession && currentSession.access_token || ''),
-    signOutLocal: async options => {
-      const opts = options || {};
-      signedOutNoticeKey = '';
-      const transitionEpoch = ++authEpoch;
-      explicitLogoutInProgress = true;
-      sessionStorage.removeItem(SESSION_ONLY_KEY);
-      if (opts.clearSavedUsername) localStorage.removeItem(SAVED_USERNAME_KEY);
-      if (opts.newUsername) localStorage.setItem(SAVED_USERNAME_KEY, normalizeUsername(opts.newUsername));
-      try {
-        if (window.PulumurActivity) await window.PulumurActivity.end().catch(() => {});
-        if (client && client.auth) await clearLocalSupabaseSession('bridge-signout');
-        if (transitionEpoch === authEpoch) await handleSignedOut();
-      } finally {
-        explicitLogoutInProgress = false;
-      }
-    },
+    signOutLocal: options => requestLogout({ ...(options || {}), confirmDiscard: false, trackLogout: false }),
   });
 
   const REMEMBER_KEY = 'plmr_auth_remember';
@@ -191,6 +209,37 @@
   const SAVE_PASSWORD_KEY = 'plmr_auth_save_password';
   const ACTIVE_SESSION_CHECK_MS = 8000;
   const AUTH_STORAGE_KEY = String(CONFIG.authStorageKey || 'plmr_supabase_auth_v1');
+
+  // Async results belong to a particular transition and session, not just a user.
+  function sessionIdentity(session) {
+    const token = String(session && session.access_token || '');
+    try {
+      const encoded = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+      return String(JSON.parse(atob(encoded)).session_id || token);
+    } catch (_) { return token; }
+  }
+
+  function authContext(session = currentSession) {
+    return { epoch: authEpoch, userId: String(session && session.user && session.user.id || ''), sessionId: sessionIdentity(session) };
+  }
+
+  function ownsAuth(context) {
+    return Boolean(context && context.epoch === authEpoch
+      && context.userId === String(currentSession && currentSession.user && currentSession.user.id || '')
+      && context.sessionId === sessionIdentity(currentSession));
+  }
+
+  function recordAuthError(source, error) {
+    if (window.PulumurRuntimeMonitor) window.PulumurRuntimeMonitor.record(`auth.${source}`, error);
+  }
+
+  function authTelemetry(action, options) {
+    // Telemetry failure or latency must not hold the auth transition open.
+    if (!window.PulumurActivity || typeof window.PulumurActivity[action] !== 'function') return;
+    try { Promise.resolve(window.PulumurActivity[action](...(options || []))).catch(error => recordAuthError('telemetry', error)); }
+    catch (error) { recordAuthError('telemetry', error); }
+  }
+
 
   function legacySupabaseAuthStoragePrefix() {
     try {
@@ -302,6 +351,8 @@
   }
 
   window.PulumurAccessContext = Object.freeze({
+    // Ephemeral ownership counter; no credential/session token is exposed.
+    getSessionEpoch: () => authEpoch,
     getDecision: () => currentAccessDecision ? { ...currentAccessDecision } : null,
     getContext: () => ({
       userId: String(verifiedUser && verifiedUser.id || ''),
@@ -310,6 +361,7 @@
       enabledProducts: AccessPolicy ? AccessPolicy.normalizeEnabledProducts(currentOrganization && currentOrganization.enabled_products) : []
     }),
     authorizeProduct,
+    authorizeCapability: capability,
     issueProductTicket,
     clearProductTicket,
     messageForCode: accessMessage
@@ -408,11 +460,18 @@
   }
 
   function applyLoginLanguage() {
+    if (ui.authGate) ui.authGate.setAttribute('aria-label', t('loginTitle'));
+    if (ui.loginBtn) ui.loginBtn.textContent = t('loginSubmit');
+    if ($('authSubtitle')) $('authSubtitle').textContent = t('loginSubtitle');
+    if ($('authOptions')) $('authOptions').setAttribute('aria-label', t('loginPreferences'));
+    if (ui.projectStartScreen) ui.projectStartScreen.setAttribute('aria-label', t('projectStartLabel'));
     if (ui.loginUsernameLabel) ui.loginUsernameLabel.textContent = t('loginUsername');
     if (ui.loginPasswordLabel) ui.loginPasswordLabel.textContent = t('loginPassword');
     if (ui.rememberMeLabel) ui.rememberMeLabel.textContent = t('rememberMe');
     if (ui.savePasswordLabel) ui.savePasswordLabel.textContent = t('savePassword');
     if (ui.authNote) ui.authNote.textContent = t('authNote');
+    [ui.logoutBtn, ui.startLogoutBtn].forEach(button => { if (button) button.textContent = t('logout'); });
+    if (ui.retrySessionBtn) ui.retrySessionBtn.textContent = t('retrySignOut');
     if ($('projectStartTitle')) $('projectStartTitle').textContent = t('startTitle');
     if ($('projectStartText')) $('projectStartText').textContent = t('startText');
     if (ui.startNewProjectBtn) ui.startNewProjectBtn.textContent = t('newProjectDialogTitle');
@@ -448,8 +507,14 @@
     const savedUsername = localStorage.getItem(SAVED_USERNAME_KEY) || '';
     if (ui.loginUsername && savedUsername) ui.loginUsername.value = savedUsername;
     if (!ui.savePassword || !ui.savePassword.checked || !navigator.credentials) return;
+    const preferenceEpoch = authEpoch;
+    const initialUsername = ui.loginUsername && ui.loginUsername.value || '';
+    const initialPin = ui.loginPassword && ui.loginPassword.value || '';
     try {
       const credential = await navigator.credentials.get({ password: true, mediation: 'optional' });
+      if (preferenceEpoch !== authEpoch || currentSession || authBusy || explicitLogoutInProgress
+          || (ui.loginUsername && ui.loginUsername.value !== initialUsername)
+          || (ui.loginPassword && ui.loginPassword.value !== initialPin)) return;
       if (credential && credential.type === 'password') {
         if (ui.loginUsername && !ui.loginUsername.value) ui.loginUsername.value = credential.id || '';
         if (ui.loginPassword && !ui.loginPassword.value) ui.loginPassword.value = credential.password || '';
@@ -466,13 +531,22 @@
   }
 
   function syncLoginInteractivity() {
-    const blocked = Boolean(authBootstrapInProgress || authBusy);
+    const blocked = Boolean(authBootstrapInProgress || authBusy || explicitLogoutInProgress || authCleanupFailed);
     [ui.loginUsername, ui.loginPassword, ui.rememberMe, ui.savePassword, ui.loginBtn].forEach(control => {
       if (!control) return;
       control.disabled = blocked;
       control.setAttribute('aria-disabled', blocked ? 'true' : 'false');
     });
     if (ui.loginForm) ui.loginForm.setAttribute('aria-busy', blocked ? 'true' : 'false');
+    [ui.logoutBtn, ui.startLogoutBtn].forEach(button => {
+      if (!button) return;
+      button.disabled = Boolean(authBusy || explicitLogoutInProgress);
+      button.setAttribute('aria-disabled', button.disabled ? 'true' : 'false');
+    });
+    if (ui.retrySessionBtn) {
+      ui.retrySessionBtn.hidden = !authCleanupFailed;
+      ui.retrySessionBtn.disabled = Boolean(explicitLogoutInProgress);
+    }
   }
 
   function setSaveState(label, mode) {
@@ -610,6 +684,17 @@
     }
   }
 
+  function refreshModeUi() {
+    const allowed = canManageProjects() && canWriteProjects();
+    ['startNewProjectBtn','startWizardBtn','startOpenProjectsBtn','startImportProjectBtn'].forEach(id => {
+      const node = $(id); if (node) node.disabled = !allowed;
+    });
+    const title = $('projectStartTitle'), text = $('projectStartText');
+    if (title) title.textContent = t(allowed ? 'fullStartTitle' : 'startTitle');
+    if (text) text.textContent = t(allowed ? 'fullStartText' : 'startText');
+    if (window.PulumurShellPresentation) window.PulumurShellPresentation.apply(language());
+  }
+
   function refreshProjectHeader() {
     const record = getRecord();
     if (ui.cloudProjectCode) ui.cloudProjectCode.textContent = quickDrawingMode ? t('quickDrawing') : (record.projectCode || t('newProject'));
@@ -617,6 +702,7 @@
 
     const writable = canWriteProjects();
     refreshRoleUi();
+    refreshModeUi();
 
     if (quickDrawingMode) {
       setSaveState(t('quickTemporary'), 'temporary');
@@ -628,18 +714,22 @@
       setSaveState(record.projectId ? t('saved') : t('unsaved'), record.projectId ? 'saved' : 'new');
     }
 
-    if (ui.newCloudProjectBtn) ui.newCloudProjectBtn.disabled = DEMO_PROJECT_UI_LOCKED || !writable;
-    if (ui.saveCloudProjectBtn) ui.saveCloudProjectBtn.disabled = DEMO_PROJECT_UI_LOCKED || quickDrawingMode || historicalMode || !writable;
+    if (ui.newCloudProjectBtn) ui.newCloudProjectBtn.disabled = !canManageProjects() || !writable;
+    if (ui.saveCloudProjectBtn) ui.saveCloudProjectBtn.disabled = !canManageProjects() || quickDrawingMode || historicalMode || !writable;
     if (ui.convertQuickDrawingBtn) {
       ui.convertQuickDrawingBtn.hidden = !quickDrawingMode;
-      ui.convertQuickDrawingBtn.disabled = DEMO_PROJECT_UI_LOCKED || !quickDrawingMode || !writable;
+      ui.convertQuickDrawingBtn.disabled = !canManageProjects() || !quickDrawingMode || !writable;
     }
-    if (ui.openCloudProjectsBtn) ui.openCloudProjectsBtn.disabled = DEMO_PROJECT_UI_LOCKED;
+    if (ui.openCloudProjectsBtn) ui.openCloudProjectsBtn.disabled = !canManageProjects();
     const projectImportBtn = $('projectImportBtn');
-    if (projectImportBtn) projectImportBtn.disabled = DEMO_PROJECT_UI_LOCKED;
+    if (projectImportBtn) projectImportBtn.disabled = !canManageProjects();
     if (ui.editProjectInfoBtn) ui.editProjectInfoBtn.disabled = quickDrawingMode || !writable;
-    if (ui.newRevisionBtn) ui.newRevisionBtn.disabled = DEMO_PROJECT_UI_LOCKED || quickDrawingMode || !record.projectId || !writable;
-    if (ui.revisionHistoryBtn) ui.revisionHistoryBtn.disabled = DEMO_PROJECT_UI_LOCKED || quickDrawingMode || !record.projectId;
+    if (ui.newRevisionBtn) ui.newRevisionBtn.disabled = !canManageProjects() || quickDrawingMode || !record.projectId || !writable;
+    if (ui.revisionHistoryBtn) ui.revisionHistoryBtn.disabled = !canManageProjects() || quickDrawingMode || !record.projectId;
+    document.querySelectorAll('[data-project-capability]').forEach(node => {
+      node.setAttribute('aria-disabled', String(Boolean(node.disabled)));
+      node.classList.toggle('demo-disabled-control', !canManageProjects());
+    });
   }
 
   function markDirty() {
@@ -678,11 +768,13 @@
       currentAccessDecision = null;
       clearProductTicket();
       projectRows = [];
+      refreshModeUi();
     }
   }
 
   function friendlyError(error, fallbackKey) {
     const raw = String((error && error.message) || '').trim();
+    if (/LOCAL_SESSION_RESET_FAILED/i.test(raw)) return t('sessionCleanupFailed');
     if (/READ_ONLY_USER/i.test(raw)) return t('noWritePermission');
     if (/SESSION_REVOKED/i.test(raw)) return t('sessionRevoked');
     if (/PRODUCT_NOT_ENTITLED|TENANT_ACCESS_DENIED|TENANT_MISMATCH|AUTH_NOT_VERIFIED|AUTH_IDENTITY_MISMATCH|PROFILE_IDENTITY_MISMATCH/i.test(raw)) return accessMessage(raw.match(/PRODUCT_NOT_ENTITLED|TENANT_ACCESS_DENIED|TENANT_MISMATCH|AUTH_NOT_VERIFIED|AUTH_IDENTITY_MISMATCH|PROFILE_IDENTITY_MISMATCH/i)[0]);
@@ -741,41 +833,39 @@
     return String(error.message || error || '');
   }
 
-  async function loadProfile() {
-    if (!currentSession || !currentSession.user) throw new Error(t('loginRequired'));
-    const userId = currentSession.user.id;
-    const profileResult = await client
-      .from('profiles')
+  async function loadProfile(context, user) {
+    if (!ownsAuth(context) || !context.userId) return null;
+    const profileResult = await client.from('profiles')
       .select('id, organization_id, username, full_name, role, language, user_code, next_project_number, is_active, session_revoked_at')
-      .eq('id', userId)
-      .single();
+      .eq('id', context.userId).single();
+    if (!ownsAuth(context)) return null;
     if (profileResult.error) throw profileResult.error;
-    if (!profileResult.data || profileResult.data.is_active === false) throw new Error(t('profileMissing'));
-    currentProfile = profileResult.data;
+    const profile = profileResult.data;
+    if (!profile || profile.is_active === false) throw new Error(t('profileMissing'));
+    if (String(profile.id) !== context.userId) throw new Error('PROFILE_IDENTITY_MISMATCH');
 
-    const orgResult = await client
-      .from('organizations')
+    const orgResult = await client.from('organizations')
       .select('id, name, slug, company_code, is_active, license_start, license_end, max_users, enabled_products')
-      .eq('id', currentProfile.organization_id)
-      .single();
+      .eq('id', profile.organization_id).single();
+    if (!ownsAuth(context)) return null;
     if (orgResult.error) throw orgResult.error;
-    currentOrganization = orgResult.data;
+    const organization = orgResult.data;
+    if (!organization || String(organization.id) !== String(profile.organization_id)) throw new Error('TENANT_MISMATCH');
     const today = new Date().toISOString().slice(0, 10);
-    if (currentOrganization.is_active === false) throw new Error('ORGANIZATION_INACTIVE');
-    if (currentOrganization.license_start && today < currentOrganization.license_start) throw new Error('LICENSE_NOT_STARTED');
-    if (currentOrganization.license_end && today > currentOrganization.license_end) throw new Error('LICENSE_EXPIRED');
+    if (organization.is_active === false) throw new Error('ORGANIZATION_INACTIVE');
+    if (organization.license_start && today < organization.license_start) throw new Error('LICENSE_NOT_STARTED');
+    if (organization.license_end && today > organization.license_end) throw new Error('LICENSE_EXPIRED');
     if (!AccessPolicy || typeof AccessPolicy.assertAccess !== 'function') throw new Error('ACCESS_POLICY_UNAVAILABLE');
-    currentAccessDecision = AccessPolicy.assertAccess(accessInput());
-
-    const username = currentProfile.username ? `@${currentProfile.username}` : t('unknownUser');
-    if (ui.cloudUserName) ui.cloudUserName.textContent = username;
-    if (ui.cloudCompanyCode) ui.cloudCompanyCode.textContent = currentOrganization.name || t('unknownCompany');
-    refreshRoleUi();
+    profile.access_context = await readAccessContext(context, profile);
+    if (!ownsAuth(context)) return null;
+    const decision = AccessPolicy.assertAccess({ session: currentSession, verifiedUser: user, profile, organization });
+    return { profile, organization, decision };
   }
 
-  async function loadEffectiveLimits() {
+  async function loadEffectiveLimits(context) {
     if (!client || !window.PulumurLimits) return false;
     const result = await client.rpc('get_effective_app_limits_v1');
+    if (context && !ownsAuth(context)) return false;
     if (result.error) {
       const compatibility = window.PulumurBackendCompatibility;
       if (compatibility && compatibility.isMissingFeatureError(result.error)) {
@@ -825,38 +915,52 @@
     return { valid: row.is_valid === true, reason: String(row.reason || '') };
   }
 
-  async function forceLocalSessionEnd(reason) {
+  async function forceLocalSessionEnd(reason, context = authContext()) {
+    if (!ownsAuth(context)) return false;
     const code = String(reason || 'SESSION_REVOKED');
-    signedOutNoticeKey = code === 'SESSION_REPLACED' ? 'sessionReplaced' : 'sessionRevoked';
-    stopActiveSessionMonitor();
-    authEpoch += 1;
-    if (client && client.auth) await clearLocalSupabaseSession('forced-session-end').catch(() => {});
-    await handleSignedOut();
+    return requestLogout({ confirmDiscard: false, trackLogout: false,
+      notice: code === 'SESSION_REPLACED' ? 'sessionReplaced' : 'sessionRevoked' });
   }
 
   async function verifyActiveBrowserSession(source = 'monitor') {
-    if (!currentSession || explicitLoginInProgress || activeSessionCheckInFlight) return true;
-    activeSessionCheckInFlight = true;
-    try {
-      const status = await readActiveSessionStatus();
-      if (status.valid) return true;
-      await forceLocalSessionEnd(status.reason || 'SESSION_REVOKED');
-      return false;
-    } catch (error) {
-      // A transient network failure must not log the user out. Normal authenticated
-      // operations remain protected by RLS/current_session_is_valid_v2 on the server.
-      if (window.PulumurRuntimeMonitor) window.PulumurRuntimeMonitor.record(`auth.single_session.${source}`, error);
-      return true;
-    } finally {
-      activeSessionCheckInFlight = false;
-    }
+    if (!currentSession || authBootstrapInProgress || explicitLoginInProgress || explicitLogoutInProgress) return true;
+    const context = authContext();
+    if (activeSessionCheckInFlight && ownsAuth(activeSessionCheckInFlight.context)) return activeSessionCheckInFlight.promise;
+    const work = { context, promise: null };
+    work.promise = (async () => {
+      try {
+        const status = await readActiveSessionStatus();
+        if (!ownsAuth(context)) return false;
+        if (status.valid) {
+          if (currentProfile) {
+            const value = await readAccessContext(context, currentProfile);
+            if (!ownsAuth(context)) return false;
+            const previous = currentProfile.access_context;
+            currentProfile.access_context = value;
+            if ((Boolean(previous) !== Boolean(value)) || (previous && value && (previous.mode !== value.mode || previous.version !== value.version))) refreshProjectHeader();
+          }
+          return true;
+        }
+        await forceLocalSessionEnd(status.reason || 'SESSION_REVOKED', context);
+        return false;
+      } catch (error) {
+        if (!ownsAuth(context)) return false;
+        // RLS remains authoritative; a network failure is not proof of revocation.
+        recordAuthError(`single_session.${source}`, error);
+        return true;
+      } finally {
+        if (activeSessionCheckInFlight === work) activeSessionCheckInFlight = null;
+      }
+    })();
+    activeSessionCheckInFlight = work;
+    return work.promise;
   }
 
   function startActiveSessionMonitor() {
     stopActiveSessionMonitor();
     if (!currentSession) return;
     activeSessionMonitorTimer = window.setInterval(() => {
-      if (document.visibilityState === 'visible' && !authBootstrapInProgress && !explicitLoginInProgress) {
+      if (document.visibilityState === 'visible' && !authBootstrapInProgress && !explicitLoginInProgress && !explicitLogoutInProgress) {
         void verifyActiveBrowserSession('interval');
       }
     }, ACTIVE_SESSION_CHECK_MS);
@@ -877,33 +981,52 @@
     const nextUserId = String(session && session.user && session.user.id || '');
     const sameAuthenticatedUser = Boolean(previousUserId && previousUserId === nextUserId);
     currentSession = session;
-    if (options.showLoading !== false) setAuthMessage(t('authLoading'), false);
-    try {
-      verifiedUser = await verifyAuthenticatedUser(session);
-      const activeSessionStatus = await readActiveSessionStatus();
-      if (!activeSessionStatus.valid) {
-        await forceLocalSessionEnd(activeSessionStatus.reason || 'SESSION_REVOKED');
-        return;
+    const context = authContext(session);
+    if (authHydrationInFlight && ownsAuth(authHydrationInFlight.context)) return authHydrationInFlight.promise;
+    const work = { context, promise: null };
+    work.promise = (async () => {
+      if (options.showLoading !== false) setAuthMessage(t('authLoading'), false);
+      try {
+        const user = await verifyAuthenticatedUser(session);
+        if (!ownsAuth(context)) return false;
+        const activeSessionStatus = await readActiveSessionStatus();
+        if (!ownsAuth(context)) return false;
+        if (!activeSessionStatus.valid) {
+          await forceLocalSessionEnd(activeSessionStatus.reason || 'SESSION_REVOKED', context);
+          return false;
+        }
+        const loaded = await loadProfile(context, user);
+        if (!loaded || !ownsAuth(context)) return false;
+        await loadEffectiveLimits(context);
+        if (!ownsAuth(context)) return false;
+        // Commit the complete verified identity together; never expose half a tenant.
+        verifiedUser = user;
+        currentProfile = loaded.profile;
+        currentOrganization = loaded.organization;
+        currentAccessDecision = loaded.decision;
+        if (ui.cloudUserName) ui.cloudUserName.textContent = currentProfile.username ? `@${currentProfile.username}` : t('unknownUser');
+        if (ui.cloudCompanyCode) ui.cloudCompanyCode.textContent = currentOrganization.name || t('unknownCompany');
+        setAppAccess(true);
+        if (!sameAuthenticatedUser) { setQuickDrawingMode(false); setWorkspaceActive(false); }
+        signedOutNoticeKey = '';
+        setAuthMessage('', false);
+        startActiveSessionMonitor();
+        refreshProjectHeader();
+        authTelemetry('identify');
+        return true;
+      } catch (error) {
+        if (!ownsAuth(context)) return false;
+        recordAuthError('bootstrap', error);
+        stopActiveSessionMonitor();
+        setAppAccess(false);
+        setAuthMessage(friendlyError(error, 'profileMissing'), true);
+        return false;
+      } finally {
+        if (authHydrationInFlight === work) authHydrationInFlight = null;
       }
-      await loadProfile();
-      await loadEffectiveLimits();
-      setAppAccess(true);
-      if (!sameAuthenticatedUser) { setQuickDrawingMode(false); setWorkspaceActive(false); }
-      signedOutNoticeKey = '';
-      setAuthMessage('', false);
-      startActiveSessionMonitor();
-      refreshProjectHeader();
-      if (window.PulumurActivity) await window.PulumurActivity.identify();
-      // V10.5: Recovery disabled by default
-      // await restoreRecoveryIfAvailable();
-    } catch (error) {
-      console.error(error);
-      verifiedUser = null;
-      currentAccessDecision = null;
-      stopActiveSessionMonitor();
-      setAppAccess(false);
-      setAuthMessage(friendlyError(error, 'profileMissing'), true);
-    }
+    })();
+    authHydrationInFlight = work;
+    return work.promise;
   }
 
   async function handleSignedOut() {
@@ -936,7 +1059,7 @@
 
   async function submitLogin(event) {
     event.preventDefault();
-    if (authBusy) return;
+    if (authBusy || explicitLogoutInProgress || authCleanupFailed) return;
     if (authBootstrapInProgress || !authBootstrapComplete) {
       setAuthMessage(t('authLoading'), false);
       syncLoginInteractivity();
@@ -944,29 +1067,25 @@
     }
     const username = normalizeUsername(ui.loginUsername && ui.loginUsername.value);
     const pin = String(ui.loginPassword && ui.loginPassword.value || '').trim();
-    if (!username || !/^\d{4}$/.test(pin)) {
-      setAuthMessage(t('loginFailed'), true);
-      return;
-    }
+    if (!username || !/^\d{4}$/.test(pin)) { setAuthMessage(t('loginFailed'), true); return; }
+    const remember = Boolean(ui.rememberMe && ui.rememberMe.checked);
+    const savePin = Boolean(ui.savePassword && ui.savePassword.checked);
     signedOutNoticeKey = '';
     authBusy = true;
-    syncLoginInteractivity();
     explicitLoginInProgress = true;
     const loginEpoch = ++authEpoch;
-    if (ui.loginBtn) ui.loginBtn.disabled = true;
+    syncLoginInteractivity();
     setAuthMessage(t('loginBusy'), false);
     try {
       if (!window.PulumurAdminUsersApi) throw new Error('ADMIN_USERS_API_MISSING');
-      // V.33: every explicit login starts from a deterministic empty local auth
-      // state. This prevents same-user stale refresh/session state from racing the
-      // freshly issued login tokens. The manual transition owns SIGNED_OUT via
-      // explicitLoginInProgress + authEpoch, so the login UI is not rebuilt mid-flow.
       await clearLocalSupabaseSession('explicit-login');
       if (loginEpoch !== authEpoch) return;
       const resetCheck = await client.auth.getSession();
+      if (loginEpoch !== authEpoch) return;
       if (resetCheck.error) throw resetCheck.error;
       if (resetCheck.data && resetCheck.data.session) throw new Error('LOCAL_SESSION_RESET_FAILED');
       const result = await window.PulumurAdminUsersApi.invoke('login', { username, pin }, { auth: false });
+      if (loginEpoch !== authEpoch) return;
       if (result.backend_warning || result.rate_limit_mode === 'memory-fallback') {
         const status = window.PulumurBackendCompatibility
           ? window.PulumurBackendCompatibility.markFallback('pin_rate_limit')
@@ -977,50 +1096,88 @@
       const expectedUserId = String(result.user_id || '').trim();
       const expectedUsername = normalizeUsername(result.username || username);
       if (!sessionData.access_token || !sessionData.refresh_token || !expectedUserId) throw new Error('INVALID_LOGIN');
-
+      const installation = client.auth.setSession({ access_token: sessionData.access_token, refresh_token: sessionData.refresh_token });
+      tokenInstallInFlight = installation;
+      let sessionResult;
+      try { sessionResult = await installation; }
+      finally { if (tokenInstallInFlight === installation) tokenInstallInFlight = null; }
       if (loginEpoch !== authEpoch) return;
-
-      const sessionResult = await client.auth.setSession({
-        access_token: sessionData.access_token,
-        refresh_token: sessionData.refresh_token
-      });
       const authenticatedSession = sessionResult.data && sessionResult.data.session;
       if (sessionResult.error || !authenticatedSession) throw sessionResult.error || new Error('INVALID_LOGIN');
-      if (String(authenticatedSession.user && authenticatedSession.user.id || '') !== expectedUserId) {
-        await client.auth.signOut({ scope: 'local' }).catch(() => {});
-        throw new Error('LOGIN_IDENTITY_MISMATCH');
-      }
+      if (String(authenticatedSession.user && authenticatedSession.user.id || '') !== expectedUserId) throw new Error('LOGIN_IDENTITY_MISMATCH');
 
-      const remember = Boolean(ui.rememberMe && ui.rememberMe.checked);
       localStorage.setItem(REMEMBER_KEY, remember ? '1' : '0');
-      if (remember) {
-        localStorage.setItem(SAVED_USERNAME_KEY, username);
-        sessionStorage.removeItem(SESSION_ONLY_KEY);
-      } else {
-        localStorage.removeItem(SAVED_USERNAME_KEY);
-        sessionStorage.setItem(SESSION_ONLY_KEY, '1');
-      }
-
-      const savePin = Boolean(ui.savePassword && ui.savePassword.checked);
+      if (remember) { localStorage.setItem(SAVED_USERNAME_KEY, username); sessionStorage.removeItem(SESSION_ONLY_KEY); }
+      else { localStorage.removeItem(SAVED_USERNAME_KEY); sessionStorage.setItem(SESSION_ONLY_KEY, '1'); }
       localStorage.setItem(SAVE_PASSWORD_KEY, savePin ? '1' : '0');
-      if (savePin) await storeBrowserCredential(username, pin);
-
-      await handleAuthenticated(authenticatedSession, { showLoading: false, source: 'manual-login' });
-      if (!currentProfile || normalizeUsername(currentProfile.username) !== expectedUsername) {
-        await client.auth.signOut({ scope: 'local' }).catch(() => {});
-        throw new Error('LOGIN_PROFILE_MISMATCH');
-      }
-      if (window.PulumurActivity) {
-        await window.PulumurActivity.log('site_login', { detail: { remembered: remember } });
-      }
+      const ready = await handleAuthenticated(authenticatedSession, { showLoading: false, source: 'manual-login' });
+      if (loginEpoch !== authEpoch) return;
+      if (!ready || !currentProfile || normalizeUsername(currentProfile.username) !== expectedUsername) throw new Error('LOGIN_PROFILE_MISMATCH');
+      if (ui.loginPassword) ui.loginPassword.value = '';
+      if (savePin) void storeBrowserCredential(username, pin);
+      authTelemetry('log', ['site_login', { detail: { remembered: remember } }]);
     } catch (error) {
-      console.error(error);
-      setAuthMessage(friendlyError(error, 'loginFailed'), true);
+      if (loginEpoch !== authEpoch) return;
+      recordAuthError('login', error);
+      try { await clearLocalSupabaseSession('failed-login'); }
+      catch (cleanupError) { authCleanupFailed = true; recordAuthError('login_cleanup', cleanupError); }
+      if (loginEpoch !== authEpoch) return;
+      await handleSignedOut();
+      setAuthMessage(authCleanupFailed ? t('sessionCleanupFailed') : friendlyError(error, 'loginFailed'), true);
     } finally {
-      explicitLoginInProgress = false;
-      authBusy = false;
-      syncLoginInteractivity();
+      if (loginEpoch === authEpoch) {
+        explicitLoginInProgress = false;
+        authBusy = false;
+        syncLoginInteractivity();
+      }
     }
+  }
+
+  function requestLogout(options = {}) {
+    if (logoutInFlight) return logoutInFlight;
+    if (options.confirmDiscard !== false && dirty && !window.confirm(t('confirmDiscard'))) return Promise.resolve(false);
+    const transitionEpoch = ++authEpoch;
+    const installation = tokenInstallInFlight;
+    explicitLogoutInProgress = true;
+    explicitLoginInProgress = false;
+    authBusy = true;
+    authCleanupFailed = false;
+    signedOutNoticeKey = options.notice || '';
+    stopActiveSessionMonitor();
+    syncLoginInteractivity();
+    if (options.trackLogout !== false) authTelemetry('log', ['site_logout']);
+    authTelemetry('end');
+    const task = (async () => {
+      try {
+        // Hide private state immediately; the login controls remain locked until cleanup is verified.
+        await handleSignedOut();
+        sessionStorage.removeItem(SESSION_ONLY_KEY);
+        if (options.clearSavedUsername) localStorage.removeItem(SAVED_USERNAME_KEY);
+        if (options.newUsername) localStorage.setItem(SAVED_USERNAME_KEY, normalizeUsername(options.newUsername));
+        // A token installation already in progress must settle before it can be cleared.
+        if (installation) await installation.catch(() => {});
+        if (transitionEpoch !== authEpoch) return false;
+        if (client && client.auth) await clearLocalSupabaseSession('explicit-logout');
+        if (transitionEpoch !== authEpoch) return false;
+        await handleSignedOut();
+        return true;
+      } catch (error) {
+        if (transitionEpoch !== authEpoch) return false;
+        authCleanupFailed = true;
+        recordAuthError('logout', error);
+        setAuthMessage(t('sessionCleanupFailed'), true);
+        return false;
+      } finally {
+        if (transitionEpoch === authEpoch) {
+          explicitLogoutInProgress = false;
+          authBusy = false;
+          syncLoginInteractivity();
+        }
+      }
+    })();
+    logoutInFlight = task;
+    task.finally(() => { if (logoutInFlight === task) logoutInFlight = null; });
+    return task;
   }
 
   async function executeIdempotentCloudWrite(operation, record, payload, writer, options = {}) {
@@ -1161,6 +1318,7 @@
 
   async function saveCurrentProject(options = {}) {
     const silent = options.silent === true;
+    if (!requireProjectAccess(silent)) return false;
     if (!currentSession) {
       if (!silent) window.alert(t('loginRequired'));
       return false;
@@ -1328,6 +1486,7 @@
   }
 
   function openProjectDialog(mode) {
+    if (!requireProjectAccess()) return false;
     projectDialogMode = mode === 'edit' ? 'edit' : (mode === 'convert' ? 'convert' : 'new');
     const record = getRecord();
     if (projectDialogMode === 'new' || projectDialogMode === 'convert') {
@@ -1422,6 +1581,7 @@
   }
 
   function submitProjectDialog(payload = {}) {
+    if (!requireProjectAccess()) return false;
     const customer = normalizeProjectText(payload.customer);
     const project = normalizeProjectText(payload.project);
     if (ui.newProjectCustomer) ui.newProjectCustomer.value = customer;
@@ -1556,6 +1716,8 @@
   }
 
   async function loadProjects() {
+    if (!requireProjectAccess()) return false;
+    const requestAuth = authContext();
     if (!currentSession) return;
     if (ui.projectsEmpty) {
       ui.projectsEmpty.hidden = false;
@@ -1568,6 +1730,7 @@
       .is('archived_at', null)
       .order('updated_at', { ascending: false })
       .limit(500);
+    if (!ownsAuth(requestAuth) || !canManageProjects()) return false;
     if (result.error) throw result.error;
     projectRows = AccessPolicy
       ? AccessPolicy.filterTenantRows(result.data || [], currentOrganization && currentOrganization.id)
@@ -1576,6 +1739,7 @@
   }
 
   async function deleteProjectById(projectId) {
+    if (!requireProjectAccess()) return false;
     if (!isSystemAdmin()) {
       window.alert(t('systemAdminRequired'));
       return;
@@ -1617,6 +1781,7 @@
   }
 
   async function showProjects() {
+    if (!requireProjectAccess()) return false;
     try {
       if (ui.projectsDialog && !ui.projectsDialog.open) ui.projectsDialog.showModal();
       await loadProjects();
@@ -1631,6 +1796,8 @@
   }
 
   async function openProjectById(projectId, options = {}) {
+    if (!requireProjectAccess()) return false;
+    const requestAuth = authContext();
     if (!options.force && dirty && !window.confirm(t('confirmDiscard'))) return;
     try {
       const result = await client
@@ -1638,6 +1805,7 @@
         .select('id, organization_id, project_code, customer_name, project_name, product_type, current_revision, server_version, project_data, app_version, schema_version, created_at, updated_at')
         .eq('id', projectId)
         .single();
+      if (!ownsAuth(requestAuth) || !canManageProjects()) return false;
       if (result.error) throw result.error;
       const row = result.data;
       if (AccessPolicy) AccessPolicy.assertTenantRecord(row, currentOrganization && currentOrganization.id);
@@ -1677,6 +1845,7 @@
   }
 
   function openNewRevisionDialog() {
+    if (!requireProjectAccess()) return false;
     if (!canWriteProjects()) { window.alert(t('noWritePermission')); return; }
     const record = getRecord();
     if (!record.projectId) {
@@ -1693,6 +1862,7 @@
 
   async function createNewRevision(event) {
     event.preventDefault();
+    if (!requireProjectAccess()) return false;
     if (!canWriteProjects()) { window.alert(t('noWritePermission')); return; }
     const record = getRecord();
     if (!record.projectId) return;
@@ -1776,6 +1946,8 @@
   }
 
   async function loadRevisions(projectId) {
+    if (!requireProjectAccess()) return false;
+    const requestAuth = authContext();
     if (ui.revisionsEmpty) {
       ui.revisionsEmpty.hidden = false;
       ui.revisionsEmpty.textContent = t('revisionLoading');
@@ -1792,6 +1964,7 @@
         .eq('project_id', projectId)
         .order('revision_no', { ascending: false })
     ]);
+    if (!ownsAuth(requestAuth) || !canManageProjects()) return false;
     if (projectResult.error) throw projectResult.error;
     if (revisionsResult.error) throw revisionsResult.error;
     revisionContext = projectResult.data;
@@ -1824,6 +1997,7 @@
   }
 
   async function showRevisions(projectId) {
+    if (!requireProjectAccess()) return false;
     if (!projectId) {
       window.alert(t('revisionRequired'));
       return;
@@ -1841,6 +2015,8 @@
   }
 
   async function openRevision(revisionNo) {
+    if (!requireProjectAccess()) return false;
+    const requestAuth = authContext();
     if (!revisionContext || !revisionContext.id) return;
     if (dirty && !window.confirm(t('confirmDiscard'))) return;
     const currentRevision = Number(revisionContext.current_revision) || 1;
@@ -1855,6 +2031,7 @@
         .eq('project_id', revisionContext.id)
         .eq('revision_no', revisionNo)
         .single();
+      if (!ownsAuth(requestAuth) || !canManageProjects()) return false;
       if (result.error) throw result.error;
       const row = result.data;
       if (!row || !row.project_data) throw new Error(t('openFailed'));
@@ -1929,32 +2106,11 @@
       ui.loginPassword.value = ui.loginPassword.value.replace(/\D/g, '').slice(0, 4);
     });
     if (ui.loginForm) ui.loginForm.addEventListener('submit', submitLogin);
-    if (ui.logoutBtn) ui.logoutBtn.addEventListener('click', async () => {
-      if (dirty && !window.confirm(t('confirmDiscard'))) return;
-      signedOutNoticeKey = '';
-      const logoutEpoch = ++authEpoch;
-      explicitLogoutInProgress = true;
-      stopActiveSessionMonitor();
-      try {
-        if (window.PulumurActivity) {
-          await window.PulumurActivity.log('site_logout');
-          await window.PulumurActivity.end();
-        }
-        sessionStorage.removeItem(SESSION_ONLY_KEY);
-        await clearLocalSupabaseSession('explicit-logout');
-        if (logoutEpoch !== authEpoch) return;
-        const sessionCheck = await client.auth.getSession();
-        if (sessionCheck.error) throw sessionCheck.error;
-        if (sessionCheck.data && sessionCheck.data.session) throw new Error('LOCAL_SESSION_RESET_FAILED');
-        await handleSignedOut();
-      } catch (error) {
-        console.error(error);
-        await handleSignedOut();
-        setAuthMessage(friendlyError(error, 'loginFailed'), true);
-      } finally {
-        explicitLogoutInProgress = false;
-      }
+    [ui.logoutBtn, ui.startLogoutBtn].forEach(button => {
+      if (button) button.addEventListener('click', () => { void requestLogout(); });
     });
+    if (ui.retrySessionBtn) ui.retrySessionBtn.addEventListener('click', () => { void requestLogout({ confirmDiscard: false, trackLogout: false }); });
+
     const commandNames = cloudCommandNames();
     if (ui.newCloudProjectBtn) ui.newCloudProjectBtn.addEventListener('click', () => executeCloudProjectCommand(commandNames.PROJECT_CREATE_START, undefined, 'ui:new-cloud-project'));
     if (ui.startNewProjectBtn) ui.startNewProjectBtn.addEventListener('click', () => executeCloudProjectCommand(commandNames.PROJECT_CREATE_START, undefined, 'ui:start-new-project'));
@@ -2025,15 +2181,11 @@
   }
 
   function handleVisibilityRefresh() {
-    if (document.visibilityState !== 'visible' || !currentSession || explicitLoginInProgress) return;
-    window.setTimeout(async () => {
-      if (!await verifyActiveBrowserSession('visibility')) return;
-      if (currentSession) await handleAuthenticated(currentSession, { showLoading: false, source: 'visibility' });
-    }, 0);
+    if (document.visibilityState !== 'visible') return;
+    void verifyActiveBrowserSession('visibility');
   }
 
   function handleWindowFocusSessionCheck() {
-    if (!currentSession || explicitLoginInProgress) return;
     void verifyActiveBrowserSession('focus');
   }
 
@@ -2076,24 +2228,30 @@
       const eventOwnedByBootstrapOrLogin = Boolean(authBootstrapInProgress || explicitLoginInProgress || explicitLogoutInProgress);
       window.setTimeout(async () => {
         if (eventOwnedByBootstrapOrLogin || authBootstrapInProgress || explicitLoginInProgress || explicitLogoutInProgress || eventEpoch !== authEpoch) return;
-        const eventUserId = String(session && session.user && session.user.id || '');
-        const activeUserId = String(currentSession && currentSession.user && currentSession.user.id || '');
-        if (session && eventUserId && activeUserId === eventUserId && currentProfile && verifiedUser
-            && (authEvent === 'SIGNED_IN' || authEvent === 'TOKEN_REFRESHED')) {
-          // Supabase may emit SIGNED_IN after setSession() has already completed the
-          // manual bootstrap. Refresh the in-memory tokens without rebuilding the
-          // profile/organization UI a second time.
-          currentSession = session;
-          return;
+        try {
+          // Read the SDK's current state after its event lock is released. A delayed
+          // SIGNED_OUT/SIGNED_IN payload must not replace a newer browser session.
+          const latest = await client.auth.getSession();
+          if (eventEpoch !== authEpoch || explicitLoginInProgress || explicitLogoutInProgress) return;
+          if (latest.error) throw latest.error;
+          const actual = latest.data && latest.data.session;
+          if (actual && sessionIdentity(actual) === sessionIdentity(currentSession) && currentProfile && verifiedUser) {
+            currentSession = actual;
+            return;
+          }
+          if (actual && !rememberPreference() && sessionStorage.getItem(SESSION_ONLY_KEY) !== '1') {
+            await requestLogout({ confirmDiscard: false, trackLogout: false });
+            return;
+          }
+          authEpoch += 1;
+          if (actual) await handleAuthenticated(actual, { showLoading: !currentProfile, source: 'auth-event' });
+          else await handleSignedOut();
+        } catch (error) {
+          if (eventEpoch === authEpoch) recordAuthError('state_event', error);
         }
-        if (session && !rememberPreference() && sessionStorage.getItem(SESSION_ONLY_KEY) !== '1') {
-          await client.auth.signOut({ scope: 'local' });
-          return;
-        }
-        if (session) await handleAuthenticated(session);
-        else await handleSignedOut();
       }, 0);
     });
+
     authSubscription = authState && authState.data && authState.data.subscription || null;
 
     if (!visibilityBound) {

@@ -353,7 +353,7 @@
 
   function mtextEntity(e, ctx) {
     const attachment = Number(e.attachment) || (e.align === 'center' ? 5 : (e.align === 'right' ? 3 : 1));
-    const out = [...commonEntityPrefix('MTEXT', ctx.nextHandle(), ctx.owner, ctx.layerName(e.layer), e), pair(100, 'AcDbMText'), pair(10, fixed(e.x)), pair(20, fixed(e.y)), pair(30, 0), pair(40, fixed(e.height || 80)), pair(41, fixed(Math.max(1, Number(e.width) || 1000))), pair(71, attachment), pair(72, 1), pair(1, cleanMText(e.value)), pair(7, 'Standard'), pair(44, fixed(e.lineSpacing || 1.15))];
+    const out = [...commonEntityPrefix('MTEXT', ctx.nextHandle(), ctx.owner, ctx.layerName(e.layer), e), pair(100, 'AcDbMText'), pair(10, fixed(e.x)), pair(20, fixed(e.y)), pair(30, 0), pair(40, fixed(e.height || 80)), pair(41, fixed(Math.max(1, Number(e.width) || 1000))), pair(71, attachment), pair(72, 1), pair(1, cleanMText(root.PulumurProductPresentation ? root.PulumurProductPresentation.entityText(e) : e.value)), pair(7, 'Standard'), pair(44, fixed(e.lineSpacing || 1.15))];
     if (Number(e.rotation)) out.push(pair(50, fixed(e.rotation)));
     return out;
   }

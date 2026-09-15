@@ -1,10 +1,10 @@
 (function (root) {
   'use strict';
 
-  const RELEASE = 'PLMR V.33';
+  const RELEASE = 'PLMR V.34';
   const PRODUCT_INPUT_SCHEMA = 'p3dv-main-product-input-v14.04';
-  const RUNTIME_BUILD = '10.33-r33';
-  const RUNTIME_CONTRACT = 'plmr-p3dv-host-bridge-v33';
+  const RUNTIME_BUILD = '10.35-r35';
+  const RUNTIME_CONTRACT = 'plmr-p3dv-host-bridge-v35';
   function embedUrlForProduct(productId, suffix) {
     const group = PRODUCT_TO_GROUP[String(productId || '')] || PRODUCT_TO_GROUP[DEFAULT_PRODUCT_ID];
     return `modules/p3dv/index.html?embedded=1&host=plmr-v29&v=${encodeURIComponent(RUNTIME_BUILD)}&productGroup=${encodeURIComponent(group)}${suffix || ''}`;
@@ -132,7 +132,9 @@
     moduleSelect.replaceChildren();
     const option = document.createElement('option');
     option.value = moduleName;
-    option.textContent = moduleName === 'Standalone' ? 'Bağımsız Çizim' : moduleName;
+    option.textContent = root.PulumurProductPresentation
+      ? root.PulumurProductPresentation.moduleName(moduleName, document.documentElement.lang)
+      : moduleName;
     option.selected = true;
     moduleSelect.appendChild(option);
   }

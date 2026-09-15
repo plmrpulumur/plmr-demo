@@ -781,13 +781,13 @@
       labelSystemCount: 'Sistem Adedi', labelWidth: 'Genişlik', labelOpening: 'Açılım',
       labelRearHeight: 'Arka H', labelFrontHeight: 'Ön H <em>Oluk Altı</em>',
       labelRayCount: 'Ray Sayısı <b>Bir Sistem</b>', labelPostCount: 'Dikme Sayısı <b>Tüm Sistem</b>',
-      project_customer: 'Müşteri', project_project: 'Proje', project_version: 'Revizyon', project_drawnBy: 'Çizen', project_date: 'Tarih', project_code: 'Proje Kodu', project_revision: 'Revizyon', editSectionBtn: 'Düzenle', sectionResetBtn: 'Resetle',
+      project_customer: 'Müşteri', project_project: 'Proje', project_version: 'Revizyon', project_drawnBy: 'Çizen', project_date: 'Tarih', project_code: 'Proje Kodu', project_revision: 'Revizyon', editSectionBtn: 'Düzenle', sectionResetBtn: 'Sıfırla',
       options_parapet: 'Parapet', options_parapetHeight: 'Parapet H <b>*(mm)</b>', options_glassTrack: 'Cam Kaydı', glassRayBoundaryToggle: 'Ray Sınırlarını Daralt',
       options_structureColor: 'Taşıyıcı Rengi', options_fabric: 'Kumaş', options_fabricProfiles: 'Kumaş Profilleri',
       options_motor: 'Motor', options_remote: 'Kumanda', options_led: 'LED', options_dimmer: 'Dimmer', options_extras: 'Ekstralar / Notlar',
-      extra_triangleJoinery: 'Üçgen Doğrama', extra_waterStandard: 'Su Çıkışı Standart mı?', extra_waterOutletPlacement: 'Fi70 Pipe Konumu', waterOutletFront: 'Ön', waterOutletSides: 'Yan', waterOutletBoth: 'Ön + Yan', quickTestsHead: 'Hızlı Testler',
+      extra_triangleJoinery: 'Üçgen Doğrama', extra_waterStandard: 'Su Çıkışı Standart mı?', extra_waterOutletPlacement: 'Ø70 Boru Konumu', waterOutletFront: 'Ön', waterOutletSides: 'Yan', waterOutletBoth: 'Ön + Yan', quickTestsHead: 'Hızlı Testler',
       previewTitle: 'Çizim Ön İzleme', previewBtn: 'Önizlemeyi Yenile', expandPreviewBtn: 'Önizlemeyi Büyüt', undoPreviewBtn: 'Geri Al', redoPreviewBtn: 'İleri Al', historyGroupLabel: 'Çizim geçmişi', shrinkPreviewBtn: 'Önizlemeyi Küçült', showMainDimsLabel: 'Ana ölçüleri göster', showAllDimsLabel: 'Tüm ölçüleri göster',
-      pdfBtn: 'PDF İndir', generateBtn: 'DXF İndir', resetBtn: 'Tüm Değerleri Resetle', calcBtn: 'Pülümür Hesaplayıcı', projectExportBtn: 'Proje Dosyası İndir', previewProjectExportBtn: 'Proje Dosyası İndir', projectImportBtn: 'Proje Dosyası Aç', checkDrawingBtn: 'Çizimi Kontrol Et', multiProductBtn: 'Çoklu Ürün Ekleme', multiDimensionBtn: 'Çoklu Ölçü Düzenleme', equalizeGapsBtn: 'Aralıkları Eşitle', postSettingsBtn: 'Dikme Ayarları', bulkExtendBtn: 'Çoklu Profil Uzat', bulkPostProfileBtn: 'Dikme Profilini Toplu Değiştir', convertProductBtn: 'Ürün Tipini Değiştir', fitProductsBtn: 'Ürünü Alana Uydur', detailCopyBtn: 'Detay Kopyala', multiDeleteBtn: 'Çoklu Ürün Silme', deleteAllProductsBtn: 'Tüm Ürünleri Sil',
+      pdfBtn: 'PDF İndir', generateBtn: 'DXF İndir', resetBtn: 'Tüm Değerleri Sıfırla', calcBtn: 'Pülümür Hesaplayıcı', projectExportBtn: 'Proje Dosyası İndir', previewProjectExportBtn: 'Proje Dosyası İndir', projectImportBtn: 'Proje Dosyası Aç', checkDrawingBtn: 'Çizimi Kontrol Et', multiProductBtn: 'Çoklu Ürün Ekleme', multiDimensionBtn: 'Çoklu Ölçü Düzenleme', equalizeGapsBtn: 'Aralıkları Eşitle', postSettingsBtn: 'Dikme Ayarları', bulkExtendBtn: 'Çoklu Profil Uzat', bulkPostProfileBtn: 'Dikme Profilini Toplu Değiştir', convertProductBtn: 'Ürün Tipini Değiştir', fitProductsBtn: 'Ürünü Alana Uydur', detailCopyBtn: 'Detay Kopyala', multiDeleteBtn: 'Çoklu Ürün Silme', deleteAllProductsBtn: 'Tüm Ürünleri Sil',
       calcTitle: 'Pülümür Hesaplayıcı', calcSub: '4 satırdan herhangi 3 tanesini doldur. Boş olan değer hesaplanır.',
       calcGuide: '<strong>TR</strong><ul><li>4 alandan 3 tanesini doldur.</li><li>Hesaplanacak alanı boş bırak.</li><li>Hesapla’ya bas.</li><li>Sonucu ana forma aktar.</li></ul>',
       calcWaiting: 'Sonuç bekleniyor.', calcReady: 'Sonuç', calcPoz: 'poz', calcOpenNote: 'Ana formdaki açılım / arka / ön değerleri aktarıldı. Açıyı hesaplamak için Hesapla’ya bas.',
@@ -1142,6 +1142,7 @@
     setBooleanSelectTexts(currentLanguage);
     translateSlidingDetailsOverlay();
     translateGuillotineDetailsOverlay();
+    if (window.PulumurShellPresentation) window.PulumurShellPresentation.apply(currentLanguage);
     try { localStorage.setItem('pulumur_lang', currentLanguage); } catch (e) {}
   }
 
@@ -1195,7 +1196,7 @@
     }
 
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10.33-r33').catch(() => {}), { once: true });
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10.35-r35').catch(() => {}), { once: true });
     }
   }
 
@@ -1665,8 +1666,8 @@
       VALUE_SYSTEM_COUNT_MISMATCH: `${name} must contain one common value or exactly one value per system.`,
       VALUE_REQUIRED: `Enter ${name}.`, VALUE_NUMERIC_REQUIRED: `${name} values must be numeric.`,
       VALUE_MINIMUM: `${name} contains a value below the permitted minimum.`, VALUE_MAXIMUM: `${name} contains a value above the permitted maximum.`,
-      INDEPENDENT_WIDTH_FORMAT: 'Independent PergoRise width must use Group:Gap:Group format.',
-      INDEPENDENT_GROUP_GAP_POSITIVE: 'The gap between independent PergoRise groups must be a positive number.',
+      INDEPENDENT_WIDTH_FORMAT: 'Independent Pergola width must use Group:Gap:Group format.',
+      INDEPENDENT_GROUP_GAP_POSITIVE: 'The gap between independent Pergola groups must be a positive number.',
       INDEPENDENT_INTERNAL_GAP_POSITIVE: 'The internal gap inside an independent group must be a positive number.',
       INDEPENDENT_FIELD_GROUP_COUNT: `${name} does not match the independent group structure defined by Width.`,
       INDEPENDENT_FIELD_COLON_NOT_ALLOWED: `The colon character is supported only in Width. Use a semicolon-separated global ${name} list.`,
@@ -1685,7 +1686,7 @@
       VALUE_SYSTEM_COUNT_MISMATCH: `${name} için tek ortak değer veya sistem adedi kadar değer girin.`,
       VALUE_REQUIRED: `${name} alanını doldurun.`, VALUE_NUMERIC_REQUIRED: `${name} değerleri sayısal olmalıdır.`,
       VALUE_MINIMUM: `${name} izin verilen minimum değerin altında.`, VALUE_MAXIMUM: `${name} izin verilen maksimum değerin üzerinde.`,
-      INDEPENDENT_WIDTH_FORMAT: 'Bağımsız PergoRise genişlik formatı Grup:Boşluk:Grup biçiminde olmalıdır.',
+      INDEPENDENT_WIDTH_FORMAT: 'Bağımsız Pergola genişlik formatı Grup:Boşluk:Grup biçiminde olmalıdır.',
       INDEPENDENT_GROUP_GAP_POSITIVE: 'Gruplar arası boşluk pozitif bir sayı olmalıdır.',
       INDEPENDENT_INTERNAL_GAP_POSITIVE: 'Bağımsız grup içi boşluk pozitif bir sayı olmalıdır.',
       INDEPENDENT_FIELD_GROUP_COUNT: `${name} değerleri genişlikteki bağımsız grup yapısıyla eşleşmiyor.`,
@@ -2397,16 +2398,11 @@
     stage.style.height = `${Math.max(80, box.height * totalScale)}px`;
   }
 
-  function commercialProductText(value) {
-    return String(value === undefined || value === null ? '' : value)
-      .replace(/PERGO RISE/g, 'PERGOLA')
-      .replace(/Pergo Rise/g, 'Pergola');
-  }
-
   function renderPreview(drawing, resetZoom = false) {
     // Product naming is a presentation-only translation. Native PLMR geometry,
     // colors, viewBox, toolbox and interaction markup remain untouched.
-    const svg = commercialProductText(window.PulumurGeometry.renderSvg(drawing));
+    const presented = window.PulumurProductPresentation ? window.PulumurProductPresentation.drawing(drawing) : drawing;
+    const svg = window.PulumurGeometry.renderSvg(presented);
     const oldStage = getPreviewStage();
     const oldSvg = getPreviewSvg();
     const compact = !isLargePreviewMode();
@@ -7226,8 +7222,8 @@
         closeSideViewSelectionOverlay();
         updatePreview(false);
         statusText.textContent = currentLanguage === 'en'
-          ? 'Only the selected side-view output was hidden. The physical PergoRise position is preserved.'
-          : 'Yalnız seçili yan görünüş çıktısı gizlendi; fiziksel PergoRise pozu korundu.';
+          ? 'Only the selected side-view output was hidden. The physical Pergola position is preserved.'
+          : 'Yalnız seçili yan görünüş çıktısı gizlendi; fiziksel Pergola pozu korundu.';
       } finally { endHistoryTransaction(true); }
     });
     return overlay;
@@ -9292,13 +9288,22 @@
     }
   }
 
+  function requireProjectFileAccess() {
+    const access = window.PulumurAccessContext;
+    if (!access || !access.authorizeCapability || !access.authorizeCapability('project_access').allowed) {
+      throw new Error(currentLanguage === 'en' ? 'Project management requires Full or Premium access.' : 'Proje yönetimi Full veya Premium erişimi gerektirir.');
+    }
+  }
+
   async function importProjectSnapshotFile(file) {
+    requireProjectFileAccess();
     if (!file) return;
     const maxMb = applicationLimits().maxProjectFileMb;
     if (file.size > maxMb * 1024 * 1024) {
       throw new Error(currentLanguage === 'en' ? `The project file is larger than ${maxMb} MB.` : `Proje dosyası ${maxMb} MB sınırından büyük.`);
     }
     const text = await file.text();
+    requireProjectFileAccess();
     const parsed = parseProjectSnapshot(text);
     const detachedModel = window.PulumurProjectModel.normalize(parsed.projectModel);
     detachedModel.revisionInfo = { projectId: null, projectCode: null, revisionNo: 1, serverVersion: null };
@@ -9314,6 +9319,7 @@
   }
 
   function openProjectSnapshotPicker() {
+    try { requireProjectFileAccess(); } catch (error) { window.alert(error.message); return; }
     const input = $('projectImportInput');
     if (!input) return;
     input.value = '';
@@ -9449,7 +9455,7 @@
           ? 'The Modern DXF engine could not be loaded (modernDxfTemplate.js / dxfModernEngine.js).'
           : 'Modern DXF motoru yüklenemedi (modernDxfTemplate.js / dxfModernEngine.js).');
       }
-      const dxf = commercialProductText(engine.toDxf(drawing));
+      const dxf = engine.toDxf(drawing);
       if (!dxf || dxf.length < 100) throw new Error(currentLanguage === 'en' ? 'The generated DXF is empty.' : 'DXF içeriği boş oluştu.');
       const nameRoot = buildNameRoot(drawing);
       downloadText(`${nameRoot}.dxf`, dxf, 'application/dxf;charset=utf-8');
@@ -9541,7 +9547,7 @@ ${err.message}`);
   }
 
   function writePdfText(pdf, ent, mx, my, scale) {
-    const raw = commercialProductText(ent.value || '');
+    const raw = window.PulumurProductPresentation ? window.PulumurProductPresentation.entityText(ent) : String(ent.value || '');
     if (!raw) return;
     const fontMm = Math.max(0.75, (Number(ent.height) || 100) * scale);
     pdf.setFont('helvetica', 'normal');

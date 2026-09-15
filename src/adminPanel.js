@@ -51,6 +51,7 @@
   const TEXT = {
     tr: {
       adminPanel: 'Yönetici Paneli', panelSubtitle: 'Firma, kullanıcı, lisans ve uygulama güvenlik ayarları', users: 'Kullanıcılar', firms: 'Firmalar', limits: 'Uygulama Limitleri', limitsSaved: 'Merkezi uygulama limitleri kaydedildi.', limitsReset: 'Seçilen kapsam varsayılan değerlere döndürüldü.', globalLimits: 'Genel varsayılanlar', limitScope: 'Kapsam', limitAudit: 'Limit Değişiklik Geçmişi', noLimitAudit: 'Limit değişiklik kaydı bulunamadı.',
+      accessMode: 'Erişim modu', modeSave: 'Modu kaydet', modeSaved: 'Erişim modu kaydedildi ve işlem geçmişine işlendi.', modeUnavailable: 'Erişim modu doğrulanamadı.', modeConflict: 'Başka bir yönetici bu modu değiştirdi. Yenileyip güncel değeri kontrol edin.', modeHistory: 'Mod geçmişi', modeNoHistory: 'Henüz mod değişikliği yok.', modeAdminOnly: 'Sistem yöneticisi tarafından yönetilir',
       inviteUser: 'Yeni Kullanıcı Oluştur', fullName: 'Ad Soyad', username: 'Kullanıcı Adı', role: 'Rol', firm: 'Firma',
       invite: 'Kullanıcı Oluştur', refresh: 'Yenile', search: 'Ara', searchPlaceholder: 'Firma, ad veya kullanıcı adı', userCode: 'Kod', status: 'Durum', projects: 'Projeler', actions: 'İşlemler',
       companyAdmin: 'Firma Yöneticisi', designer: 'Tasarımcı', systemAdmin: 'Sistem Yöneticisi', active: 'Aktif', passive: 'Pasif',
@@ -88,6 +89,7 @@
     },
     en: {
       adminPanel: 'Admin Panel', panelSubtitle: 'Company, user, license and application safety settings', users: 'Users', firms: 'Companies', limits: 'Application Limits', limitsSaved: 'Central application limits saved.', limitsReset: 'The selected scope was restored to defaults.', globalLimits: 'Global defaults', limitScope: 'Scope', limitAudit: 'Limit Change History', noLimitAudit: 'No limit changes were found.',
+      accessMode: 'Access mode', modeSave: 'Save mode', modeSaved: 'Access mode saved and audited.', modeUnavailable: 'Access mode could not be verified.', modeConflict: 'Another administrator changed this mode. Refresh and review the latest value.', modeHistory: 'Mode history', modeNoHistory: 'No mode changes yet.', modeAdminOnly: 'Managed by the system administrator',
       inviteUser: 'Create New User', fullName: 'Full Name', username: 'Username', role: 'Role', firm: 'Company',
       invite: 'Create User', refresh: 'Refresh', search: 'Search', searchPlaceholder: 'Company, name or username', userCode: 'Code', status: 'Status', projects: 'Projects', actions: 'Actions',
       companyAdmin: 'Company Administrator', designer: 'Designer', systemAdmin: 'System Administrator', active: 'Active', passive: 'Inactive',
@@ -130,6 +132,7 @@
   let currentProfile = null;
   let organizations = [];
   let users = [];
+  let usersLoadEpoch = 0;
   let busy = false;
   let passwordTargetUserId = null;
   let deleteTargetUserId = null;
@@ -417,7 +420,19 @@
       ui.usersEmpty.textContent = t('loading');
     }
     const orgId = ui.userFilterOrg ? ui.userFilterOrg.value || null : null;
-    users = await rpc('admin_list_users_v1', { p_organization_id: orgId });
+    const actor = currentUser && currentUser.id;
+    const epoch = ++usersLoadEpoch;
+    const loaded = await rpc('admin_list_users_v1', { p_organization_id: orgId });
+    if (!modeActorIsCurrent(actor) || epoch !== usersLoadEpoch) return;
+    let modes = [];
+    if (isSystemAdmin()) {
+      try { modes = await rpc('admin_list_user_access_modes_v1', { p_organization_id: orgId }); }
+      catch (_) { modes = []; }
+    }
+    if (!modeActorIsCurrent(actor) || epoch !== usersLoadEpoch) return;
+    users = loaded.map(user => ({ ...user, access_context: modes.find(mode =>
+      mode.user_id === user.id && mode.organization_id === user.organization_id &&
+      ['DEMO','FULL','PREMIUM'].includes(mode.mode) && Number.isSafeInteger(mode.version) && mode.version >= 0) || null }));
     renderUsers();
   }
 
@@ -446,6 +461,11 @@
         <td><input class="admin-inline-input js-user-username" value="${esc(user.username || '')}" readonly title="${esc(t('usernameChangeSecureOnly'))}"></td>
         <td><select class="admin-inline-select js-user-role" ${protectedAccount ? 'disabled' : ''}>${roleOptions}</select></td>
         <td><label class="admin-toggle"><input class="js-user-active" type="checkbox" ${user.is_active ? 'checked' : ''} ${protectedAccount ? 'disabled' : ''}><span>${esc(user.is_active ? t('active') : t('passive'))}</span></label></td>
+        <td class="admin-access-mode">${isSystemAdmin() ? (user.access_context ? `
+          <select class="admin-inline-select js-user-mode" aria-label="${esc(t('accessMode'))}">${['DEMO','FULL','PREMIUM'].map(mode => `<option value="${mode}" ${user.access_context.mode===mode?'selected':''}>${mode}</option>`).join('')}</select>
+          <button type="button" class="soft-btn js-user-mode-save">${esc(t('modeSave'))}</button>
+          <button type="button" class="soft-btn js-user-mode-history">${esc(t('modeHistory'))}</button>
+          <p class="js-user-mode-audit" aria-live="polite"></p>` : `<span>${esc(t('modeUnavailable'))}</span>`) : `<span>${esc(t('modeAdminOnly'))}</span>`}</td>
         <td>${esc(user.project_count || 0)}</td>
         <td class="admin-row-actions">
           <button type="button" class="primary-btn js-user-save" ${protectedAccount ? 'disabled title="' + esc(t('protectedUser')) + '"' : ''}>${esc(t('save'))}</button>
@@ -466,6 +486,8 @@
         if (label) label.textContent = input.checked ? t('active') : t('passive');
       });
     });
+    ui.usersBody.querySelectorAll('.js-user-mode-save').forEach(button => button.addEventListener('click', () => saveAccessMode(button.closest('tr'))));
+    ui.usersBody.querySelectorAll('.js-user-mode-history').forEach(button => button.addEventListener('click', () => showAccessModeHistory(button.closest('tr'))));
     ui.usersBody.querySelectorAll('.js-user-save').forEach(button => button.addEventListener('click', () => saveUserRow(button.closest('tr'))));
     ui.usersBody.querySelectorAll('.js-user-password').forEach(button => button.addEventListener('click', () => openPasswordDialog(button.dataset.userId, button.dataset.userName)));
     ui.usersBody.querySelectorAll('.js-user-delete').forEach(button => button.addEventListener('click', () => openDeleteDialog(button.dataset.userId, button.dataset.userName)));
@@ -544,6 +566,50 @@
     } finally {
       setBusy(false);
     }
+  }
+
+  function modeActorIsCurrent(id) {
+    const access = window.PulumurAccessContext;
+    return Boolean(id && currentUser && currentUser.id === id && access && access.getContext().userId === id);
+  }
+
+  async function saveAccessMode(row) {
+    if (!row || busy || !isSystemAdmin()) return;
+    const actor = currentUser && currentUser.id;
+    if (!modeActorIsCurrent(actor)) return;
+    const user = users.find(item => item.id === row.dataset.userId);
+    const select = row.querySelector('.js-user-mode');
+    if (!user || !user.access_context || !select) return;
+    const requestedMode = select.value;
+    const button = row.querySelector('.js-user-mode-save');
+    setBusy(true); if (button) button.disabled = true;
+    try {
+      const value = await rpc('admin_set_user_access_mode_v1', {
+        p_user_id: user.id, p_mode: requestedMode, p_expected_version: user.access_context.version
+      });
+      if (!modeActorIsCurrent(actor)) return;
+      if (!value || value.user_id !== user.id || value.organization_id !== user.organization_id || value.mode !== requestedMode || !Number.isSafeInteger(value.version)) throw new Error('ACCESS_MODE_UNAVAILABLE');
+      user.access_context = value;
+      setMessage(t('modeSaved'), false);
+      renderUsers();
+    } catch (error) {
+      if (modeActorIsCurrent(actor)) setMessage(t(String(error.message).includes('ACCESS_MODE_CONFLICT') ? 'modeConflict' : 'modeUnavailable'), true);
+    } finally { setBusy(false); if (button) button.disabled = false; }
+  }
+
+  async function showAccessModeHistory(row) {
+    if (!row || busy || !isSystemAdmin()) return;
+    const actor = currentUser && currentUser.id;
+    if (!modeActorIsCurrent(actor)) return;
+    const output = row.querySelector('.js-user-mode-audit');
+    if (!output) return;
+    output.textContent = t('loading');
+    try {
+      const rows = await rpc('admin_user_access_audit_v1', { p_user_id: row.dataset.userId });
+      if (!modeActorIsCurrent(actor)) return;
+      output.textContent = rows.length ? rows.slice(0,10).map(item =>
+        `${new Date(item.created_at).toLocaleString(language()==='en'?'en-GB':'tr-TR')} · ${item.previous_mode} → ${item.new_mode}`).join('\n') : t('modeNoHistory');
+    } catch (_) { if (modeActorIsCurrent(actor)) output.textContent = t('modeUnavailable'); }
   }
 
   async function saveUserRow(row) {

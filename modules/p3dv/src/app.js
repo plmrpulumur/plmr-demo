@@ -1,8 +1,8 @@
 (function () {
   const p3dvEmbeddedHostMode = (() => { try { return new URLSearchParams(window.location.search).get('embedded') === '1' || Boolean(window.frameElement && window.frameElement.dataset && window.frameElement.dataset.p3dvEmbeddedHost === 'true'); } catch (_) { return false; } })();
   const P3DV_PRODUCT_INPUT_SCHEMA = 'p3dv-main-product-input-v14.04';
-  const P3DV_HOST_BUILD = '10.33-r33';
-  const P3DV_HOST_CONTRACT = 'plmr-p3dv-host-bridge-v33';
+  const P3DV_HOST_BUILD = '10.35-r35';
+  const P3DV_HOST_CONTRACT = 'plmr-p3dv-host-bridge-v35';
   if (p3dvEmbeddedHostMode && document && document.body) document.body.classList.add('p3dv-host-embedded');
 
   // V3.86 demo default: keep internal Galaxy identity, expose Bioclimatic (Tilt) as the initial product.
@@ -3063,9 +3063,9 @@
 
   function pergolaDisplaySvgMarkup(drawing) {
     if (!window.PulumurGeometry || typeof window.PulumurGeometry.renderSvg !== 'function') return '';
-    // Keep the PLMR V13.92 geometry/calculation engine byte-for-byte intact;
-    // only translate the legacy product name in its rendered user-facing SVG.
-    return String(window.PulumurGeometry.renderSvg(drawing) || '').replace(/PERGO RISE/g, 'PERGOLA');
+    // Format explicitly marked product labels; preserve customer text and geometry.
+    const presented = window.PulumurProductPresentation ? window.PulumurProductPresentation.drawing(drawing) : drawing;
+    return String(window.PulumurGeometry.renderSvg(presented) || '');
   }
 
   function renderPergo2DPreview(options = {}) {
@@ -6335,7 +6335,7 @@
   function quickTestScenario(index) {
     const scenarios = {
       1: {
-        description: 'Freedom · ön cephede merkez dışı dikey profil, katlanır cam + giyotin + zip ve dört cephe ürün kontrolü.',
+        description: 'Rolling Roof · ön cephede merkez dışı dikey profil, katlanır cam + giyotin + zip ve dört cephe ürün kontrolü.',
         group: 'b-cube', width: 4000, panelCount: 25, height: 2700,
         systemColor: { code: 'RAL 7016', hex: '#383E42', finish: 'TEXTURE' },
         panelColor: { code: 'RAL 9016', hex: '#E7E8E2', finish: 'MATTE' },
@@ -6349,7 +6349,7 @@
         ]
       },
       2: {
-        description: 'Freedom · yatay profil, K Seri katlanır cam dış bakış sağa toplama, üst sabit kapı ve sabit doğrama.',
+        description: 'Rolling Roof · yatay profil, K Seri katlanır cam dış bakış sağa toplama, üst sabit kapı ve sabit doğrama.',
         group: 'b-cube', width: 3600, panelCount: 20, height: 2800,
         systemColor: { code: 'RAL 9005', hex: '#0A0A0D', finish: 'GLOSS' },
         panelColor: { code: 'RAL 1013', hex: '#E9E5CE', finish: 'TEXTURE' },
@@ -6362,7 +6362,7 @@
         ]
       },
       3: {
-        description: 'Freedom · profilsiz dört cephe; 9 panelli otomatik iki yana katlanır cam, toplanan giyotin, P seri zip ve çift kanat üst sabit kapı.',
+        description: 'Rolling Roof · profilsiz dört cephe; 9 panelli otomatik iki yana katlanır cam, toplanan giyotin, P seri zip ve çift kanat üst sabit kapı.',
         group: 'b-cube', width: 4100, panelCount: 27, height: 2900,
         systemColor: { code: 'RAL 7035', hex: '#C5C7C4', finish: 'MATTE' },
         panelColor: { code: 'RAL 3005', hex: '#5E2028', finish: 'GLOSS' },
@@ -6375,7 +6375,7 @@
         ]
       },
       4: {
-        description: 'Freedom · iki dikey profil ve orta alanda yatay profil; profil sonrası genişlik/yükseklik aralıkları düzenlenmiş çok alan testi.',
+        description: 'Rolling Roof · iki dikey profil ve orta alanda yatay profil; profil sonrası genişlik/yükseklik aralıkları düzenlenmiş çok alan testi.',
         group: 'b-cube', width: 4600, panelCount: 30, height: 3000,
         systemColor: { code: 'RAL 8019', hex: '#3B3332', finish: 'TEXTURE' },
         panelColor: { code: 'RAL 9006', hex: '#7C7D7F', finish: 'GLOSS' },
@@ -6395,7 +6395,7 @@
         ]
       },
       5: {
-        description: 'Freedom · özel/döndürülmüş dikmeler, sol ve sağ cephede düzenlenmiş profil aralıkları, tüm ürün tipleri.',
+        description: 'Rolling Roof · özel/döndürülmüş dikmeler, sol ve sağ cephede düzenlenmiş profil aralıkları, tüm ürün tipleri.',
         group: 'b-cube', width: 4300, panelCount: 26, height: 2750,
         systemColor: { code: 'RAL 6005', hex: '#0F4336', finish: 'MATTE' },
         panelColor: { code: 'RAL 9010', hex: '#F1ECE1', finish: 'TEXTURE' },
@@ -6459,7 +6459,7 @@
         ]
       },
       9: {
-        description: 'Freedom · ürün açık/kapalı ve panel durumları; toplanmış sürme/giyotin ile zip panel görünürlüğü hızlı kontrolü.',
+        description: 'Rolling Roof · ürün açık/kapalı ve panel durumları; toplanmış sürme/giyotin ile zip panel görünürlüğü hızlı kontrolü.',
         group: 'b-cube', width: 3900, panelCount: 24, height: 2650,
         systemColor: { code: 'RAL 3020', hex: '#CC0605', finish: 'GLOSS' },
         panelColor: { code: 'RAL 9005', hex: '#0A0A0D', finish: 'TEXTURE' },

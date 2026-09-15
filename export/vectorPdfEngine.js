@@ -360,7 +360,8 @@
       const sizeMm = Math.max(0.75, finite(entity.height, 30) * scale);
       pdf.setFont(fontName || pdf.__plmrFontName || 'PLMRNoto', 'normal');
       pdf.setFontSize(sizeMm * 72 / 25.4);
-      const lines = entity.type === 'mtext' ? String(entity.value).split('\\P') : [String(entity.value)];
+      const displayValue = root.PulumurProductPresentation ? root.PulumurProductPresentation.entityText(entity) : String(entity.value);
+      const lines = entity.type === 'mtext' ? displayValue.split('\\P') : [displayValue];
       const align = entity.align === 'center' ? 'center' : (entity.align === 'right' ? 'right' : 'left');
       lines.forEach((line, index) => pdf.text(line, mx(entity.x), my(entity.y) + index * sizeMm * 1.15, { align, baseline: 'middle', angle: -finite(entity.rotation) }));
     }

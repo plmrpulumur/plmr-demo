@@ -2980,6 +2980,7 @@
         : (d.systemCount > 1 ? `PERGO RISE POZ ${i + 1}` : 'PERGO RISE');
       const fit = pergoRiseTextFitForSystem(d, sys, label);
       const ent = g.text(fit.x, textY, label, fit.h, 'TITLE', 'center');
+      ent.presentationRole = 'product-name';
       ent.color = 3; // PERI01 pergoPozYaz: (col "3")
     });
   }

@@ -15,6 +15,8 @@
     BCUBE_FREEDOM: ['BCUBE_FREEDOM', 'B_CUBE_FREEDOM', 'B-CUBE FREEDOM', 'B CUBE FREEDOM', 'FREEDOM']
   });
   const ALL_PRODUCTS = Object.freeze(Object.keys(PRODUCT_ALIASES));
+  const ACCESS_MODES = Object.freeze(['DEMO', 'FULL', 'PREMIUM']);
+  const PREMIUM_CAPABILITIES = Object.freeze(['premium_access', 'erp_access', 'crm_access', 'quotation_access', 'production_access', 'commercial_access']);
 
   function upper(value) {
     return String(value == null ? '' : value).trim().toLocaleUpperCase('tr-TR');
@@ -155,6 +157,23 @@
     return result;
   }
 
+  // This snapshot is returned by the authenticated server RPC, never by local
+  // preferences or editable JWT metadata. The database rechecks every mutation.
+  function evaluateCapability(input, capability) {
+    const access = evaluateAccess(input);
+    if (!access.allowed) return access;
+    const context = input.profile && input.profile.access_context;
+    const verified = Boolean(context && String(context.user_id) === access.userId &&
+      String(context.organization_id) === access.organizationId && ACCESS_MODES.includes(context.mode) &&
+      Number.isSafeInteger(context.version) && context.version >= 0);
+    const mode = verified ? context.mode : 'DEMO';
+    const allowed = capability === 'product_access' || (verified && (
+      (['project_access', 'engineering_access'].includes(capability) && ['FULL', 'PREMIUM'].includes(mode)) ||
+      (PREMIUM_CAPABILITIES.includes(capability) && mode === 'PREMIUM')));
+    return decision(allowed, allowed ? 'CAPABILITY_GRANTED' : (verified ? 'CAPABILITY_REQUIRED' : 'ACCESS_MODE_UNAVAILABLE'),
+      { userId: access.userId, organizationId: access.organizationId, mode, modeVerified: verified, capability });
+  }
+
   function assertTenantRecord(record, organizationId) {
     const expected = String(organizationId || '');
     const actual = String(record && (record.organization_id || record.organizationId) || '');
@@ -176,11 +195,14 @@
     SCHEMA,
     PRODUCT_ALIASES,
     ALL_PRODUCTS,
+    ACCESS_MODES,
+    PREMIUM_CAPABILITIES,
     normalizeProduct,
     normalizeEnabledProducts,
     decodeJwtPayload,
     sessionIssuedAt,
     evaluateAccess,
+    evaluateCapability,
     assertAccess,
     assertTenantRecord,
     filterTenantRows
