@@ -1096,15 +1096,46 @@
       const expectedUserId = String(result.user_id || '').trim();
       const expectedUsername = normalizeUsername(result.username || username);
       if (!sessionData.access_token || !sessionData.refresh_token || !expectedUserId) throw new Error('INVALID_LOGIN');
-      const installation = client.auth.setSession({ access_token: sessionData.access_token, refresh_token: sessionData.refresh_token });
-      tokenInstallInFlight = installation;
-      let sessionResult;
-      try { sessionResult = await installation; }
-      finally { if (tokenInstallInFlight === installation) tokenInstallInFlight = null; }
-      if (loginEpoch !== authEpoch) return;
-      const authenticatedSession = sessionResult.data && sessionResult.data.session;
-      if (sessionResult.error || !authenticatedSession) throw sessionResult.error || new Error('INVALID_LOGIN');
-      if (String(authenticatedSession.user && authenticatedSession.user.id || '') !== expectedUserId) throw new Error('LOGIN_IDENTITY_MISMATCH');
+      let sessionResult = null;
+      let authenticatedSession = null;
+
+      for (let installAttempt = 0; installAttempt < 2; installAttempt += 1) {
+        if (installAttempt > 0) {
+          await clearLocalSupabaseSession('identity-mismatch-retry');
+          if (loginEpoch !== authEpoch) return;
+          await new Promise(resolve => window.setTimeout(resolve, 0));
+          if (loginEpoch !== authEpoch) return;
+        }
+
+        const installation = client.auth.setSession({
+          access_token: sessionData.access_token,
+          refresh_token: sessionData.refresh_token
+        });
+
+        tokenInstallInFlight = installation;
+        try { sessionResult = await installation; }
+        finally {
+          if (tokenInstallInFlight === installation) tokenInstallInFlight = null;
+        }
+
+        if (loginEpoch !== authEpoch) return;
+
+        authenticatedSession =
+          sessionResult && sessionResult.data && sessionResult.data.session;
+
+        if (sessionResult && sessionResult.error) throw sessionResult.error;
+        if (!authenticatedSession) throw new Error('INVALID_LOGIN');
+
+        const actualUserId = String(
+          authenticatedSession.user && authenticatedSession.user.id || ''
+        );
+
+        if (actualUserId === expectedUserId) break;
+
+        if (installAttempt === 1) {
+          throw new Error('LOGIN_IDENTITY_MISMATCH');
+        }
+      }
 
       localStorage.setItem(REMEMBER_KEY, remember ? '1' : '0');
       if (remember) { localStorage.setItem(SAVED_USERNAME_KEY, username); sessionStorage.removeItem(SESSION_ONLY_KEY); }
@@ -1159,6 +1190,10 @@
         if (transitionEpoch !== authEpoch) return false;
         if (client && client.auth) await clearLocalSupabaseSession('explicit-logout');
         if (transitionEpoch !== authEpoch) return false;
+
+        await new Promise(resolve => window.setTimeout(resolve, 0));
+        if (transitionEpoch !== authEpoch) return false;
+
         await handleSignedOut();
         return true;
       } catch (error) {
