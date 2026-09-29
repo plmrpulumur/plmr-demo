@@ -1,1005 +1,824 @@
-<!doctype html>
+<!DOCTYPE html>
+<!-- legacy-regression-token:p3dv.v3.53 -->
+
 <html lang="tr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="referrer" content="no-referrer" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://*.supabase.co wss://*.supabase.co; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0d5d5f" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-  <meta name="apple-mobile-web-app-title" content="Pülümür Automation Studio" />
-  <title>Pülümür Automation Studio</title>
-  <script src="src/buildBootstrap.js?v=10.47-r47"></script>
-  <link rel="manifest" href="manifest.webmanifest?v=10.47-r47" />
-  <link rel="icon" type="image/png" sizes="64x64" href="assets/icons/favicon-64.png" />
-  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
-  <link rel="stylesheet" href="assets/styles/app.css?v=10.47-r47" />
-  <link rel="preload" href="blocks/filteredBlocks.js?v=10.47-r47" as="script" />
-  <link rel="preload" href="src/peri01Geometry.js?v=10.47-r47" as="script" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>PLMR | Designer</title>
+<meta content="PLMR | Designer" name="application-name"/>
+<meta content="PLMR | Designer" name="apple-mobile-web-app-title"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="default" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="#ffffff" name="theme-color"/>
+<meta content="PLMR ürünleri için profesyonel 2D/3D tasarım, ürün yerleşimi ve teklif önizleme arayüzü." name="description"/>
+<link href="./assets/branding/favicon.ico" rel="icon" sizes="any"/>
+<link href="./assets/branding/favicon-32.png" rel="icon" sizes="32x32" type="image/png"/>
+<link href="./assets/branding/favicon-48.png" rel="icon" sizes="48x48" type="image/png"/>
+<link href="./assets/branding/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./manifest.webmanifest?v=10.47-r47" rel="manifest"/>
+<link href="./src/styles.css?v=10.47-r47" rel="stylesheet"/>
+<link href="./src/p3dv-document-workspace.css?v=10.47-r47" rel="stylesheet"/>
 </head>
-<body class="auth-pending v13-8-premium v13-9-premium v13-10-premium v13-11-premium v13-12-premium v13-13-premium v13-14-premium v13-15-premium v13-28-premium v13-29-premium v13-30-premium">
-  <section id="authGate" class="auth-gate" aria-label="Kullanıcı girişi">
-    <form id="loginForm" class="auth-card" autocomplete="on">
-      <img src="assets/plmr-logo-header.png" alt="PLMR" class="auth-logo" />
-      <h1>Pülümür Automation Studio</h1>
-      <p id="authSubtitle" class="auth-subtitle">Kullanıcı Girişi ve Proje Yönetimi</p>
-      <label class="auth-field">
-        <span id="loginUsernameLabel">Kullanıcı Adı</span>
-        <input id="loginUsername" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required disabled aria-disabled="true" />
-      </label>
-      <label class="auth-field">
-        <span id="loginPasswordLabel">PIN Kodu</span>
-        <input id="loginPassword" type="password" minlength="4" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="current-password" required disabled aria-disabled="true" />
-      </label>
-      <div id="authOptions" class="auth-options" aria-label="Giriş tercihleri">
-        <label class="auth-check"><input id="rememberMe" type="checkbox" checked disabled aria-disabled="true" /><span id="rememberMeLabel">Beni hatırla</span></label>
-        <label class="auth-check"><input id="savePassword" type="checkbox" disabled aria-disabled="true" /><span id="savePasswordLabel">Şifremi kaydet</span></label>
-      </div>
-      <button id="loginBtn" type="submit" class="primary-btn auth-login-btn" disabled aria-disabled="true">Giriş Yap</button>
-      <p id="authMessage" class="auth-message" aria-live="polite">Oturum kontrol ediliyor…</p>
-      <button id="retrySessionBtn" type="button" class="soft-btn" hidden>Çıkışı tekrar dene</button>
-      <p id="authNote" class="auth-note">Kullanıcı adı ve şifre firma yöneticisi tarafından tanımlanır. Şifre kaydı desteklenen cihazlarda tarayıcının parola yöneticisiyle yapılır.</p>
-    </form>
-  </section>
+<body class="p3dv-plmr-interface">
+<header class="plmr-studio-header">
+<div class="plmr-studio-brand">
+<img alt="PLMR" src="./assets/branding/plmr-logo-header.png"/>
+</div>
+<div aria-label="Ürün seçimleri" class="plmr-header-selectors">
+<label><span>Ürün</span><select aria-label="Ürün" id="productGroupInput"><option value="b-cube">Rolling Roof (Retractable)</option><option selected="" value="b-cube-galaxy">Bioclimatic (Tilt)</option><option value="bio-rise">Eco-Bioclimatic (Tilt)</option><option value="pergo-rise">Pergola</option></select></label>
+<label><span>Modül</span><select aria-label="Modül"><option>Module 1</option></select></label>
+<label class="engine-selector"><span>Çizim Motoru</span><select aria-label="Çizim Motoru" disabled id="engineSelectorInput"><option value="3d">Web 3D</option><option value="2d">Web DXF / 2D</option></select></label>
+</div>
+<div class="plmr-header-actions">
+<label class="language-selector"><span>Dil</span><select aria-label="Dil"><option>TR</option><option>EN</option></select></label>
+<div class="plmr-user-summary"><span>PÜLÜMÜR AUTOMATION STUDIO</span><strong>Ayetullah</strong><b>Sistem Yöneticisi</b></div>
+<button aria-disabled="true" class="header-action-btn is-disabled" disabled="" type="button">Yönetim</button>
+<button aria-disabled="true" class="header-help-btn is-disabled" disabled="" type="button">Yardım</button>
+<span class="app-version">p3dv.v3.86</span><!-- legacy regression baseline token: p3dv.v3.54 -->
+</div>
+</header>
+<div class="plmr-studio-workspace">
+<nav aria-label="Proje kontrol merkezi" class="plmr-project-rail">
+<div class="project-rail-title"><span>PROJE<br/>KONTROL<br/>MERKEZİ</span><b>⌃</b></div>
+<div class="project-rail-body">
+<div class="project-state"><span>DURUM</span><strong>Kaydedilmedi</strong></div>
+<button aria-disabled="true" class="is-disabled" disabled="" id="toolbarOpenBtn" type="button">Proje Dosyası Aç</button>
+<button aria-disabled="true" class="is-disabled" disabled="" id="toolbarNewBtn" type="button">Yeni Proje</button>
+<button aria-disabled="true" class="is-disabled" disabled="" id="toolbarSaveBtn" type="button">Kaydet</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Yeni Revizyon</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Projelerim</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Revizyonlar</button>
+</div>
+<button aria-disabled="true" class="project-rail-exit is-disabled" disabled="" type="button">Çıkış</button>
+</nav>
+<div class="plmr-main-stack">
+<main class="plmr-designer-layout">
+<section aria-label="Parametreler" class="plmr-parameter-panel">
+<div class="plmr-form-grid">
+<div class="plmr-form-column">
+<fieldset class="plmr-form-card project-card">
+<div class="plmr-card-legend teal"><span>PROJE BİLGİLERİ</span><button aria-disabled="true" disabled="" type="button">Düzenle</button></div>
+<div class="project-data-row"><i>▣</i><span>Proje Kodu</span><strong id="projectCodeValue">-</strong></div>
+<div class="project-data-row"><i>♙</i><span>Müşteri</span><strong>—</strong></div>
+<div class="project-data-row"><i>▰</i><span>Proje</span><strong>—</strong></div>
+<div class="project-data-row"><i>↻</i><span>Revizyon</span><strong>R01</strong></div>
+<div class="project-data-row"><i>♙</i><span>Çizen</span><strong>—</strong></div>
+<div class="project-data-row"><i>▦</i><span>Tarih</span><strong id="plmrProjectDate">—</strong></div>
+<div class="project-card-actions"><button class="calculator-btn" id="pergoCalculatorBtn" type="button">Pülümür<br/>Hesaplayıcı</button><button class="reset-all-btn" id="pergoResetAllBtn" type="button">Tüm Değerleri<br/>Resetle</button></div>
+</fieldset>
+<fieldset class="plmr-form-card options-card">
+<div class="plmr-card-legend amber"><span>OPSİYONLAR</span><button id="pergoOptionsResetBtn" type="button">Resetle</button></div>
+<label class="plmr-cell-row"><span>Parapet</span><select id="parapetInput"><option>HAYIR</option><option>EVET</option></select></label>
+<label class="plmr-cell-row"><span>Parapet H <b>*(mm)</b></span><input id="parapetHeightInput" inputmode="numeric" placeholder="-" type="text"/></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoGlassTrackRow"><span>Cam Kaydı</span><select id="pergoGlassTrackInput"><option>HAYIR</option><option>EVET</option></select></label><input id="pergoGlassRayBoundaryModeInput" type="hidden" value="DARALT"/>
+<label class="plmr-cell-row pergo-option-row" id="pergoStructureColorRow"><span>Taşıyıcı Rengi</span><input autocomplete="off" id="pergoStructureColorInput" placeholder="-" type="text"/></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoFabricRow"><span>Kumaş</span><div class="excel-cell p3dv-combo" id="pergoFabricCombo"><input autocomplete="off" id="pergoFabricInput" type="text" value="-"/><button aria-label="Kumaş listesini aç" id="pergoFabricComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="pergoFabricComboMenu"></div></div></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoFabricProfilesRow"><span>Kumaş Profilleri</span><input autocomplete="off" id="pergoFabricProfilesInput" placeholder="-" type="text"/></label>
+<div class="plmr-cell-row color-cell freedom-option-row"><span>Taşıyıcı Rengi</span><button class="cell-value-button" id="systemColorTrigger" type="button"><span class="cell-swatch" id="systemColorSwatch"></span><strong id="systemColorValue">-</strong><em>▾</em></button></div>
+<div class="plmr-cell-row color-cell panel-color-cell freedom-option-row"><span>Panel Rengi <label class="panel-color-independent" title="Panel için ayrı renk seç"><input checked="" id="panelColorIndependentInput" type="checkbox"/><i>✓</i></label></span><button class="cell-value-button" id="panelColorTrigger" type="button"><span class="cell-swatch" id="panelColorSwatch"></span><strong id="panelColorValue">-</strong><em>▾</em></button></div>
+<label class="plmr-cell-row freedom-option-row"><span>Panel Dolgusu</span><select id="panelFillInput"><option>EVET</option><option>HAYIR</option></select></label>
+<label class="plmr-cell-row"><span>Motor</span><div class="excel-cell p3dv-combo" id="motorCombo"><input autocomplete="off" id="motorInput" readonly="" type="text" value="Yok"/><button aria-label="Motor listesini aç" id="motorComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="motorComboMenu"></div></div></label>
+<label class="plmr-cell-row"><span>Kumanda</span><div class="excel-cell p3dv-combo" id="remoteCombo"><input autocomplete="off" id="remoteInput" type="text" value="Yok"/><button aria-label="Kumanda listesini aç" id="remoteComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="remoteComboMenu"></div></div></label>
+<label class="plmr-cell-row"><span>LED</span><div class="excel-cell p3dv-combo" id="ledCombo"><input autocomplete="off" id="ledInput" type="text" value="NO"/><button aria-label="LED listesini aç" id="ledComboButton" type="button">▾</button><div class="p3dv-combo-menu" hidden="" id="ledComboMenu"></div></div></label>
+<label class="plmr-cell-row freedom-option-row" id="freedomDimmerRow"><span>Dimmer</span><select id="dimmerInput"><option>HAYIR</option><option>EVET</option></select></label>
+<label class="plmr-cell-row pergo-option-row" id="pergoDimmerRow"><span>Dimmer</span><input autocomplete="off" id="pergoDimmerInput" placeholder="-" type="text"/></label>
+<label class="plmr-cell-row notes-row"><span>Ekstralar / Notlar</span><textarea id="extrasInput" placeholder="-" rows="2"></textarea></label>
+<div aria-hidden="true" class="p3dv-hidden-controls"><button class="is-active" id="defaultColorModeBtn" type="button">Default</button><button id="ralColorModeBtn" type="button">RAL</button></div>
+</fieldset>
+</div>
+<div class="plmr-form-column">
+<fieldset class="plmr-form-card system-card">
+<div class="plmr-card-legend blue"><span>SİSTEM ÖLÇÜLERİ <b>*(mm)</b></span><button id="pergoSystemResetBtn" type="button">Resetle</button></div>
+<form class="plmr-system-form" id="freedomInputForm" novalidate="">
+<label class="plmr-cell-row system-count-row"><span>Sistem Adedi</span><input id="pergoSystemCountInput" inputmode="numeric" maxlength="6" pattern="[0-9]*" placeholder="Örn. 1" type="text"/></label>
+<label class="plmr-cell-row"><span id="primaryWidthLabel">Genişlik</span><input autocomplete="off" id="freedomWidthInput" inputmode="text" placeholder="Örn. 4000 veya 3000;100;2500;NO" type="text"/></label>
+<label class="plmr-cell-row opening-row"><span id="primaryDepthLabel">Açılım</span><div class="excel-cell p3dv-combo projection-combo" id="projectionCombo"><input autocomplete="off" id="freedomDepthInput" inputmode="numeric" placeholder="Örn. 2308 veya 2308;2524" type="text"/><button aria-label="Açılım listesini aç" id="projectionCustomToggleBtn" type="button">▾</button><div class="p3dv-combo-menu projection-combo-menu" hidden="" id="projectionComboMenu"></div></div></label>
+<label class="plmr-cell-row"><span id="primaryHeightLabel">Yükseklik</span><input autocomplete="off" id="freedomHeightInput" inputmode="numeric" placeholder="Örn. 3200 veya 3200;3400" type="text"/></label>
+<label class="plmr-cell-row pergo-only-row" id="pergoFrontHeightRow"><span>Ön H <em>Oluk Altı</em></span><input id="pergoFrontHeightInput" inputmode="text" placeholder="Örn. 2600" type="text"/></label>
+<label class="plmr-cell-row pergo-only-row" id="pergoRayCountRow"><span>Ray Sayısı <b>Bir Sistem</b></span><input id="pergoRayCountInput" inputmode="text" placeholder="Örn. 2 veya 2;3;2" type="text"/></label>
+<label class="plmr-cell-row pergo-only-row" id="pergoPostCountRow"><span>Dikme Sayısı <b>Tüm Sistem</b></span><input id="pergoPostCountInput" inputmode="text" placeholder="Örn. 2 veya boş: otomatik" type="text"/></label>
+<div aria-hidden="true" class="system-card-spacer" id="freedomSystemCardSpacer"><span></span><span></span><span></span></div>
+<div class="system-hidden-fields">
+<select aria-label="Açılım seçenekleri" id="projectionOptions"></select>
+<input id="freedomPanelCountInput" type="number" value="1"/>
+<div hidden="" id="pergoRiseParametricFields"></div>
+<small id="freedomWidthLimitNote"></small><small id="freedomDepthLimitNote"></small>
+<small id="productFormulaText"></small><div aria-live="polite" id="freedomInputValidation"></div>
+<button id="freedomApplyBtn" type="submit">3D Modeli Oluştur</button>
+</div>
+</form>
+</fieldset>
+<fieldset class="plmr-form-card extra-card">
+<div class="plmr-card-legend purple"><span>EK OPSİYONLAR</span><button id="pergoExtraResetBtn" type="button">Resetle</button></div>
+<label class="plmr-cell-row pergo-option-row" id="pergoTriangleJoineryRow"><span>Üçgen Doğrama</span><select id="pergoTriangleJoineryInput"><option>HAYIR</option><option>EVET</option></select></label>
+<label class="plmr-cell-row"><span>Su Çıkışı Standart mı?</span><select id="waterStandardInput"><option>EVET</option><option>HAYIR</option></select></label>
+<label class="plmr-cell-row pergo-option-row" hidden="" id="pergoWaterOutletPlacementRow"><span>Fi70 Pipe Konumu</span><select id="pergoWaterOutletPlacementInput"><option value="FRONT">ÖN</option><option value="SIDES">YAN</option><option selected="" value="BOTH">ÖN + YAN</option></select></label>
+<div class="plmr-cell-row pergo-option-row pergo-back-wall-row" id="pergoBackWallRow"><span>Arka Duvar</span><button class="pergo-back-wall-open" id="pergoBackWallOpenBtn" type="button"><strong id="pergoBackWallSummary">VAR · PLMR varsayılan</strong><em>▾</em></button></div>
+<div aria-hidden="true" class="extra-card-row-spacer"></div>
+<div class="quick-tests-block" hidden aria-hidden="true"><strong>HIZLI TESTLER</strong><div class="quick-test-grid">
+<button id="quickTestBtn1" type="button">Test 1</button><button id="quickTestBtn2" type="button">Test 2</button><button id="quickTestBtn3" type="button">Test 3</button><button id="quickTestBtn4" type="button">Test 4</button>
+<button id="quickTestBtn5" type="button">Test 5</button><button id="quickTestBtn6" type="button">Test 6</button><button id="quickTestBtn7" type="button">Test 7</button><button id="quickTestBtn8" type="button">Test 8</button>
+<button id="quickTestBtn9" type="button">Test 9</button><button id="quickTestBtn10" type="button">Test 10</button>
+</div></div>
+<div aria-live="polite" class="sr-only" id="quickTestStatus"></div>
+</fieldset>
+</div>
+</div>
+</section>
+<section aria-label="2D / 3D çizim ön izleme" class="plmr-preview-panel">
+<div class="plmr-preview-head">
+<div class="preview-title-group"><h2>ÇİZİM ÖN İZLEME</h2><span class="sr-only" id="previewProductLabel">Bioclimatic (Tilt)</span></div>
+<div class="preview-toolbar-axis">
+<div class="preview-actions-left">
+<div aria-label="Çizim modu" class="preview-mode-switch" role="group"><button id="mode2DBtn" type="button">2D</button><button class="is-active" id="mode3DBtn" type="button">3D</button></div>
+<button id="toolbarRefreshBtn" type="button">Önizlemeyi Yenile</button>
+<button aria-pressed="false" id="previewExpandBtn" type="button"><span id="previewExpandLabel">Önizlemeyi Büyüt</span></button>
+<div aria-label="Çizim geçmişi" class="preview-history-actions" role="group">
+<button aria-disabled="true" disabled="" id="previewUndoBtn" type="button"><span>Geri Al</span><small>Ctrl+Z</small></button>
+<button aria-disabled="true" disabled="" id="previewRedoBtn" type="button"><span>İleri Al</span><small>Ctrl+Shift+Z</small></button>
+</div>
+<div aria-label="3D görünüm kontrolleri" class="preview-camera-actions" role="group">
+<button id="toolbarZoomInBtn" type="button">Yakınlaştır</button>
+<button id="toolbarZoomOutBtn" type="button">Uzaklaştır</button>
+<button id="toolbarFitBtn" type="button">Sığdır</button>
+<button class="ar-real-space-btn" id="toolbarArBtn" type="button">AR Gerçek Alan</button>
+</div>
+</div>
+<div class="preview-actions-right">
+<button aria-disabled="true" class="drawing-check-btn is-disabled" disabled id="headerCheckDrawingBtn" title="3D demo modunda pasif" type="button">Çizimi Kontrol Et</button>
+<button aria-disabled="true" class="is-disabled" disabled="" type="button">Proje Dosyası İndir</button>
+<button class="pdf-download-btn" id="toolbarPdfBtn" type="button">PDF İndir</button>
+<button aria-disabled="true" class="dxf-download-btn is-disabled" disabled="" id="toolbarDxfBtn" type="button">DXF İndir</button>
+</div>
+</div>
+</div>
+<div class="plmr-preview-workspace" id="expandedPreviewWorkspace">
+<div class="plmr-preview-canvas">
+<div aria-hidden="true" class="viewer-meta">
+<button class="position-pill" id="positionEditBtn" type="button"><strong id="positionTitle">Bioclimatic (Tilt) Poz1</strong><span id="positionSummary">Ölçüleri girin</span></button>
+<span class="product-status" id="productStatus">Model için ölçüleri tamamlayın</span>
+</div>
+<div class="toolbox-selection-banner" hidden="" id="toolboxSelectionBanner"><div><strong id="toolboxSelectionBannerTitle">Çoklu seçim</strong><span id="toolboxSelectionBannerText">Uygun alanları seçin.</span></div><div class="toolbox-selection-banner-actions"><button id="toolboxSelectionDoneBtn" type="button">Tamam</button><button class="ghost" id="toolboxSelectionCancelBtn" type="button">İptal</button></div></div>
+<div aria-live="polite" class="preview-input-guidance" hidden="" id="previewInputGuidance"></div>
+<div aria-label="Pergola Web DXF / 2D çalışma alanı" class="pergo-2d-viewport" hidden id="pergo2DViewport" tabindex="0"><div class="pergo-2d-stage" id="pergo2DStage"></div></div>
+<iframe allow="camera; xr-spatial-tracking; fullscreen" allowfullscreen webkitallowfullscreen id="viewerFrame" title="Bioclimatic (Tilt) 3D viewer"></iframe>
+</div>
+<aside aria-label="Büyük önizleme hızlı çizim komutları" class="large-preview-toolbox is-open" id="largePreviewToolbox">
+<div class="large-preview-toolbox-head">
+<button aria-expanded="true" aria-label="Toolbox'ı daralt" class="large-preview-toolbox-icon large-preview-toolbox-toggle" id="largePreviewToolboxToggleBtn" type="button"><span>‹</span></button>
+<button aria-label="Toolbox'ı sabitle" aria-pressed="true" class="large-preview-toolbox-icon large-preview-toolbox-pin" id="largePreviewToolboxPinBtn" title="Toolbox'ı açık tut" type="button">
+<svg aria-hidden="true" viewbox="0 0 24 24"><path d="M14 2l8 8-2 2-2-2-4 4v5l-2 2-3-3-5 5-1-1 5-5-3-3 2-2h5l4-4-2-2 2-2z"></path></svg>
+</button>
+</div>
+<div class="large-preview-toolbox-grid">
+<button aria-pressed="false" class="large-preview-toggle is-off" id="largePreviewShowAllDimsBtn" type="button"><span class="large-toggle-dot"></span><span>Tüm ölçüleri<br/>göster</span><b>▾</b></button>
+<button aria-pressed="true" class="large-preview-toggle is-on" id="largePreviewShowMainDimsBtn" type="button"><span class="large-toggle-dot"></span><span>Ana ölçüleri<br/>göster</span></button>
+<button aria-pressed="false" class="large-preview-boolean large-preview-pergo-option is-off" hidden="" id="largePreviewGlassTrackBtn" type="button"><span>Cam Kaydı</span><strong>HAYIR</strong><b>▾</b></button>
+<button aria-pressed="true" class="large-preview-boolean large-preview-pergo-option is-on" hidden="" id="largePreviewRayBoundaryBtn" type="button"><span>Ray Sınırlarını Daralt</span><strong>EVET</strong><b>▾</b></button>
+<button aria-pressed="false" class="large-preview-boolean large-preview-pergo-option is-off" hidden="" id="largePreviewTriangleJoineryBtn" type="button"><span>Üçgen Doğrama</span><strong>HAYIR</strong><b>▾</b></button>
+<button aria-pressed="true" class="large-preview-boolean large-preview-pergo-option is-on" hidden="" id="largePreviewWaterStandardBtn" type="button"><span>Su Çıkışı Standart mı?</span><strong>EVET</strong><b>▾</b></button>
+<label class="large-preview-parapet large-preview-pergo-option" hidden="" id="largePreviewParapetControl"><span>Parapet H (mm)</span><input id="largePreviewParapetInput" inputmode="numeric" placeholder="0" type="text"/></label>
+<div aria-hidden="true" class="large-preview-toolbox-spacer large-preview-pergo-option" hidden=""></div>
+<div class="large-preview-product-state toolbox-wide is-open" id="largePreviewProductStateControl">
+<button aria-pressed="true" id="largePreviewProductStateBtn" type="button"><span class="product-state-dot"></span><span>Ürün Durumları</span><strong id="largePreviewProductStateValue">AÇIK</strong></button>
+<button aria-expanded="false" aria-label="Ürün durumları listesini aç" id="largePreviewProductStateMenuBtn" type="button">▾</button>
+<div class="large-preview-product-state-menu" hidden="" id="largePreviewProductStateMenu"></div>
+</div>
+<button class="large-preview-command" id="largePreviewMultiProfileAddBtn" type="button">Çoklu Profil Ekleme</button>
+<button class="large-preview-command" id="largePreviewMultiProfileDeleteBtn" type="button">Çoklu Profil Silme</button>
+<button class="large-preview-command" id="largePreviewMultiProductBtn" type="button">Çoklu Ürün Ekleme</button>
+<button class="large-preview-command" id="largePreviewMultiDeleteBtn" type="button">Çoklu Ürün Silme</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewMultiDimensionBtn" type="button">Çoklu Ölçü Düzenleme</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewEqualizeGapsBtn" type="button">Aralıkları Eşitle</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewPostSettingsBtn" type="button">Dikme Ayarları</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewBulkExtendBtn" type="button">Çoklu Profil Uzat</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewBulkPostProfileBtn" type="button">Dikme Profilini Toplu Değiştir</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewConvertProductBtn" type="button">Ürün Tipini Değiştir</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewFitProductsBtn" type="button">Ürünü Alana Uydur</button>
+<button aria-disabled="true" class="large-preview-command is-disabled" disabled="" id="largePreviewDetailCopyBtn" type="button">Detay Kopyala</button>
+<button class="large-preview-command danger toolbox-wide" id="largePreviewDeleteAllBtn" type="button">Tüm Ürünleri Sil</button>
+<div class="large-preview-section-title toolbox-wide" hidden aria-hidden="true">HIZLI ERİŞİM TESTLERİ</div>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="1" id="largePreviewQuickTest1Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 1</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="2" id="largePreviewQuickTest2Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 2</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="3" id="largePreviewQuickTest3Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 3</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="4" id="largePreviewQuickTest4Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 4</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="5" id="largePreviewQuickTest5Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 5</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="6" id="largePreviewQuickTest6Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 6</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="7" id="largePreviewQuickTest7Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 7</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="8" id="largePreviewQuickTest8Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 8</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="9" id="largePreviewQuickTest9Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 9</button>
+<button class="large-preview-command large-preview-quick-test" data-quick-test="10" id="largePreviewQuickTest10Btn" type="button" hidden aria-hidden="true" tabindex="-1">Test 10</button>
+</div>
+</aside>
+</div>
+</section>
+</main>
+</div>
+</div>
+<aside aria-hidden="true" class="p3dv-functional-store">
+<span id="productSubgroupValue">Tilt</span>
+<button aria-disabled="true" class="is-disabled" disabled="" id="toolbarMeasureBtn" type="button">Ölçü</button><button aria-disabled="true" class="is-disabled" disabled="" id="toolbarLayersBtn" type="button">Katmanlar</button><button aria-disabled="true" class="is-disabled" disabled="" id="toolbarViewBtn" type="button">Görünüm</button>
+<button id="toolbarFullscreenBtn" type="button">Tam Ekran</button>
+<input id="toolboxIntermediateDimensionsInput" type="checkbox"/><input checked="" id="toolboxMainDimensionsInput" type="checkbox"/>
+<button id="toolboxResetCameraBtn" type="button">Kamerayı Sıfırla</button><button id="replayAnimationBtn" type="button">Ürünler Açık</button>
+<button id="exportProductListPdfBtn" type="button">Ürün Listesi PDF</button><button id="mobileArBtn" type="button">Gerçek Alanda Gör</button>
+<div id="mobileArStatus"></div><input checked="" id="toolboxPanelMasterInput" type="checkbox"/><span id="toolboxProductOpenEmpty"></span><div id="toolboxProductOpenList"></div>
+<button id="multiProductBtn" type="button"></button><button id="multiDeleteBtn" type="button"></button><button id="multiProfileAddBtn" type="button"></button><button id="multiProfileDeleteBtn" type="button"></button><button id="fitProductsBtn" type="button"></button><button id="clearProductsBtn" type="button"></button>
+</aside>
+<!-- P3DV historical regression contract; invisible in the V3.50 PLMR Studio shell.
+  Ürün Giriş Bilgileri · Ürün Ailesi · Ürün Grubu · Rolling Roof (Retractable) · Bioclimatic (Tilt) · Eco-Bioclimatic (Tilt) · Pergola · Zip Perde · Modul 1 · Module
+  placeholder="Önerilen maks. 4050 mm" · placeholder="Önerilen 2308–7060 mm"
+  min="2308" · type="text" inputmode="decimal" min="2308"
+  Paneller Açık · Hızlı Testler · Sabit Doğrama · Dikey Bölme Sayısı · Yatay Bölme Sayısı
+  Yatay Bölme Yükseklikleri (mm) · Dikmenin Önü
+  -->
+<dialog class="p3dv-calculator-dialog" id="pergoCalculatorDialog">
+<form class="p3dv-calculator-card" method="dialog">
+<div class="p3dv-calculator-head"><h2>Pülümür Hesaplayıcı</h2><button aria-label="Kapat" value="cancel" type="submit">×</button></div>
+<p>4 satırdan herhangi 3 tanesini doldur. Boş olan değer hesaplanır.</p>
+<div class="p3dv-calculator-grid">
+<label><span>Sistem Açısı (°)</span><input id="pergoCalcAngle" placeholder="Örn. 4.16 veya boş" type="text"/></label>
+<label><span>Açılım *(mm)</span><input id="pergoCalcOpening" placeholder="Örn. 4500;5200 veya boş" type="text"/></label>
+<label><span>Arka Yükseklik *(mm)</span><input id="pergoCalcRear" placeholder="Örn. 3200;3400 veya boş" type="text"/></label>
+<label><span>Ön Yükseklik *(mm)</span><input id="pergoCalcFront" placeholder="Örn. 2600 veya boş" type="text"/></label>
+</div>
+<div aria-live="polite" class="p3dv-calculator-result" id="pergoCalcResult">Sonuç bekleniyor.</div>
+<div class="p3dv-calculator-actions"><button id="pergoCalcComputeBtn" type="button">Hesapla</button><button id="pergoCalcTransferBtn" type="button">Sonucu Hücrelere Aktar</button><button id="pergoCalcClearBtn" type="button">Sıfırla</button></div>
+</form>
+</dialog>
+<div class="dialog-backdrop pergo-back-wall-dialog" hidden="" id="pergoBackWallDialog">
+<form class="dialog-card pergo-back-wall-card" id="pergoBackWallForm">
+<div class="pergo-back-wall-head"><div><h2>Pergola · Arka Duvar</h2><p>PLMR Web DXF arka duvar alanları. Geçerli değişiklikler 2D çizime canlı uygulanır.</p></div><button aria-label="Kapat" class="ghost" id="pergoBackWallCloseBtn" type="button">×</button></div>
+<div class="pergo-back-wall-grid">
+<label><span>Sistem / Poz</span><select id="pergoBackWallSystemInput"></select></label>
+<label><span>Duvar</span><select id="pergoBackWallEnabledInput"><option value="EVET">VAR</option><option value="HAYIR">YOK</option></select></label>
+<label><span>Duvar Yönü</span><select id="pergoBackWallDirectionInput"><option value="STRAIGHT">DÜZ</option><option value="NEGATIVE_X_TO_POSITIVE_X">−X → +X</option><option value="POSITIVE_X_TO_NEGATIVE_X">+X → −X</option></select></label>
+<label><span>X Kaydırma *(mm)</span><input id="pergoBackWallOffsetInput" inputmode="decimal" type="text" value="0"/></label>
+<label><span>Duvar Yüksekliği *(mm)</span><input id="pergoBackWallHeightInput" inputmode="numeric" placeholder="0: Arka H" type="text"/></label>
+<label><span>Yan Görünüş Derinliği *(mm)</span><input id="pergoBackWallDepthInput" inputmode="numeric" type="text" value="600"/></label>
+<label><span>Parça Başlangıç X *(mm)</span><input id="pergoBackWallMinXInput" inputmode="decimal" type="text" value="0"/></label>
+<label><span>Parça Bitiş X *(mm)</span><input id="pergoBackWallMaxXInput" inputmode="decimal" type="text"/></label>
+<label><span>−X Ucu Derinliği *(mm)</span><input id="pergoBackWallStartDepthInput" inputmode="decimal" type="text"/></label>
+<label><span>+X Ucu Derinliği *(mm)</span><input id="pergoBackWallEndDepthInput" inputmode="decimal" type="text"/></label>
+<label><span>Eğim *(°)</span><input id="pergoBackWallAngleInput" inputmode="decimal" type="text" value="0"/></label>
+<label><span>Üst Görünüş X Bölme</span><input id="pergoBackWallTopColumnsInput" inputmode="numeric" type="text" value="1"/></label>
+<label><span>Üst Görünüş Derinlik Bölme</span><input id="pergoBackWallTopRowsInput" inputmode="numeric" type="text" value="1"/></label>
+<label><span>Yan Görünüş Derinlik Bölme</span><input id="pergoBackWallSideColumnsInput" inputmode="numeric" type="text" value="1"/></label>
+<label><span>Yan Görünüş Yükseklik Bölme</span><input id="pergoBackWallSideRowsInput" inputmode="numeric" type="text" value="1"/></label>
+</div>
+<div class="pergo-back-wall-note" id="pergoBackWallNote">+Y/arka kenar PLMR’deki gibi sabittir. 3D’de duvar, ürünün arka referansından negatif Z yönüne yerleşir.</div>
+<div aria-live="polite" class="dim-edit-error" id="pergoBackWallError"></div>
+<div class="dialog-actions"><button class="ghost" id="pergoBackWallDefaultBtn" type="button">Default</button><button class="ghost" id="pergoBackWallCancelBtn" type="button">İptal</button><button id="pergoBackWallApplyBtn" type="submit">Tamam</button></div>
+</form>
+</div>
+<div class="dialog-backdrop" hidden="" id="colorPickerDialog">
+<section aria-labelledby="colorPickerTitle" aria-modal="true" class="dialog-card ral-color-picker-card" role="dialog">
+<div class="ral-color-picker-head">
+<div>
+<span class="ral-color-picker-eyebrow">Renk Kartelası</span>
+<h2 id="colorPickerTitle">Sistem Rengi Seçin</h2>
+<p id="colorPickerDescription">RAL ve Rising ahşap transfer renkleri listelenir.</p>
+</div>
+<button class="ghost" id="colorPickerCloseBtn" type="button">Kapat</button>
+</div>
+<div class="ral-color-picker-tools">
+<div aria-label="RAL katalog filtresi" class="ral-color-tabs" role="tablist">
+<button aria-selected="true" class="is-active" id="colorCatalogRisingBtn" role="tab" type="button">Rising Standart</button>
+<button aria-selected="false" id="colorCatalogAllBtn" role="tab" type="button">Tüm RAL Renkleri</button>
+</div>
+<label class="ral-color-search">
+<span>Renk Kodu Ara</span>
+<input autocomplete="off" id="colorSearchInput" placeholder="Örn. 7016 veya A-4252" type="search"/>
+</label>
+</div>
+<div class="ral-color-result-line"><strong id="colorResultCount">0 renk</strong><span>RAL renklerde yüzey tipi seçilir; ahşap transfer renkleri doğrudan uygulanır.</span></div>
+<div aria-label="RAL renk seçenekleri" class="ral-color-option-grid" id="colorOptionGrid" role="listbox"></div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="colorFinishDialog">
+<section aria-labelledby="colorFinishTitle" aria-modal="true" class="dialog-card finish-picker-card" role="dialog">
+<div class="ral-color-picker-head finish-picker-head">
+<div>
+<span class="ral-color-picker-eyebrow">Yüzey Seçimi</span>
+<h2 id="colorFinishTitle">Yüzey tipini seçin</h2>
+<p id="colorFinishDescription">Seçilen RAL kodu için parlaklık/yüzey tipini belirleyin.</p>
+</div>
+<button class="ghost" id="colorFinishCloseBtn" type="button">Kapat</button>
+</div>
+<div class="finish-picker-summary" id="colorFinishSummary">RAL 9006</div>
+<div aria-label="Yüzey tipi seçenekleri" class="finish-option-grid" id="colorFinishOptions" role="listbox"></div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="appConfirmDialog">
+<section aria-labelledby="appConfirmTitle" aria-modal="true" class="dialog-card app-confirm-card" role="dialog">
+<h2 id="appConfirmTitle">İşlemi Onayla</h2>
+<p class="dialog-copy" id="appConfirmMessage">Bu işlem uygulansın mı?</p>
+<div class="dialog-actions"><button class="ghost" id="appConfirmCancelBtn" type="button">İptal</button><button class="danger-action" id="appConfirmAcceptBtn" type="button">Onayla</button></div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="positionDialog">
+<form class="dialog-card" id="positionForm">
+<h2 id="positionDialogTitle">Bioclimatic (Tilt) Poz1</h2>
+<label>
+        Width (mm)
+        <input id="widthInput" inputmode="decimal" min="1000" required="" type="number"/>
+</label>
+<label>
+        Projection / Depth (mm)
+        <input id="depthInput" inputmode="decimal" min="2308" required="" type="number"/>
+</label>
+<label>
+        Height (mm)
+        <input id="heightInput" inputmode="decimal" min="1600" required="" type="number"/>
+</label>
+<div class="lamella-readout">
+<span>Lamellas</span>
+<strong id="dialogLamellaCount">25</strong>
+</div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelPositionBtn" type="button">Cancel</button>
+<button type="submit">Uygula</button>
+</div>
+</form>
+</div>
+<div class="dialog-backdrop context-backdrop" hidden="" id="zoneActionDialog">
+<section aria-labelledby="zoneActionTitle" aria-modal="true" class="dialog-card zone-action-card" role="dialog">
+<div>
+<h2 id="zoneActionTitle">Cephe alanı</h2>
+<p class="dialog-copy" id="zoneActionInfo">Yapılacak işlemi seçin.</p>
+</div>
+<div class="zone-action-grid">
+<button id="zoneActionAddProfileBtn" type="button">Profil Ekle</button>
+<button class="danger-action" hidden="" id="zoneActionRemoveProfileBtn" type="button">Profil Kaldır</button>
+<button id="zoneActionEditDimensionBtn" type="button">Ölçüyü Düzenle</button>
+<button id="zoneActionPlaceProductBtn" type="button">Ürün Yerleştir</button>
+<button class="danger-action" disabled="" id="zoneActionDeleteProductBtn" type="button">Ürünü Sil</button>
+<button hidden="" id="zoneActionRecalculateBtn" type="button">Yeniden Hesapla</button>
+</div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelZoneActionBtn" type="button">Kapat</button>
+</div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="profileDialog">
+<form class="dialog-card" id="profileForm">
+<div>
+<h2>Profil Ekle</h2>
+<p class="dialog-copy">Dikey profil, seçilen ürünün üst mavi profil yüksekliği kadar kısalır. Yatay profil seçilen bölmenin ortasına yerleşir.</p>
+</div>
+<label>
+        Yerleşim Yönü
+        <select id="profileOrientationInput">
+<option value="vertical">Dikey Profil</option>
+<option value="horizontal">Yatay Profil</option>
+</select>
+</label>
+<label>
+        Profil Tipi
+        <select id="profileTypeInput">
+<option value="100x100">100 × 100 mm</option>
+<option value="CUSTOM">Özel Kesit</option>
+</select>
+</label>
+<div class="two-field-grid" hidden="" id="profileCustomFields">
+<label>
+          Profil Yüz Genişliği (mm)
+          <input id="profileWidthInput" max="300" min="40" required="" step="1" type="number" value="100"/>
+</label>
+<label>
+          Profil Derinliği (mm)
+          <input id="profileDepthInput" max="300" min="30" required="" step="1" type="number" value="100"/>
+</label>
+</div>
+<div aria-live="polite" class="product-validation" id="profileValidation"></div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelProfileBtn" type="button">İptal</button>
+<button type="submit">Ortaya Yerleştir</button>
+</div>
+</form>
+</div>
+<div class="dialog-backdrop" hidden="" id="dividerProfileDialog">
+<section aria-labelledby="dividerProfileTitle" aria-modal="true" class="dialog-card" role="dialog">
+<div>
+<h2 id="dividerProfileTitle">Eklenen Profil</h2>
+<p class="dialog-copy" id="dividerProfileInfo">Profil bilgisi</p>
+</div>
+<div class="dialog-actions split-actions">
+<button class="danger-action" id="deleteDividerProfileBtn" type="button">Profili Sil</button>
+<span class="action-spacer"></span>
+<button class="ghost" id="cancelDividerProfileBtn" type="button">Kapat</button>
+</div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="postActionDialog">
+<section aria-labelledby="postActionTitle" aria-modal="true" class="dialog-card" role="dialog">
+<div>
+<h2 id="postActionTitle">Ana Dikme</h2>
+<p class="dialog-copy" id="postActionInfo">Dikme işlemini seçin.</p>
+</div>
+<div class="zone-action-grid two-actions">
+<button id="postChangeProfileBtn" type="button">Profili Değiştir</button>
+<button id="postRotateProfileBtn" type="button">Profili Döndür</button>
+</div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelPostActionBtn" type="button">Kapat</button>
+</div>
+</section>
+</div>
+<div class="dialog-backdrop" hidden="" id="postProfileDialog">
+<form class="dialog-card" id="postProfileForm">
+<div>
+<h2 id="postProfileTitle">Ana Dikme Profilini Değiştir</h2>
+<p class="dialog-copy">Toplam sistem genişliği, açılımı ve yüksekliği değişmez. Bağlı profiller ve ürün alanları otomatik uyarlanır.</p>
+</div>
+<label>
+        Profil Tipi
+        <select id="postProfileTypeInput">
+<option value="100x220">100 × 220 mm</option>
+<option value="100x100">100 × 100 mm</option>
+<option value="CUSTOM">Özel Kesit</option>
+</select>
+</label>
+<div class="two-field-grid" hidden="" id="postCustomFields">
+<label>
+          X Ölçüsü (mm)
+          <input id="postXInput" max="300" min="40" required="" step="1" type="number"/>
+</label>
+<label>
+          Z Ölçüsü (mm)
+          <input id="postZInput" max="300" min="40" required="" step="1" type="number"/>
+</label>
+</div>
+<div aria-live="polite" class="product-validation" id="postValidation"></div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelPostProfileBtn" type="button">İptal</button>
+<button type="submit">Uygula</button>
+</div>
+</form>
+</div>
+<div class="dialog-backdrop" hidden="" id="zoneDimensionDialog">
+<form class="dialog-card" id="zoneDimensionForm">
+<div>
+<h2 id="zoneDimensionTitle">Alan Ölçüsünü Düzenle</h2>
+<p class="dialog-copy">Bölünmüş alanda genişlik değişikliği en yakın ara profili kaydırır. Bölünmemiş alanda sistem ölçüsü güncellenir.</p>
+</div>
+<label>
+        Net Alan Genişliği (mm)
+        <input id="zoneWidthInput" min="250" required="" step="1" type="number"/>
+</label>
+<label>
+        Net Alan Yüksekliği (mm)
+        <input id="zoneHeightInput" min="400" required="" step="1" type="number"/>
+</label>
+<div aria-live="polite" class="product-validation" id="zoneDimensionValidation"></div>
+<div class="dialog-actions">
+<button class="ghost" id="cancelZoneDimensionBtn" type="button">İptal</button>
+<button type="submit">Uygula</button>
+</div>
+</form>
+</div>
+<div class="dialog-backdrop" hidden="" id="productDialog">
+<form class="dialog-card product-dialog-card" id="productForm">
+<div class="product-dialog-head">
+<div>
+<h2 id="productZoneTitle">Cephe açıklığı</h2>
+<p class="dialog-copy" id="productZoneInfo">Ürün tipini seçin.</p>
+</div>
+<span class="rule-badge" id="productRuleBadge">PLMR seçimleri</span>
+</div>
+<div class="product-type-row">
+<label id="productTypeWrap">
+          Ürün
+          <select id="productTypeInput">
+<option value="sliding">Sürme Sistem</option>
+<option value="folding">Katlanır Cam</option>
+<option value="guillotine">Giyotin Sistem</option>
+<option value="zip">Zip Perde</option>
+<option value="fixed">Sabit Doğrama</option>
+<option value="door">Kapı (Dış Bakış)</option>
+</select>
+</label>
+</div>
+<div class="product-form-grid" id="productFormGrid">
+<label id="productSeriesWrap">
+          Ürün Serisi
+          <select id="productSeriesInput">
+<option value="A SERIES">A Serisi</option>
+<option value="K SERIES">K Serisi</option>
+</select>
+</label>
+<label id="productSubtypeWrap">
+          Tip
+          <select id="productSubtypeInput"></select>
+</label>
+<label hidden="" id="productPlacementWrap">
+          Yerleşim Yeri
+          <select id="productPlacementInput">
+<option value="BETWEEN POSTS">Dikme Arası</option>
+<option value="FRONT OF POSTS">Dikmenin Önü</option>
+</select>
+</label>
+<label hidden="" id="productMechanismWrap">
+          Mekanizma
+          <select id="productMechanismInput"></select>
+</label>
+<label hidden="" id="productSlidingViewWrap">
+          Bakış Yönü
+          <select id="productSlidingViewInput">
+<option selected="" value="OUTSIDE VIEW">Dış Bakış</option>
+<option value="INSIDE VIEW">İç Bakış</option>
+</select>
+<small class="field-hint">Sürme yönleri ve panel hareketleri seçilen bakışa göre yorumlanır.</small>
+</label>
+<label id="productOpeningWrap">
+          Açılım Tipi
+          <select id="productOpeningInput"></select>
+</label>
+<label id="productDirectionWrap">
+<span id="productDirectionLabel">Açılım Yönü</span>
+<select id="productDirectionInput"></select>
+</label>
+<label id="productGlassThicknessWrap">
+          Cam Kalınlığı
+          <select id="productGlassThicknessInput"></select>
+</label>
+<label id="productGlassColorWrap">
+<span id="productGlassColorLabel">Cam Rengi</span>
+<select id="productGlassColorInput">
+<option value="TRANSPARENT">Şeffaf</option>
+<option value="FUME">Füme</option>
+<option value="BRONZE">Bronz</option>
+<option value="LOW-E GLASS">Low-e Cam</option>
+<option value="OTHER">Diğer</option>
+</select>
+</label>
+<div class="door-type-select-wrap fabric-picker-wrap" hidden="" id="productFabricWrap">
+<span class="field-label">Zip Perde Kumaşı</span>
+<input id="productFabricInput" type="hidden" value="7635-52101"/>
+<button aria-expanded="false" aria-haspopup="dialog" class="door-type-trigger" id="productFabricTrigger" type="button">
+<span id="productFabricValue">7635-52101</span>
+<span aria-hidden="true" class="door-type-trigger-icon">⌄</span>
+</button>
+<small class="field-hint">Perde kataloğunu açmak için tıklayın.</small>
+</div>
+<label hidden="" id="productCustomGlassWrap">
+<span id="productCustomGlassLabel">Özel Cam Rengi</span>
+<input autocomplete="off" id="productCustomGlassInput" placeholder="Renk adını yazın" type="text"/>
+</label>
+<label id="productPanelsWrap">
+          Panel Sayısı <span class="manual-chip">Manuel</span>
+<input id="productPanelsInput" inputmode="numeric" max="12" min="2" required="" step="1" type="number"/>
+<small class="field-hint" id="productPanelHint">2–12 panel</small>
+</label>
+<label hidden="" id="productFoldingViewWrap">
+          Bakış Yönü
+          <select id="productFoldingViewInput">
+<option selected="" value="INSIDE VIEW">İç Bakış</option>
+<option value="OUTSIDE VIEW">Dış Bakış</option>
+</select>
+<small class="field-hint">Bakış yönü, ürünü hangi taraftan karşınıza aldığınızı belirler. Sol/sağ seçimi bu bakışa göre; içeri/dışarı seçimi ise her zaman sistemin içine ve dışına göre değerlendirilir.</small>
+</label>
+<label hidden="" id="productFoldingOpenDirectionWrap">
+          Panellerin Açılma Yönü
+          <select id="productFoldingOpenDirectionInput">
+<option selected="" value="INWARD">İçeri</option>
+<option value="OUTWARD">Dışarı</option>
+</select>
+<small class="field-hint">İlk kanadın ve toplanan paket yönünün içeri mi dışarı mı açılacağını belirler.</small>
+</label>
+<label hidden="" id="productFixedVerticalCountWrap">
+          Dikey Bölme Sayısı
+          <input id="productFixedVerticalCountInput" inputmode="numeric" max="20" min="1" step="1" type="number" value="1"/>
+<small class="field-hint">Ölçüye göre otomatik gelir; gerektiğinde manuel değiştirilebilir.</small>
+</label>
+<label hidden="" id="productFixedHorizontalCountWrap">
+          Yatay Bölme Sayısı
+          <input id="productFixedHorizontalCountInput" inputmode="numeric" max="10" min="1" step="1" type="number" value="1"/>
+<small class="field-hint">1 = tek bölme, 2 = arada 1 profil, 3 = arada 2 profil.</small>
+</label>
+<div class="fixed-horizontal-heights-wrap" hidden="" id="productFixedHorizontalHeightsWrap">
+<span class="field-label">Yatay Bölme Yükseklikleri (mm)</span>
+<input autocomplete="off" hidden="" id="productFixedHorizontalHeightsInput" type="text"/>
+<div class="fixed-horizontal-height-rows" id="productFixedHorizontalHeightRows"></div>
+<small class="field-hint">SDY hücreleri toplam ürün yüksekliğini korur. Manuel hücreler sabit kalır; Resetle ile yeniden otomatik dağıtıma katılır.</small>
+</div>
+<div class="door-type-select-wrap" hidden="" id="productDoorTypeWrap">
+<span class="field-label">Kapı Tipi</span>
+<select aria-hidden="true" hidden="" id="productDoorTypeInput" tabindex="-1"></select>
+<button aria-expanded="false" aria-haspopup="dialog" class="door-type-trigger" id="productDoorTypeTrigger" type="button">
+<span id="productDoorTypeValue">Tek Kanat · Hareketli</span>
+<span aria-hidden="true" class="door-type-trigger-icon">⌄</span>
+</button>
+<small class="field-hint">Kapı tipi seçim ekranını açmak için tıklayın.</small>
+</div>
+<label hidden="" id="productDoorHingeWrap">
+          Menteşe Yönü
+          <select id="productDoorHingeInput">
+<option value="LEFT">Sol</option>
+<option value="RIGHT">Sağ</option>
+</select>
+</label>
+<label hidden="" id="productDoorActiveLeafWrap">
+          Aktif Kanat
+          <select id="productDoorActiveLeafInput">
+<option value="RIGHT">Sağ Aktif</option>
+<option value="LEFT">Sol Aktif</option>
+</select>
+</label>
+<label hidden="" id="productDoorOpenDirectionWrap">
+          Açılma Yönü
+          <select id="productDoorOpenDirectionInput">
+<option value="OUTWARD">Dışa</option>
+<option value="INWARD">İçe</option>
+</select>
+</label>
+<label hidden="" id="productDoorHandleTypeWrap">
+          Kapı Kolu
+          <select id="productDoorHandleTypeInput">
+<option value="NORMAL">Normal Kapı Kolu</option>
+<option value="PANIC">Panik Kapı Kolu</option>
+</select>
+<small class="field-hint">Kol ekseni zeminden 900 mm yüksektedir.</small>
+</label>
+<!-- Legacy regression token: Hareketli Kapı Kanadı Yüksekliği -->
+<label hidden="" id="productDoorTopFixedHeightWrap">
+          Kanat Yüksekliği (mm)
+          <input id="productDoorTopFixedHeightInput" inputmode="numeric" min="1200" step="1" type="number" value="2200"/>
+<small class="field-hint">Üst sabit cam yüksekliği toplam kapı yüksekliğinden otomatik hesaplanır ve en az 110 mm olmalıdır.</small>
+</label>
+<div aria-live="polite" class="door-height-summary" hidden="" id="productDoorHeightSummaryWrap">
+<div>
+<span>Üst Sabit Cam Yüksekliği</span>
+<strong id="productDoorFixedHeightValue">—</strong>
+</div>
+<div>
+<span>Kanat Yüksekliği</span>
+<strong id="productDoorMovingHeightValue">2200 mm</strong>
+</div>
+</div>
+<label hidden="" id="productPanelTypeWrap">
+<span id="productPanelTypeLabel">Giyotin Panel Tipi</span>
+<select id="productPanelTypeInput">
+<option value="1+1">1+1</option>
+<option value="1+2">1+2</option>
+</select>
+</label>
+<label hidden="" id="productMotorDirectionWrap">
+          Motor Yönü
+          <select id="productMotorDirectionInput">
+<option value="RIGHT">Sağ</option>
+<option value="LEFT">Sol</option>
+</select>
+</label>
+<span hidden="" id="productViewWrap">
+<input id="productViewInput" type="hidden" value="OUTSIDE VIEW"/>
+</span>
+<label hidden="" id="productMotorTypeWrap">
+          Motor Tipi
+          <select id="productMotorTypeInput">
+<option value="SOMFY RTS">Somfy RTS</option>
+<option value="SOMFY IO">Somfy IO</option>
+<option value="RISING">Rising</option>
+</select>
+</label>
+<label hidden="" id="productRemoteWrap">
+          Kumanda
+          <select id="productRemoteInput">
+<option value="1 CHANNEL">1 Kanal</option>
+<option value="2 CHANNELS">2 Kanal</option>
+<option value="4 CHANNELS">4 Kanal</option>
+<option value="6 CHANNELS">6 Kanal</option>
+<option value="16 CHANNELS">16 Kanal</option>
+<option value="40 CHANNELS">40 Kanal</option>
+</select>
+</label>
+</div>
+<section aria-labelledby="productDoorTypePickerTitle" class="door-type-picker-page" hidden="" id="productDoorTypePicker">
+<div class="door-type-picker-head">
+<div>
+<span class="door-type-picker-eyebrow">Kapı (Dış Bakış)</span>
+<h3 id="productDoorTypePickerTitle">Kapı Tipini Seçin</h3>
+<p>Hareketli kanatlar mavi, sabit alanlar gri olarak gösterilir. Açılım yönü gerçek 3D kapı çiziminde kanat üzerindeki döner okla belirtilir.</p>
+</div>
+<button class="ghost door-type-picker-close" id="productDoorTypePickerClose" type="button">Geri</button>
+</div>
+<div aria-label="Kapı tipi silüet seçimi" class="door-type-card-grid" id="productDoorTypeCards" role="listbox"></div>
+</section>
+<section aria-labelledby="productFabricPickerTitle" class="door-type-picker-page fabric-picker-page" hidden="" id="productFabricPicker">
+<div class="door-type-picker-head">
+<div>
+<span class="door-type-picker-eyebrow">Zip Perde Kumaşı</span>
+<h3 id="productFabricPickerTitle">Perde Kataloğu</h3>
+<p>Gerçek Sun-Store katalog sayfaları. Kumaş koduna doğrudan sayfa üzerindeki ilgili numune alanından tıklayın; seçim 3D perde yüzeyine yansır.</p>
+</div>
+<button class="ghost door-type-picker-close" id="productFabricPickerClose" type="button">Geri</button>
+</div>
+<div aria-label="Zip perde kumaş seçenekleri" class="fabric-page-stack" id="productFabricCards" role="listbox"></div>
+</section>
+<div hidden="" id="cleanableWindowSection">
+<input id="bottomPanelModeInput" type="hidden" value="VASISTAS"/>
+<span hidden="" id="bottomPanelStateWrap">
+<input id="bottomPanelStateInput" type="hidden" value="OPEN"/>
+</span>
+<span hidden="" id="bottomPanelHingeWrap">
+<input id="bottomPanelHingeInput" type="hidden" value="BOTTOM"/>
+</span>
+</div>
+<section class="collecting-display-section" hidden="" id="slidingCollectionSection">
+<div class="section-heading collecting-heading">
+<strong>Sürme · Toplanma Görünümü</strong>
+<span>Kanatları seçilen açılım düzenine göre toplanmış biçimde gösterin.</span>
+</div>
+<div class="product-form-grid compact-grid">
+<label>
+            3D Gösterim
+            <select id="slidingCollectionStateInput">
+<option value="NORMAL">Kapalı / normal görünüm</option>
+<option value="COLLECTED">Toplanmış göster</option>
+</select>
+</label>
+</div>
+</section>
+<section class="collecting-display-section" hidden="" id="foldingCollectionSection">
+<div class="section-heading collecting-heading">
+<strong>Katlanır Cam · Açık/Kapalı Görünüm</strong>
+<span>Kanatları 90° döndürerek seçilen tarafta paketlenmiş biçimde gösterin.</span>
+</div>
+<div class="product-form-grid compact-grid">
+<label>
+            3D Gösterim
+            <select id="foldingCollectionStateInput">
+<option value="NORMAL">Kapalı / normal görünüm</option>
+<option value="COLLECTED">Katlanmış göster</option>
+</select>
+</label>
+</div>
+<div aria-live="polite" class="product-validation folding-rule-note" id="foldingRuleNote"></div>
+</section>
+<section class="collecting-display-section" hidden="" id="collectingDisplaySection">
+<div class="section-heading collecting-heading">
+<strong>Giyotin · Toplanma Görünümü</strong>
+<span><b id="collectingDisplayDirection">Yukarı toplanır</b> panel paketini 3D modelde gösterin.</span>
+</div>
+<div class="product-form-grid compact-grid">
+<label>
+            3D Gösterim
+            <select id="collectingDisplayStateInput">
+<option value="NORMAL">Kapalı / normal görünüm</option>
+<option value="COLLECTED">Toplanmış göster</option>
+</select>
+</label>
+</div>
+</section>
+<div aria-live="polite" class="product-validation" id="productValidation"></div>
+<div class="dialog-actions split-actions">
+<button class="danger-action" hidden="" id="removeProductBtn" type="button">Ürünü Sil</button>
+<span class="action-spacer"></span>
+<button class="ghost" id="cancelProductBtn" type="button">İptal</button>
+<button type="submit">Yerleştir / Güncelle</button>
+</div>
+</form>
+</div>
+<script src="../../core/productPresentation.js?v=10.47-r47"></script>
+<script src="./src/ral-colors.js?v=10.47-r47"></script>
+<script src="./src/zip-fabric-textures.js?v=10.47-r47"></script>
+<script src="./src/p3dv-pdf.js?v=10.47-r47"></script>
+<script src="../../documents/documentWorkspace.js?v=10.47-r47"></script>
+<script src="./src/p3dv-document-workspace.js?v=10.47-r47"></script>
+<script src="./src/p3dv-document-center.js?v=10.47-r47"></script>
+<script src="./products/bcube-freedom/freedom-multi-position.js?v=10.47-r47"></script>
+<script src="../../technical2d/freedom2d-adapter.js?v=10.47-r47"></script>
+<script src="./products/bio-rise/bio-rise-multi-position.js?v=10.47-r47"></script>
+<script src="./products/bcube-galaxy/galaxy-multi-position.js?v=10.47-r47"></script>
+<script src="../../technical2d/galaxy2d-adapter.js?v=10.47-r47"></script>
+<script src="../../technical2d/biorise2d-adapter.js?v=10.47-r47"></script>
+<script src="../../technical2d/technical2d-workspace.js?v=10.47-r47"></script>
+<script src="../../src/modernDxfTemplate.js?v=10.47-r47"></script>
+<script src="../../src/dxfModernEngine.js?v=10.47-r47"></script>
+<script src="../../export/drawingEntityValidator.js?v=10.47-r47"></script>
+<script src="../../export/exportService.js?v=10.47-r47"></script>
+<script src="../../export/vectorPdfEngine.js?v=10.47-r47"></script>
+<script src="../../technical2d/technical2d-export.js?v=10.47-r47"></script>
+<script src="./products/pergo-rise/plmr-runtime/inputLimitPolicy.js?v=10.47-r47"></script>
+<script src="./products/pergo-rise/plmr-runtime/multiPositionRules.js?v=10.47-r47"></script>
+<script src="./products/pergo-rise/plmr-runtime/peri01ExcelBridge.js?v=10.47-r47"></script>
+<script src="../../src/peri01Geometry.js?v=10.47-r47"></script>
+<script src="../../history/transactionCommandEngine.js?v=10.47-r47"></script>
+<script src="../../products/product-registry.js?v=10.47-r47"></script>
+<script src="../../products/p3dv/p3dv-product-adapters.js?v=10.47-r47"></script>
+<script src="../../products/product-adapter-utils.js?v=10.47-r47"></script>
+<script src="../../products/product-adapter-factory.js?v=10.47-r47"></script>
+<script src="../../products/sliding/sliding-adapter.js?v=10.47-r47"></script>
+<script src="../../products/guillotine/guillotine-adapter.js?v=10.47-r47"></script>
+<script src="../../products/zip-screen/zip-screen-adapter.js?v=10.47-r47"></script>
+<script src="../../products/standalone/facade-product-adapters.js?v=10.47-r47"></script>
+<script src="../../technical2d/facade2d-native-reuse.js?v=10.47-r47"></script>
+<script src="./products/pergo-rise/pergo-rise-input-controller.js?v=10.47-r47"></script>
+<script src="./products/pergo-rise/pergo-rise-editing.js?v=10.47-r47"></script>
+<script src="./products/pergo-rise/pergo-rise-product.js?v=10.47-r47"></script>
+<script src="./products/pergo-rise/pergo-rise-derived-geometry.js?v=10.47-r47"></script>
+<script src="./src/app.js?v=10.47-r47"></script>
 
-  <div id="legacyControlStaging" class="legacy-control-staging" hidden aria-hidden="true" style="display:none!important">
-    <div class="selector-grid header-selector-grid">
-      <label class="selector-product">
-        <span id="labelProduct">Ürün</span>
-        <select id="product">
-          <option value="Pergo Rise">Pergola</option>
-          <option value="P3DV_ROLLING_ROOF">Rolling Roof (Retractable)</option>
-          <option selected value="P3DV_BIOCLIMATIC">Bioclimatic (Tilt)</option>
-          <option value="P3DV_ECO_BIOCLIMATIC">Eco-Bioclimatic (Tilt)</option>
-          <option value="SLIDING">Sürme</option>
-          <option value="GUILLOTINE">Giyotin</option>
-          <option value="ZIP_SCREEN">Zip Perde</option>
-          <option value="DOOR">Kapı</option>
-          <option value="FIXED_JOINERY">Sabit Doğrama</option>
-          <option value="FOLDING_GLASS">Katlanır Cam</option>
-        </select>
-      </label>
-      <label class="selector-module">
-        <span id="labelModule">Modül</span>
-        <select id="moduleName">
-          <option selected>Module 1</option>
-        </select>
-      </label>
-      <select id="engine" class="shell-state-control" disabled hidden aria-hidden="true" tabindex="-1" aria-label="Aktif çizim motoru">
-        <option value="2d">Web DXF / 2D</option>
-        <option selected value="3d">Web 3D</option>
-      </select>
-    </div>
-    <div class="top-actions header-account-actions">
-      <button id="installBtn" class="soft-btn install-btn" type="button">Ana Ekrana Ekle</button>
-      <div class="header-user-summary" aria-label="Aktif kullanıcı bilgileri">
-        <span id="cloudCompanyCode" class="header-company-name">Firma</span>
-        <strong id="cloudUserName" class="header-user-name">Kullanıcı</strong>
-        <span id="cloudRoleBadge" class="cloud-role-badge header-role-badge" data-role="designer">Tasarımcı</span>
-      </div>
-      <button id="adminPanelBtn" type="button" class="secondary-btn header-admin-btn" hidden>Yönetim</button>
-      <label class="selector-language lang-picker header-language-control" aria-label="Dil / Language">
-        <span id="langLabel">Dil</span>
-        <select id="languageSelect">
-          <option value="tr">TR</option>
-          <option value="en">EN</option>
-        </select>
-      </label>
-      <button id="helpBtn" class="soft-btn header-help-btn" type="button">Yardım</button>
-      <span class="plmr-release-badge" aria-label="Müşteri sürümü">PLMR FULL</span>
-    </div>
-  </div>
-
-
-  <div id="backendWarningBanner" class="backend-warning-banner" role="status" aria-live="polite" hidden></div>
-
-  <section id="erpShell" class="erp-shell" aria-label="PLMR çalışma alanı" hidden>
-    <aside id="erpSidebar" class="erp-sidebar" aria-label="Ana menü">
-      <div class="erp-sidebar-head">
-        <div class="erp-company-block">
-          <div class="erp-company-logo-wrap"><img id="erpCompanyLogo" src="assets/plmr-logo-header.png" alt="Firma logosu" class="erp-company-logo" /></div>
-          <div id="erpIdentitySlot" class="erp-identity-slot"></div>
-        </div>
-        <button id="erpSidebarToggle" class="erp-sidebar-toggle" type="button" aria-label="Menüyü daralt" title="Menüyü daralt">«</button>
-      </div>
-      <div id="erpLanguageSlot" class="erp-language-slot"></div>
-      <nav id="erpSidebarMenu" class="erp-sidebar-menu" aria-label="PLMR modülleri"></nav>
-      <div class="erp-sidebar-version"><span>PLMR</span><strong>V39</strong><small>Makrosky çalışma arayüzü</small></div>
-    </aside>
-
-    <main class="erp-main">
-      <div id="erpTabs" class="erp-tabs" role="tablist" aria-label="Açık çalışma sekmeleri"></div>
-      <div id="erpWorkspace" class="erp-workspace">
-        <section id="erpHomePanel" class="erp-panel-view erp-home-panel" data-erp-panel="home">
-          <article class="erp-hero-card">
-            <div class="erp-hero-copy">
-              <span class="erp-kicker">PLMR</span>
-              <h2>Projenize başlayın</h2>
-              <p>Proje çizimi, teklif, üretim ve cari süreçlerini aynı çalışma alanından yönetin.</p>
-              <div class="erp-hero-actions">
-                <button type="button" class="erp-action erp-action-primary" data-erp-action="project-new">Yeni Proje</button>
-                <button type="button" class="erp-action" data-erp-action="projects">Projelerim</button>
-                <button type="button" class="erp-action" data-erp-action="project-import">Proje Dosyası Aç</button>
-              </div>
-            </div>
-            <div class="erp-hero-visual" aria-hidden="true">
-              <div class="erp-hero-frame"><span></span><i></i><b></b></div>
-            </div>
-          </article>
-
-          <div class="erp-status-grid" aria-label="Modül durumu">
-            <article class="erp-status-card is-live"><span class="erp-status-icon">◇</span><div><small>Proje Çizimi</small><strong>Aktif</strong><em>Mevcut PLMR proje akışı bağlı</em></div></article>
-            <article class="erp-status-card"><span class="erp-status-icon">▤</span><div><small>Teklif</small><strong>Hazırlanıyor</strong><em>Ticari modül henüz bağlı değil</em></div></article>
-            <article class="erp-status-card"><span class="erp-status-icon">⚙</span><div><small>Üretim BOM</small><strong>Hazırlanıyor</strong><em>ERP üretim ekranı henüz bağlı değil</em></div></article>
-            <article class="erp-status-card"><span class="erp-status-icon">◎</span><div><small>Cariler</small><strong>Hazırlanıyor</strong><em>CRM/cari veri katmanı henüz yok</em></div></article>
-          </div>
-
-          <div class="erp-home-grid">
-            <article class="erp-card">
-              <div class="erp-card-head"><div><span class="erp-card-icon">⚡</span><h3>Hızlı İşlemler</h3></div></div>
-              <div class="erp-quick-grid">
-                <button type="button" data-erp-action="project-new"><strong>Yeni Proje</strong><small>Yeni çizim projesi oluştur</small></button>
-                <button type="button" data-erp-action="projects"><strong>Projelerim</strong><small>Kayıtlı projeleri aç</small></button>
-                <button type="button" data-erp-action="project-import"><strong>Proje Dosyası Aç</strong><small>Yerel PLMR proje dosyasını yükle</small></button>
-                <button type="button" data-erp-action="management"><strong>Yönetim</strong><small>Kullanıcı ve menü ayarları</small></button>
-              </div>
-            </article>
-            <article class="erp-card erp-info-card">
-              <div class="erp-card-head"><div><span class="erp-card-icon">i</span><h3>Çalışma Alanı</h3></div></div>
-              <ul>
-                <li>Sol menü istenildiğinde daraltılıp yeniden açılabilir.</li>
-                <li>Açtığınız modüller üstte sekme olarak kalır; sekmeler arasında hızlı geçiş yapılır.</li>
-                <li>Henüz geliştirilmemiş modüller görünür fakat pasiftir.</li>
-                <li>Proje çizimi mevcut PLMR mühendislik motorunu kullanır.</li>
-              </ul>
-            </article>
-          </div>
-        </section>
-
-        <section id="erpManagementPanel" class="erp-panel-view erp-management-panel" data-erp-panel="management" hidden>
-          <div class="erp-page-heading">
-            <div><span class="erp-page-icon">⚙</span><div><h2>Yönetim</h2><p>Kullanıcı yönetimini açın veya sol menü yapısını metin tabanlı hiyerarşiyle düzenleyin.</p></div></div>
-          </div>
-          <div class="erp-management-grid">
-            <article class="erp-card erp-menu-editor-card">
-              <div class="erp-card-head"><div><span class="erp-card-icon">☷</span><h3>Menü ve Sayfa Yapılandırma</h3></div><button id="erpLoadMenuExampleBtn" type="button" class="erp-small-btn">Örnek Yükle</button></div>
-              <p class="erp-help-text">Her satır bir menü öğesidir. Ana öğe için düz metin, alt menü için <code>_</code>, bir alt seviye için <code>__</code> kullanın.</p>
-              <textarea id="erpMenuDefinition" class="erp-menu-definition" spellcheck="false" aria-label="Menü tanımı"></textarea>
-              <div class="erp-editor-actions">
-                <button id="erpApplyMenuBtn" type="button" class="erp-action erp-action-primary">Menüyü Uygula</button>
-                <button id="erpResetMenuBtn" type="button" class="erp-action">Varsayılana Dön</button>
-                <button id="erpOpenAdminBtn" type="button" class="erp-action">Kullanıcı Yönetimini Aç</button>
-              </div>
-              <p id="erpMenuStatus" class="erp-menu-status" role="status" aria-live="polite"></p>
-              <div class="erp-local-note">Bu sürümde özel menü düzeni yalnız bu tarayıcıda saklanır. Şirket genelinde sunucuya yayınlama henüz bağlanmadı.</div>
-            </article>
-            <article class="erp-card erp-menu-preview-card">
-              <div class="erp-card-head"><div><span class="erp-card-icon">◉</span><h3>Canlı Menü Önizleme</h3></div></div>
-              <div id="erpMenuPreview" class="erp-menu-preview"></div>
-            </article>
-          </div>
-        </section>
-
-        <section id="erpDrawingPanel" class="erp-panel-view erp-drawing-panel" data-erp-panel="drawing" hidden>
-          <div id="erpDrawingToolbar" class="erp-drawing-toolbar">
-            <div id="erpDrawingSelectors" class="erp-drawing-selectors"></div>
-            <div id="erpDrawingProjectActions" class="erp-drawing-project-actions"></div>
-          </div>
-          <div id="erpDrawingEmpty" class="erp-empty-state">
-            <span class="erp-empty-icon">◇</span>
-            <h2>Proje Çizimi</h2>
-            <p>Yeni bir proje oluşturun, kayıtlı projenizi açın veya proje dosyası yükleyin.</p>
-            <div class="erp-hero-actions">
-              <button type="button" class="erp-action erp-action-primary" data-erp-action="project-new">Yeni Proje</button>
-              <button type="button" class="erp-action" data-erp-action="projects">Projelerim</button>
-              <button type="button" class="erp-action" data-erp-action="project-import">Proje Dosyası Aç</button>
-            </div>
-          </div>
-          <div id="erpDedicatedProductHost" class="erp-dedicated-product-host" hidden>
-            <iframe id="erpDedicatedProductFrame" class="erp-dedicated-product-frame" title="PLMR ürün çizim motoru" loading="eager"></iframe>
-          </div>
-          <div id="erpLegacyHost" class="erp-legacy-host"></div>
-        </section>
-
-        <section id="erpHelpPanel" class="erp-panel-view erp-help-panel" data-erp-panel="help" hidden>
-          <div class="erp-page-heading"><div><span class="erp-page-icon">?</span><div><h2>Yardım</h2><p>Mevcut PLMR kullanım kılavuzu.</p></div></div></div>
-          <article class="erp-card"><pre id="erpHelpContent" class="erp-help-content"></pre></article>
-        </section>
-
-        <section id="erpProjectsPanel" class="erp-panel-view erp-projects-panel" data-erp-panel="projects" hidden>
-          <div class="erp-page-heading"><div><span class="erp-page-icon">☷</span><div><h2>Projelerim</h2><p>Mevcut PLMR proje yöneticisi bu sekmeyle bağlantılıdır.</p></div></div></div>
-          <article class="erp-card erp-bridge-card">
-            <h3>Proje Listesi</h3>
-            <p>Kayıtlı projelerin mevcut güvenli proje yöneticisini açmak için aşağıdaki düğmeyi kullanın.</p>
-            <button id="erpOpenProjectsDialogBtn" type="button" class="erp-action erp-action-primary">Proje Listesini Aç</button>
-          </article>
-        </section>
-      </div>
-    </main>
-  </section>
-
-
-  <section id="projectStartScreen" class="project-start-screen" aria-label="Proje başlangıcı" hidden>
-    <div class="project-start-card">
-      <div class="project-start-copy">
-        <span class="project-start-kicker">PLMR</span>
-        <h2 id="projectStartTitle">PLMR · Projenize başlayın</h2>
-        <p id="projectStartText">Yeni bir proje oluşturun, kayıtlı çalışmanızı açın veya hızlı çizimle başlayın.</p>
-      </div>
-      <div class="project-start-actions">
-        <button id="startNewProjectBtn" type="button" class="primary-btn" data-project-capability="project_access">Yeni Proje</button>
-        <button id="startQuickDrawingBtn" type="button" class="accent-btn">Hızlı Çizim</button>
-        <button id="startWizardBtn" type="button" class="secondary-btn" data-project-capability="project_access">Akıllı Proje Sihirbazı</button>
-        <button id="startOpenProjectsBtn" type="button" class="secondary-btn" data-project-capability="project_access">Projelerim</button>
-        <button id="startImportProjectBtn" type="button" class="soft-btn" data-project-capability="project_access">Proje Dosyası Aç</button>
-        <button id="startLogoutBtn" type="button" class="soft-btn welcome-logout-btn">Çıkış</button>
-      </div>
-      <div class="plmr-premium-preview">
-        <span>PREMIUM</span>
-        <button type="button" data-premium-preview disabled aria-disabled="true" title="Premium modül · Geliştirme sürüyor">Cari / CRM</button>
-        <button type="button" data-premium-preview disabled aria-disabled="true" title="Premium modül · Geliştirme sürüyor">Teklifler</button>
-        <button type="button" data-premium-preview disabled aria-disabled="true" title="Premium modül · Geliştirme sürüyor">Üretim</button>
-        <button type="button" data-premium-preview disabled aria-disabled="true" title="Premium modül · Geliştirme sürüyor">Sevkiyat</button>
-      </div>
-    </div>
-  </section>
-
-  <div id="studioWorkspaceShell" class="studio-workspace-shell">
-    <nav class="studio-side-rail" aria-label="Proje kontrol merkezi">
-      <div class="studio-control-title"><span>PROJE<br />KONTROL<br />MERKEZİ</span><b aria-hidden="true">⌃</b></div>
-      <section id="cloudProjectBar" class="cloud-project-bar" hidden aria-label="Proje yönetimi">
-        <div class="cloud-project-identity">
-          <div><span>Durum</span><strong id="cloudSaveState" data-state="new">Kaydedilmedi</strong></div>
-        </div>
-        <div class="cloud-project-actions">
-          <button id="projectImportBtn" class="soft-btn project-file-action" data-project-capability="project_access" type="button">Proje Dosyası Aç</button>
-          <input id="projectImportInput" type="file" accept=".plmr,.json,application/json,text/plain" hidden />
-          <button id="newCloudProjectBtn" type="button" class="soft-btn" data-project-capability="project_access">Yeni Proje</button>
-          <button id="saveCloudProjectBtn" type="button" class="primary-btn" data-project-capability="project_access">Kaydet</button>
-          <button id="convertQuickDrawingBtn" type="button" class="accent-btn quick-convert-action" data-project-capability="project_access" hidden>Projeye Dönüştür</button>
-          <button id="newRevisionBtn" type="button" class="accent-btn" data-project-capability="project_access">Yeni Revizyon</button>
-          <button id="openCloudProjectsBtn" type="button" class="secondary-btn" data-project-capability="project_access">Projelerim</button>
-          <button id="revisionHistoryBtn" type="button" class="soft-btn" data-project-capability="project_access">Revizyonlar</button>
-        </div>
-        <div class="cloud-side-footer">
-          <button id="logoutBtn" type="button" class="danger-btn">Çıkış</button>
-        </div>
-      </section>
-    </nav>
-    <div class="studio-main-stack">
-  <main id="plmr2DWorkspace" class="layout">
-    <section class="panel input-panel" aria-label="Parametreler">
-
-      <div class="form-grid">
-        <div class="form-column form-column-primary">
-          <fieldset id="projectInfoFieldset" class="project-info-card">
-            <div class="section-card-legend project-section-legend" role="heading" aria-level="2">
-              <span class="section-title-text" id="legendProject">Proje Bilgileri</span>
-              <button id="editProjectInfoBtn" class="section-header-action" type="button">Düzenle</button>
-            </div>
-            <div id="quickDrawingNotice" class="quick-drawing-notice" hidden>Geçici çizim modu: proje bilgileri çıktılarda boş bırakılır.</div>
-            <div class="project-metadata-row project-code-row">
-              <span class="metadata-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5M10 12h6M10 16h6"/></svg></span>
-              <span class="metadata-label" id="projectCodeLabel">Proje Kodu</span>
-              <strong id="cloudProjectCode" class="metadata-value">Yeni proje</strong>
-            </div>
-            <label class="project-metadata-row">
-              <span class="metadata-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M6 20c.7-4 2.7-6 6-6s5.3 2 6 6"/></svg></span>
-              <span class="metadata-label">Müşteri</span><input id="customer" autocomplete="organization" readonly aria-readonly="true" />
-            </label>
-            <label class="project-metadata-row">
-              <span class="metadata-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3z"/><path d="M3 7V5h7l2 2"/></svg></span>
-              <span class="metadata-label">Proje</span><input id="project" readonly aria-readonly="true" />
-            </label>
-            <div class="project-metadata-row project-revision-row">
-              <span class="metadata-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.6"/><path d="M4 4v4.6h4.6"/></svg></span>
-              <span class="metadata-label" id="projectRevisionLabel">Revizyon</span>
-              <strong id="cloudRevision" class="metadata-value">R01</strong>
-              <input id="version" type="hidden" value="01" readonly aria-readonly="true" />
-            </div>
-            <label class="project-metadata-row">
-              <span class="metadata-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 20c1-4 3.3-6 7-6s6 2 7 6"/><path d="M18 4l2 2"/></svg></span>
-              <span class="metadata-label">Çizen</span><input id="drawnBy" value="AYETULLAH KILINC" readonly aria-readonly="true" />
-            </label>
-            <label class="project-metadata-row">
-              <span class="metadata-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span>
-              <span class="metadata-label">Tarih</span><input id="date" type="date" readonly aria-readonly="true" />
-            </label>
-            <div class="project-card-actions">
-              <button id="calcBtn" class="accent-btn form-action-btn" type="button">Pülümür Hesaplayıcı</button>
-              <button id="resetBtn" class="danger-btn form-action-btn" type="button">Tüm Değerleri Resetle</button>
-            </div>
-          </fieldset>
-
-          <fieldset class="options-fieldset options-card">
-            <div class="section-card-legend options-section-legend" role="heading" aria-level="2">
-              <span class="section-title-text" id="legendOptions">Opsiyonlar</span>
-              <button id="optionsResetBtn" class="section-header-action section-reset-action" type="button">Resetle</button>
-            </div>
-            <label><span>Parapet</span><select id="parapet"><option value="HAYIR">HAYIR</option><option value="EVET">EVET</option></select></label>
-            <label><span id="labelParapetHeight">Parapet H <b>*(mm)</b></span><input id="parapetHeight" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="-" /></label>
-            <label><span>Cam Kaydı</span><select id="glassTrack"><option value="HAYIR">HAYIR</option><option value="EVET">EVET</option></select></label>
-            <input id="glassRayBoundaryMode" type="hidden" value="DARALT" />
-            <label><span>Structure Color</span><input id="structureColor" class="upper-table-field" autocomplete="off" placeholder="-" /></label>
-            <label><span>Fabric</span><input id="fabric" class="upper-table-field" data-excel-combo="fabric" autocomplete="off" placeholder="-" /></label>
-            <label><span id="labelFabricProfiles">Fabric Profiles</span><input id="fabricProfiles" class="upper-table-field" autocomplete="off" placeholder="-" /></label>
-            <label><span>Motor</span><input id="motor" class="upper-table-field" data-excel-combo="motor" autocomplete="off" placeholder="-" /></label>
-            <label><span>Remote</span><input id="remote" class="upper-table-field" data-excel-combo="remote" autocomplete="off" placeholder="-" /></label>
-            <label><span>LED</span><input id="led" class="upper-table-field" autocomplete="off" placeholder="-" /></label>
-            <label><span>Dimmer</span><input id="dimmer" class="upper-table-field" autocomplete="off" placeholder="-" /></label>
-            <label class="span-two extras-field"><span>Extras / Notes</span><textarea id="extras" class="upper-table-field" rows="3" placeholder="-"></textarea></label>
-          </fieldset>
-        </div>
-
-        <div class="form-column form-column-secondary">
-          <fieldset class="system-measures-card">
-            <div class="section-card-legend system-section-legend" role="heading" aria-level="2">
-              <span class="section-title-text" id="legendSystem">Sistem Ölçüleri <b>*(mm)</b></span>
-              <button id="systemResetBtn" class="section-header-action section-reset-action" type="button">Resetle</button>
-            </div>
-            <label><span id="labelSystemCount">Sistem Adedi</span><input id="systemCount" type="text" inputmode="numeric" pattern="[0-9]*" required placeholder="Örn. 1" /></label>
-            <label><span id="labelWidth">Genişlik</span><input id="width" type="text" inputmode="text" placeholder="Örn. 4000 veya 3000;100;2500;NO" /></label>
-            <label><span id="labelOpening">Açılım</span><input id="opening" type="text" inputmode="text" placeholder="Örn. 6000 veya 4500;5200" /></label>
-            <label><span id="labelRearHeight">Arka H</span><input id="rearHeight" type="text" inputmode="text" placeholder="Örn. 3200 veya 3200;3400" /></label>
-            <label><span id="labelFrontHeight">Ön H <em>Oluk Altı</em></span><input id="frontHeight" type="text" inputmode="text" placeholder="Örn. 2600" /></label>
-            <label><span id="labelRayCount">Ray Sayısı <b>Bir Sistem</b></span><input id="rayCount" type="text" inputmode="text" placeholder="Örn. 2 veya 2;3;2" /></label>
-            <label><span id="labelPostCount">Dikme Sayısı <b>Tüm Sistem</b></span><input id="postCount" type="text" inputmode="text" placeholder="Örn. 2 veya boş: otomatik" /></label>
-          </fieldset>
-
-          <fieldset class="extra-options-card">
-            <div class="section-card-legend extra-section-legend" role="heading" aria-level="2">
-              <span class="section-title-text" id="legendExtra">Ek Opsiyonlar</span>
-              <button id="extraOptionsResetBtn" class="section-header-action section-reset-action" type="button">Resetle</button>
-            </div>
-            <label><span>Üçgen Doğrama</span><select id="triangleJoinery"><option value="HAYIR">HAYIR</option><option value="EVET">EVET</option></select></label>
-            <label><span id="labelWaterStandard">Su Çıkışı Standart mı?</span><select id="waterStandard"><option value="EVET">EVET</option><option value="HAYIR">HAYIR</option></select></label>
-            <label id="waterOutletPlacementWrap" hidden><span id="labelWaterOutletPlacement">Fi70 Pipe Konumu</span><select id="waterOutletPlacement"><option value="FRONT">ÖN</option><option value="SIDES">YAN</option><option value="BOTH" selected>ÖN + YAN</option></select></label>
-            <div class="quick-tests">
-              <div id="quickTestsHead" class="quick-tests-head">Hızlı Testler</div>
-              <div id="quickTestsGrid" class="quick-tests-grid" aria-label="Hızlı test butonları"></div>
-            </div>
-          </fieldset>
-        </div>
-      </div>
-
-    </section>
-
-    <aside class="panel preview-panel">
-      <div class="preview-head">
-        <div class="preview-title">
-          <h2 id="previewTitle">Çizim Ön İzleme</h2>
-          <p id="statusText" class="sr-only">Ölçüleri girince önizleme otomatik güncellenir.</p>
-          <div class="preview-toolbar-row">
-            <div class="preview-control-row">
-              <button id="previewBtn" class="soft-btn preview-tool-btn" type="button">Önizlemeyi Yenile</button>
-              <button id="expandPreviewBtn" class="soft-btn preview-tool-btn" type="button">Önizlemeyi Büyüt</button>
-              <div id="historyControlGroup" class="history-control-group" role="group" aria-label="Çizim geçmişi">
-                <span class="history-tool-wrap"><button id="undoPreviewBtn" class="soft-btn history-tool-btn" type="button" disabled><span id="undoPreviewLabel">Geri Al</span><small>Ctrl+Z</small></button></span>
-                <span class="history-tool-wrap"><button id="redoPreviewBtn" class="soft-btn history-tool-btn" type="button" disabled><span id="redoPreviewLabel">İleri Al</span><small>Ctrl+Shift+Z</small></button></span>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="preview-download-actions">
-          <button id="technical2DTo3DBtn" class="soft-btn preview-tool-btn" type="button" hidden title="3D çalışma alanına dön">3D Görünüm</button>
-          <button id="headerCheckDrawingBtn" class="soft-btn preview-tool-btn preview-check-drawing" type="button">Çizimi Kontrol Et</button>
-          <button id="previewProjectExportBtn" class="soft-btn preview-tool-btn preview-project-export" type="button">Proje Dosyası İndir</button>
-          <button id="pdfBtn" class="secondary-btn preview-tool-btn" type="button">PDF İndir</button>
-          <button id="generateBtn" class="primary-btn preview-tool-btn" type="button">DXF İndir</button>
-        </div>
-      </div>
-      <div class="preview-workspace">
-        <div id="preview" class="preview-canvas" role="img" tabindex="-1" aria-label="DXF çizim önizlemesi"></div>
-        <aside id="previewToolbox" class="preview-toolbox" aria-label="Hızlı çizim komutları">
-          <div class="preview-toolbox-grid">
-            <div id="dimensionFilterControl" class="dimension-filter-control">
-              <button id="showAllDims" class="preview-toggle-btn is-off" type="button" aria-pressed="false" aria-haspopup="true" aria-expanded="false"><span class="toggle-dot" aria-hidden="true"></span><span id="showAllDimsLabel">Tüm ölçüleri göster</span><span class="dimension-filter-chevron" aria-hidden="true">▾</span></button>
-              <div id="dimensionFilterMenu" class="dimension-filter-menu" hidden>
-                <div class="dimension-filter-menu-head"><strong id="dimensionFilterTitle">Ölçü Filtresi</strong><button id="dimensionFilterClose" type="button" aria-label="Kapat">×</button></div>
-                <label class="dimension-filter-master-row">
-                  <input id="dimensionFilterMaster" type="checkbox" checked>
-                  <span id="dimensionFilterMasterLabel">Hepsi</span>
-                </label>
-                <div class="dimension-filter-section">
-                  <span id="dimensionFilterAxisTitle">Yön</span>
-                  <label><input type="checkbox" data-dim-filter="horizontal" checked><span id="dimensionFilterHorizontalLabel">Yatay</span></label>
-                  <label><input type="checkbox" data-dim-filter="vertical" checked><span id="dimensionFilterVerticalLabel">Dikey</span></label>
-                </div>
-                <div class="dimension-filter-section">
-                  <span id="dimensionFilterEditTitle">Durum</span>
-                  <label><input type="checkbox" data-dim-filter="editable" checked><span id="dimensionFilterEditableLabel">Düzenlenebilir</span></label>
-                  <label><input type="checkbox" data-dim-filter="readonly" checked><span id="dimensionFilterReadonlyLabel">Bilgi amaçlı</span></label>
-                </div>
-                <div class="dimension-filter-section dimension-filter-position-section">
-                  <span id="dimensionFilterPositionTitle">Poz</span>
-                  <div id="dimensionFilterPositions" class="dimension-filter-positions"></div>
-                </div>
-              </div>
-            </div>
-            <button id="restoreHiddenDimensionsBtn" class="secondary-btn preview-toolbox-btn" type="button" hidden>Gizli Ölçüleri Göster (0)</button>
-            <button id="showMainDims" class="preview-toggle-btn is-on" type="button" aria-pressed="true"><span class="toggle-dot" aria-hidden="true"></span><span id="showMainDimsLabel">Ana ölçüleri göster</span></button>
-            <div class="side-feature-control">
-              <button id="glassTrackQuickBtn" class="boolean-quick-toggle side-feature-main" type="button" data-boolean-field="glassTrack" aria-pressed="false"><span class="boolean-quick-label">Cam Kaydı</span><span class="boolean-quick-state">HAYIR</span></button>
-              <button id="glassTrackSideMenuBtn" class="side-feature-menu-btn" type="button" aria-label="Cam kaydı taraflarını seç" title="Sol / sağ taraf seçimi">▾</button>
-              <div id="glassTrackSideMenu" class="side-feature-menu" hidden>
-                <strong>Cam Kaydı</strong>
-                <label><input type="checkbox" data-side-feature-field="glassTrack" data-side-key="0"><span>Sol</span></label>
-                <label><input type="checkbox" data-side-feature-field="glassTrack" data-side-key="right"><span>Sağ</span></label>
-              </div>
-            </div>
-            <button id="glassRayBoundaryQuickBtn" class="boolean-quick-toggle glass-ray-boundary-quick is-disabled" type="button" aria-pressed="true" aria-disabled="true" disabled><span id="glassRayBoundaryQuickLabel" class="boolean-quick-label">Ray Sınırlarını Daralt</span><span class="boolean-quick-state">EVET</span></button>
-            <div class="side-feature-control">
-              <button id="triangleJoineryQuickBtn" class="boolean-quick-toggle side-feature-main" type="button" data-boolean-field="triangleJoinery" aria-pressed="false"><span class="boolean-quick-label">Üçgen Doğrama</span><span class="boolean-quick-state">HAYIR</span></button>
-              <button id="triangleJoinerySideMenuBtn" class="side-feature-menu-btn" type="button" aria-label="Üçgen doğrama taraflarını seç" title="Sol / sağ taraf seçimi">▾</button>
-              <div id="triangleJoinerySideMenu" class="side-feature-menu" hidden>
-                <strong>Üçgen Doğrama</strong>
-                <label><input type="checkbox" data-side-feature-field="triangleJoinery" data-side-key="0"><span>Sol</span></label>
-                <label><input type="checkbox" data-side-feature-field="triangleJoinery" data-side-key="right"><span>Sağ</span></label>
-              </div>
-            </div>
-            <div class="side-feature-control water-outlet-placement-control">
-              <button id="waterStandardQuickBtn" class="boolean-quick-toggle side-feature-main" type="button" data-boolean-field="waterStandard" aria-pressed="true"><span class="boolean-quick-label">Su Çıkışı Standart mı?</span><span class="boolean-quick-state">EVET</span></button>
-              <button id="waterOutletPlacementMenuBtn" class="side-feature-menu-btn is-disabled" type="button" aria-label="Su çıkışı boru konumunu seç" aria-disabled="true" disabled>▾</button>
-              <div id="waterOutletPlacementMenu" class="side-feature-menu" hidden>
-                <strong id="waterOutletPlacementMenuTitle">Fi70 Pipe Konumu</strong>
-                <label><input type="radio" name="waterOutletPlacementQuick" value="FRONT" data-water-outlet-placement><span id="waterOutletFrontQuickLabel">Ön</span></label>
-                <label><input type="radio" name="waterOutletPlacementQuick" value="SIDES" data-water-outlet-placement><span id="waterOutletSidesQuickLabel">Yan</span></label>
-                <label><input type="radio" name="waterOutletPlacementQuick" value="BOTH" data-water-outlet-placement checked><span id="waterOutletBothQuickLabel">Ön + Yan</span></label>
-              </div>
-            </div>
-            <label id="parapetQuickWrap" class="parapet-quick-input is-empty"><span>Parapet H (mm)</span><input id="parapetQuickInput" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="0"></label>
-            <button id="checkDrawingBtn" class="primary-btn preview-toolbox-btn toolbox-wide-btn" type="button">Çizimi Kontrol Et</button>
-            <button id="multiProductBtn" class="secondary-btn preview-toolbox-btn" type="button">Çoklu Ürün Ekleme</button>
-            <button id="multiDimensionBtn" class="secondary-btn preview-toolbox-btn" type="button">Çoklu Ölçü Düzenleme</button>
-            <button id="equalizeGapsBtn" class="secondary-btn preview-toolbox-btn" type="button">Aralıkları Eşitle</button>
-            <button id="postSettingsBtn" class="secondary-btn preview-toolbox-btn" type="button">Dikme Ayarları</button>
-            <button id="bulkExtendBtn" class="secondary-btn preview-toolbox-btn" type="button">Çoklu Profil Uzat</button>
-            <button id="bulkPostProfileBtn" class="secondary-btn preview-toolbox-btn is-passive-feature" type="button" disabled aria-disabled="true" title="Yakında aktif edilecek">Dikme Profilini Toplu Değiştir</button>
-            <button id="convertProductBtn" class="secondary-btn preview-toolbox-btn" type="button">Ürün Tipini Değiştir</button>
-            <button id="fitProductsBtn" class="secondary-btn preview-toolbox-btn" type="button">Ürünü Alana Uydur</button>
-            <button id="detailCopyBtn" class="secondary-btn preview-toolbox-btn" type="button">Detay Kopyala</button>
-            <button id="multiDeleteBtn" class="secondary-btn preview-toolbox-btn" type="button">Çoklu Ürün Silme</button>
-            <button id="deleteAllProductsBtn" class="danger-btn preview-toolbox-btn toolbox-wide-btn" type="button">Tüm Ürünleri Sil</button>
-          </div>
-        </aside>
-      </div>
-    </aside>
-  </main>
-  <section id="p3dv3DWorkspace" class="p3dv-runtime-workspace" aria-label="P3DV 3D çalışma alanı" hidden>
-    <iframe id="p3dvRuntimeFrame" data-p3dv-embedded-host="true" title="PLMR Web 3D ürün çalışma alanı" src="about:blank" allow="camera; xr-spatial-tracking; fullscreen" allowfullscreen webkitallowfullscreen loading="eager"></iframe>
-  </section>
-    </div>
-  </div>
-
-<dialog id="calculatorDialog" class="modal">
-    <form method="dialog" class="modal-card">
-      <div class="modal-head">
-        <h2 id="calcTitle">Pülümür Hesaplayıcı</h2>
-        <button value="cancel" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <p id="calcSub" class="modal-sub">4 satırdan herhangi 3 tanesini doldur. Boş olan değer hesaplanır.</p>
-      <div id="calcGuide" class="calc-guide" aria-label="Calculator guide"></div>
-      <div class="calc-grid">
-        <label><span>Sistem Açısı (°)</span><input id="calcAngle" type="text" placeholder="Örn. 4.16 veya boş" /></label>
-        <label><span>Açılım *(mm)</span><input id="calcOpening" type="text" placeholder="Örn. 4500;5200 veya boş" /></label>
-        <label><span>Arka Yükseklik *(mm)</span><input id="calcRear" type="text" placeholder="Örn. 3200;3400 veya boş" /></label>
-        <label><span>Ön Yükseklik *(mm)</span><input id="calcFront" type="text" placeholder="Örn. 2600 veya boş" /></label>
-      </div>
-      <div id="calcResult" class="calc-result">Sonuç bekleniyor.</div>
-      <div class="modal-actions">
-        <button id="calcComputeBtn" type="button" class="primary-btn">Hesapla</button>
-        <button id="calcTransferBtn" type="button" class="secondary-btn">Sonucu Hücrelere Aktar</button>
-        <button id="calcClearBtn" type="button" class="soft-btn">Sıfırla</button>
-      </div>
-    </form>
-  </dialog>
-
-
-  <dialog id="helpDialog" class="modal help-modal">
-    <form method="dialog" class="modal-card help-card">
-      <div class="modal-head">
-        <h2 id="helpTitle">Yardım / Kullanım Kılavuzu</h2>
-        <button value="cancel" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <pre id="helpContent" class="help-content">Yükleniyor...</pre>
-      <div class="modal-actions">
-        <button value="cancel" type="submit" class="primary-btn">Kapat</button>
-      </div>
-    </form>
-  </dialog>
-
-
-  <dialog id="projectsDialog" class="modal projects-modal">
-    <div class="modal-card projects-card">
-      <div class="modal-head">
-        <h2>Projelerim</h2>
-        <button id="projectsCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <div class="projects-toolbar">
-        <input id="projectsSearch" type="search" placeholder="Proje kodu, müşteri veya proje adı ara" autocomplete="off" />
-        <button id="projectsRefreshBtn" type="button" class="soft-btn">Yenile</button>
-      </div>
-      <div class="projects-table-wrap">
-        <table class="projects-table">
-          <thead>
-            <tr><th>Proje Kodu</th><th>Müşteri</th><th>Proje</th><th>Revizyon</th><th>Son Kayıt</th><th></th></tr>
-          </thead>
-          <tbody id="projectsTableBody"></tbody>
-        </table>
-        <p id="projectsEmpty" class="projects-empty">Projeler yükleniyor…</p>
-      </div>
-    </div>
-  </dialog>
-
-
-  <dialog id="projectWizardDialog" class="modal project-wizard-modal">
-    <div class="modal-card project-wizard-card">
-      <div class="modal-head"><div><h2>Akıllı Yeni Proje</h2><p id="wizardStepLabel" class="modal-sub">1/4 · Proje</p></div><button id="wizardCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button></div>
-      <section data-wizard-step="0" class="wizard-step"><label>Müşteri<input id="wizardCustomer" maxlength="120"></label><label>Proje adı<input id="wizardProject" maxlength="120"></label></section>
-      <section data-wizard-step="1" class="wizard-step" hidden><label>Ürün<select id="wizardProduct"><option value="PERGO_RISE">Pergola</option><option value="P3DV_ROLLING_ROOF">Rolling Roof (Retractable)</option><option selected value="P3DV_BIOCLIMATIC">Bioclimatic (Tilt)</option><option value="P3DV_ECO_BIOCLIMATIC">Eco-Bioclimatic (Tilt)</option><option value="SLIDING">Sürme</option><option value="GUILLOTINE">Giyotin</option><option value="ZIP_SCREEN">Zip Perde</option></select></label></section>
-      <section data-wizard-step="2" class="wizard-step" hidden><div id="wizardPositions" class="wizard-positions"></div><button id="wizardAddPositionBtn" type="button" class="secondary-btn">Poz Ekle</button></section>
-      <section data-wizard-step="3" class="wizard-step" hidden><pre id="wizardReview" class="wizard-review"></pre></section>
-      <p id="wizardMessage" class="modal-sub wizard-message" role="alert"></p>
-      <div class="modal-actions"><button id="wizardResetBtn" type="button" class="danger-btn">Reset</button><button id="wizardBackBtn" type="button" class="soft-btn">Geri</button><button id="wizardNextBtn" type="button" class="primary-btn">İleri</button><button id="wizardCompleteBtn" type="button" class="primary-btn" hidden>Projeyi Hazırla</button></div>
-    </div>
-  </dialog>
-
-  <dialog id="newProjectDialog" class="modal new-project-modal">
-    <form id="newProjectForm" class="modal-card new-project-card">
-      <div class="modal-head">
-        <h2 id="newProjectTitle">Yeni Proje</h2>
-        <button id="newProjectCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <div class="new-project-body">
-        <div class="new-project-identity">
-          <div><span id="newProjectCodeLabel">Proje Kodu</span><strong id="newProjectCodeValue">-</strong></div>
-          <div><span id="newProjectRevisionLabel">Revizyon No</span><strong id="newProjectRevisionValue">R01</strong></div>
-        </div>
-        <label class="new-project-field"><span id="newProjectCustomerLabel">Müşteri Adı</span><input id="newProjectCustomer" type="text" maxlength="120" autocomplete="organization" required /></label>
-        <label class="new-project-field"><span id="newProjectNameLabel">Proje Adı</span><input id="newProjectName" type="text" maxlength="120" required /></label>
-        <p id="newProjectMessage" class="modal-sub">Müşteri ve proje adı büyük harfli İngilizce karakterlere otomatik dönüştürülür.</p>
-      </div>
-      <div class="modal-actions">
-        <button id="newProjectCancelBtn" type="button" class="soft-btn">İptal</button>
-        <button id="newProjectConfirmBtn" type="submit" class="primary-btn">Tamam</button>
-      </div>
-    </form>
-  </dialog>
-
-
-  <dialog id="newRevisionDialog" class="modal revision-create-modal">
-    <form id="newRevisionForm" class="modal-card revision-create-card">
-      <div class="modal-head">
-        <h2 id="newRevisionTitle">Yeni Revizyon Oluştur</h2>
-        <button id="newRevisionCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <div class="revision-create-body">
-        <div class="revision-step-line">
-          <span id="revisionFromLabel">Mevcut</span>
-          <strong id="revisionFromValue">R01</strong>
-          <span aria-hidden="true">→</span>
-          <span id="revisionToLabel">Yeni</span>
-          <strong id="revisionToValue">R02</strong>
-        </div>
-        <label class="revision-note-field">
-          <span id="revisionNoteLabel">Revizyon notu (isteğe bağlı)</span>
-          <textarea id="revisionChangeNote" rows="3" maxlength="500" placeholder="Örn. Ön yükseklik ve dikme aralıkları güncellendi."></textarea>
-        </label>
-        <p id="newRevisionMessage" class="modal-sub">Mevcut çalışma kaydedilir ve yeni revizyon aynı proje koduyla açılır.</p>
-      </div>
-      <div class="modal-actions">
-        <button id="newRevisionCancelBtn" type="button" class="soft-btn">İptal</button>
-        <button id="newRevisionConfirmBtn" type="submit" class="primary-btn">Revizyonu Oluştur</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="revisionsDialog" class="modal revisions-modal">
-    <div class="modal-card revisions-card">
-      <div class="modal-head">
-        <div>
-          <h2 id="revisionsTitle">Revizyon Geçmişi</h2>
-          <p id="revisionsProjectCode" class="modal-sub project-code-cell">-</p>
-        </div>
-        <button id="revisionsCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <div class="projects-table-wrap revisions-table-wrap">
-        <table class="projects-table revisions-table">
-          <thead>
-            <tr><th id="revisionColRevision">Revizyon</th><th id="revisionColNote">Not</th><th id="revisionColDate">Oluşturma</th><th id="revisionColVersion">Uygulama</th><th></th></tr>
-          </thead>
-          <tbody id="revisionsTableBody"></tbody>
-        </table>
-        <p id="revisionsEmpty" class="projects-empty">Revizyonlar yükleniyor…</p>
-      </div>
-    </div>
-  </dialog>
-
-
-  <dialog id="projectConflictDialog" class="modal project-conflict-modal">
-    <div class="modal-card project-conflict-card">
-      <div class="modal-head">
-        <h2>Proje Kayıt Çakışması</h2>
-      </div>
-      <p id="projectConflictMessage" class="modal-sub">Bu proje başka bir sekmede değiştirildi. Yerel çalışmanız korunuyor.</p>
-      <div class="project-conflict-actions">
-        <button id="projectConflictReloadBtn" type="button" class="soft-btn">Sunucudakini yükle</button>
-        <button id="projectConflictRevisionBtn" type="button" class="primary-btn">Yerel çalışmayı yeni revizyon yap</button>
-        <button id="projectConflictCopyBtn" type="button" class="soft-btn">Yerel çalışmayı kopya olarak kaydet</button>
-        <button id="projectConflictCancelBtn" type="button" class="danger-btn">İptal</button>
-      </div>
-    </div>
-  </dialog>
-
-
-  <dialog id="adminPanelDialog" class="modal admin-panel-modal">
-    <div class="modal-card admin-panel-card">
-      <div class="modal-head admin-panel-head">
-        <div>
-          <h2 id="adminPanelTitle">Yönetici Paneli</h2>
-          <p id="adminPanelSubtitle">Firma, kullanıcı ve lisans yönetimi</p>
-        </div>
-        <button id="adminPanelCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-
-      <div class="admin-tabs" role="tablist">
-        <button id="adminUsersTab" type="button" class="admin-tab is-active">Kullanıcılar</button>
-        <button id="adminOrganizationsTab" type="button" class="admin-tab">Firmalar</button>
-        <button id="adminActivityTab" type="button" class="admin-tab">Kullanım Geçmişi</button>
-        <button id="adminLimitsTab" type="button" class="admin-tab">Uygulama Limitleri</button>
-      </div>
-
-      <section id="adminUsersPane" class="admin-pane">
-        <div id="adminOwnSecurityCard" class="admin-form-card admin-own-security-card" hidden>
-          <div class="admin-form-title">
-            <div><h3 id="adminOwnSecurityTitle">Hesap Güvenliği</h3><p id="adminOwnSecuritySubtitle" class="modal-sub">Sistem Yöneticisi hesabının kullanıcı adı ve oturum güvenliği.</p></div>
-          </div>
-          <div class="admin-own-security-actions">
-            <button id="adminChangeOwnUsernameBtn" type="button" class="soft-btn">Kullanıcı Adımı Değiştir</button>
-            <button id="adminGlobalLogoutBtn" type="button" class="danger-btn">Tüm Cihazlardan Çıkış Yap</button>
-          </div>
-        </div>
-        <div class="admin-section-head">
-          <h3 id="adminUsersTitle">Kullanıcılar</h3>
-        </div>
-
-        <form id="adminInviteForm" class="admin-form-card" autocomplete="off">
-          <div class="admin-form-title">
-            <h3 id="adminInviteTitle">Yeni Kullanıcı Oluştur</h3>
-            <p data-admin-i18n="inviteHelp">Kullanıcı adı ve ilk şifre yönetici tarafından belirlenir.</p>
-          </div>
-          <div class="admin-form-grid">
-            <label id="adminInviteOrgField"><span data-admin-i18n="firm">Firma</span><select id="adminInviteOrg" required></select></label>
-            <label><span data-admin-i18n="fullName">Ad Soyad</span><input id="adminInviteFullName" required autocomplete="name"></label>
-            <label><span data-admin-i18n="username">Kullanıcı Adı</span><input id="adminInviteUsername" required minlength="3" maxlength="32" pattern="[a-z0-9._-]+" autocomplete="off"></label>
-            <label><span data-admin-i18n="password">Şifre</span><input id="adminInvitePassword" type="password" minlength="4" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" required autocomplete="new-password"></label>
-            <label><span data-admin-i18n="passwordAgain">Şifre Tekrar</span><input id="adminInvitePasswordConfirm" type="password" minlength="4" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" required autocomplete="new-password"></label>
-            <label><span data-admin-i18n="role">Rol</span><select id="adminInviteRole"><option value="designer">Tasarımcı</option><option value="company_admin">Firma Yöneticisi</option></select></label>
-          </div>
-          <div class="admin-form-actions"><button id="adminInviteSubmit" type="submit" class="primary-btn">Kullanıcı Oluştur</button></div>
-        </form>
-
-        <div class="admin-table-wrap">
-          <div class="admin-user-list-toolbar">
-            <label id="adminUserFilterOrgField" class="admin-compact-field admin-user-list-firm">
-              <span data-admin-i18n="firm">Firma</span>
-              <select id="adminUserFilterOrg"></select>
-            </label>
-            <label class="admin-compact-field admin-user-search-field">
-              <span data-admin-i18n="search">Ara</span>
-              <input id="adminUserSearch" type="search" placeholder="Firma, ad veya kullanıcı adı">
-            </label>
-            <button id="adminUsersRefresh" type="button" class="soft-btn">Yenile</button>
-          </div>
-          <table class="admin-table">
-            <thead><tr>
-              <th data-admin-i18n="firm">Firma</th><th data-admin-i18n="fullName">Ad Soyad</th><th data-admin-i18n="username">Kullanıcı Adı</th>
-              <th data-admin-i18n="role">Rol</th><th data-admin-i18n="status">Durum</th><th data-admin-i18n="accessMode">Erişim modu</th><th data-admin-i18n="projects">Projeler</th><th data-admin-i18n="actions">İşlemler</th>
-            </tr></thead>
-            <tbody id="adminUsersBody"></tbody>
-          </table>
-          <p id="adminUsersEmpty" class="projects-empty">Yükleniyor…</p>
-        </div>
-      </section>
-
-      <section id="adminOrganizationsPane" class="admin-pane" hidden>
-        <div class="admin-section-head">
-          <h3 id="adminOrganizationsTitle">Firmalar</h3>
-          <button id="adminOrganizationsRefresh" type="button" class="soft-btn">Yenile</button>
-        </div>
-
-        <form id="adminOrganizationCreateForm" class="admin-form-card">
-          <div class="admin-form-title"><h3 data-admin-i18n="createFirm">Yeni Firma Oluştur</h3></div>
-          <div class="admin-form-grid admin-company-grid">
-            <label><span data-admin-i18n="firmName">Firma Adı</span><input id="adminOrganizationName" required></label>
-            <label><span data-admin-i18n="licenseEnd">Lisans Bitişi</span><input id="adminOrganizationLicenseEnd" type="date"></label>
-            <label><span data-admin-i18n="maxUsers">Kullanıcı Limiti</span><input id="adminOrganizationMaxUsers" type="number" min="1" max="9999" value="5" required></label>
-          </div>
-          <div class="admin-form-actions"><button id="adminOrganizationCreateSubmit" type="submit" class="primary-btn">Firma Oluştur</button></div>
-        </form>
-
-        <div class="admin-table-wrap">
-          <table class="admin-table admin-organizations-table">
-            <thead><tr>
-              <th data-admin-i18n="firmName">Firma Adı</th><th data-admin-i18n="licenseEnd">Lisans Bitişi</th>
-              <th data-admin-i18n="maxUsers">Kullanıcı Limiti</th><th data-admin-i18n="status">Durum</th><th data-admin-i18n="projects">Projeler</th><th data-admin-i18n="actions">İşlemler</th>
-            </tr></thead>
-            <tbody id="adminOrganizationsBody"></tbody>
-          </table>
-          <p id="adminOrganizationsEmpty" class="projects-empty">Yükleniyor…</p>
-        </div>
-      </section>
-
-      <section id="adminActivityPane" class="admin-pane" hidden>
-        <div class="admin-section-head">
-          <h3 id="adminActivityTitle">Kullanım Geçmişi</h3>
-          <div class="admin-toolbar admin-activity-toolbar">
-            <label id="adminActivityOrgField" class="admin-compact-field">
-              <span>Firma</span><select id="adminActivityOrg"></select>
-            </label>
-            <label class="admin-compact-field"><span>Başlangıç</span><input id="adminActivityFrom" type="date"></label>
-            <label class="admin-compact-field"><span>Bitiş</span><input id="adminActivityTo" type="date"></label>
-            <button id="adminActivityRefresh" type="button" class="soft-btn">Yenile</button>
-          </div>
-        </div>
-
-        <div class="admin-summary-grid">
-          <article><span id="adminSummaryVisits">0</span><small id="adminSummaryVisitsLabel">Ziyaret</small></article>
-          <article><span id="adminSummaryUsers">0</span><small id="adminSummaryUsersLabel">Aktif kullanıcı</small></article>
-          <article><span id="adminSummaryActions">0</span><small id="adminSummaryActionsLabel">İşlem</small></article>
-          <article><span id="adminSummaryLast">-</span><small id="adminSummaryLastLabel">Son hareket</small></article>
-        </div>
-
-        <div class="admin-history-section">
-          <h4 id="adminVisitsTitle">Ziyaret Saatleri</h4>
-          <div class="admin-table-wrap">
-            <table class="admin-table admin-history-table">
-              <thead><tr><th>Başlangıç</th><th>Son aktif</th><th>Süre</th><th>Firma</th><th>Kullanıcı</th><th>Sayfa</th><th>İşlem</th></tr></thead>
-              <tbody id="adminSessionsBody"></tbody>
-            </table>
-            <p id="adminSessionsEmpty" class="projects-empty">Yükleniyor…</p>
-          </div>
-        </div>
-
-        <div class="admin-history-section">
-          <h4 id="adminActionsTitle">Kullanıcı İşlem Geçmişi</h4>
-          <div class="admin-table-wrap">
-            <table class="admin-table admin-history-table">
-              <thead><tr><th>Tarih / Saat</th><th>Firma</th><th>Kullanıcı</th><th>İşlem</th><th>Proje</th><th>Detay</th></tr></thead>
-              <tbody id="adminActivityBody"></tbody>
-            </table>
-            <p id="adminActivityEmpty" class="projects-empty">Yükleniyor…</p>
-          </div>
-        </div>
-      </section>
-
-
-      <section id="adminLimitsPane" class="admin-pane" hidden>
-        <div class="admin-section-head">
-          <div><h3 id="adminLimitsTitle">Uygulama Limitleri</h3><p id="adminLimitsSubtitle" class="modal-sub">Genel limitleri veya firma istisnalarını merkezi olarak yönetin.</p></div>
-        </div>
-        <form id="adminLimitsForm" class="admin-form-card admin-limits-card">
-          <label class="admin-limit-scope"><span id="adminLimitsScopeLabel">Kapsam</span><select id="adminLimitsScope"><option value="">Genel varsayılanlar</option></select></label>
-          <div id="adminLimitsGrid" class="admin-form-grid admin-limits-grid"></div>
-          <div class="admin-limits-note" id="adminLimitsNote">Girilen değerler mutlak kod tavanını aşamaz. Firma istisnası yoksa genel değer uygulanır.</div>
-          <div class="admin-form-actions">
-            <button id="adminLimitsReset" type="button" class="soft-btn">Varsayılana Sıfırla</button>
-            <button id="adminLimitsSave" type="submit" class="primary-btn">Limitleri Kaydet</button>
-          </div>
-        </form>
-        <div class="admin-history-section admin-limit-audit-section">
-          <h4 id="adminLimitsAuditTitle">Limit Değişiklik Geçmişi</h4>
-          <div class="admin-table-wrap">
-            <table class="admin-table admin-history-table">
-              <thead><tr><th>Tarih / Saat</th><th>Kapsam</th><th>Limit</th><th>Eski</th><th>Yeni</th><th>Değiştiren</th></tr></thead>
-              <tbody id="adminLimitsAuditBody"></tbody>
-            </table>
-            <p id="adminLimitsAuditEmpty" class="projects-empty">Kayıt bulunamadı.</p>
-          </div>
-        </div>
-      </section>
-
-      <p id="adminPanelMessage" class="admin-panel-message" aria-live="polite"></p>
-    </div>
-  </dialog>
-
-  <dialog id="adminDeleteUserDialog" class="modal">
-    <form id="adminDeleteUserForm" class="modal-card admin-delete-card">
-      <div class="modal-head">
-        <div><h2 id="adminDeleteUserTitle">Kullanıcıyı Sil</h2><p id="adminDeleteUserName" class="modal-sub">Kullanıcı</p></div>
-        <button id="adminDeleteUserCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <p id="adminDeleteUserWarning" class="admin-delete-warning">Bu işlem kalıcıdır ve geri alınamaz.</p>
-      <label class="admin-delete-option"><input type="radio" name="adminDeleteMode" value="keep" checked><span><strong>Kullanıcıyı sil, projeleri koru</strong><small>Projeler firma hesabında kalır; kullanıcı bağlantısı kaldırılır.</small></span></label>
-      <label class="admin-delete-option"><input type="radio" name="adminDeleteMode" value="all"><span><strong>Kullanıcıyı ve oluşturduğu projeleri sil</strong><small>Test temizliği için proje ve revizyonlar da kalıcı olarak silinir.</small></span></label>
-      <div id="adminDeleteLastAdminConfirm" class="admin-delete-confirm" hidden>
-        <p id="adminDeleteConfirmPrompt" class="admin-delete-confirm-prompt">Devam etmek için hedef kullanıcı adını eksiksiz yaz.</p>
-        <input id="adminDeleteConfirmUsername" class="admin-delete-confirm-input" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" disabled>
-      </div>
-      <p id="adminDeleteUserMessage" class="admin-delete-message" role="alert" aria-live="assertive"></p>
-      <div class="modal-actions">
-        <button id="adminDeleteUserSubmit" type="submit" class="danger-btn">Kalıcı Olarak Sil</button>
-        <button id="adminDeleteUserCancelBtn" type="button" class="soft-btn">İptal</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="adminOwnUsernameDialog" class="modal admin-security-dialog">
-    <form id="adminOwnUsernameForm" class="modal-card admin-security-card">
-      <div class="modal-head">
-        <div><h2 id="adminOwnUsernameTitle">Kullanıcı Adımı Değiştir</h2><p id="adminOwnUsernameCurrent" class="modal-sub"></p></div>
-        <button id="adminOwnUsernameCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <p id="adminOwnUsernameWarning" class="admin-delete-warning">Bu işlem tüm mevcut oturumları kapatır. Yeni kullanıcı adıyla tekrar giriş yapmanız gerekir.</p>
-      <label><span id="adminOwnUsernameNewLabel">Yeni kullanıcı adı</span><input id="adminOwnUsernameNew" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
-      <label><span id="adminOwnUsernamePinLabel">Mevcut PIN</span><input id="adminOwnUsernamePin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="4" required></label>
-      <label><span id="adminOwnUsernameConfirmLabel">Yeni kullanıcı adını tekrar yaz</span><input id="adminOwnUsernameConfirm" autocapitalize="none" spellcheck="false" required></label>
-      <p id="adminOwnUsernameMessage" class="admin-dialog-message" role="alert" aria-live="assertive"></p>
-      <div class="modal-actions">
-        <button id="adminOwnUsernameCancelBtn" type="button" class="secondary-btn">İptal</button>
-        <button id="adminOwnUsernameSubmitBtn" type="submit" class="danger-btn">Değiştir ve Tüm Oturumları Kapat</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="adminGlobalLogoutDialog" class="modal admin-security-dialog">
-    <form id="adminGlobalLogoutForm" class="modal-card admin-security-card">
-      <div class="modal-head">
-        <div><h2 id="adminGlobalLogoutTitle">Tüm Cihazlardan Çıkış Yap</h2><p id="adminGlobalLogoutSubtitle" class="modal-sub">Bu tarayıcı dahil bütün PLMR oturumları kapatılacaktır.</p></div>
-        <button id="adminGlobalLogoutCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <p id="adminGlobalLogoutWarning" class="admin-delete-warning">Kaydedilmemiş çalışmalar varsa önce kaydedin. İşlemden sonra yeniden giriş gerekir.</p>
-      <label class="admin-delete-option"><input id="adminGlobalLogoutConfirm" type="checkbox"><span><strong id="adminGlobalLogoutConfirmText">Tüm cihazlardaki oturumların kapatılmasını onaylıyorum.</strong></span></label>
-      <p id="adminGlobalLogoutMessage" class="admin-dialog-message" role="alert" aria-live="assertive"></p>
-      <div class="modal-actions">
-        <button id="adminGlobalLogoutCancelBtn" type="button" class="secondary-btn">İptal</button>
-        <button id="adminGlobalLogoutSubmitBtn" type="submit" class="danger-btn">Tüm Cihazlardan Çıkış Yap</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="adminLoginLockDialog" class="modal admin-security-dialog">
-    <form id="adminLoginLockForm" method="dialog" class="modal-card admin-security-card">
-      <div class="modal-head">
-        <div>
-          <h2 id="adminLoginLockTitle">Giriş Kilidi</h2>
-          <p id="adminLoginLockUser"></p>
-        </div>
-        <button id="adminLoginLockCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <div id="adminLoginLockSummary" class="admin-security-summary" aria-live="polite"></div>
-      <div id="adminLoginLockAttempts" class="admin-security-attempts"></div>
-      <p id="adminLoginLockMessage" class="admin-dialog-message" aria-live="polite"></p>
-      <div class="modal-actions">
-        <button id="adminLoginLockCancelBtn" type="button" class="secondary-btn">Kapat</button>
-        <button id="adminLoginLockResetBtn" type="submit" class="danger-btn">Kilidi Sıfırla</button>
-      </div>
-    </form>
-  </dialog>
-
-  <dialog id="adminPasswordDialog" class="modal">
-    <form id="adminPasswordForm" class="modal-card" autocomplete="off">
-      <div class="modal-head">
-        <div>
-          <h2 id="adminPasswordTitle">PIN Belirle</h2>
-          <p id="adminPasswordUser" class="modal-sub">Kullanıcı</p>
-        </div>
-        <button id="adminPasswordCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button>
-      </div>
-      <div class="password-update-fields">
-        <label><span data-admin-i18n="newPassword">Yeni Şifre</span><input id="adminNewPassword" type="password" minlength="4" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="new-password" required /></label>
-        <label><span data-admin-i18n="passwordAgain">Şifre Tekrar</span><input id="adminNewPasswordConfirm" type="password" minlength="4" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" autocomplete="new-password" required /></label>
-      </div>
-      <p id="adminPasswordMessage" class="modal-sub">PIN kodu yalnızca 4 rakamdan oluşmalı.</p>
-      <div class="modal-actions">
-        <button id="adminPasswordSubmit" type="submit" class="primary-btn">Şifreyi Güncelle</button>
-        <button id="adminPasswordCancelBtn" type="button" class="soft-btn">İptal</button>
-      </div>
-    </form>
-  </dialog>
-
-  <script src="core/productPresentation.js?v=10.47-r47"></script>
-  <script src="ui/shellPresentation.js?v=10.47-r47"></script>
-  <script src="core/backendCompatibility.js?v=10.47-r47"></script>
-  <script src="diagnostics/runtimeMonitor.js?v=10.47-r47"></script>
-  <script src="src/appLimits.js?v=10.47-r47"></script>
-  <script src="ui/inputLimitPolicy.js?v=10.47-r47"></script>
-  <script src="core/actions.js?v=10.47-r47"></script>
-  <script src="core/multiPositionRules.js?v=10.47-r47"></script>
-  <script src="core/projectModel.js?v=10.47-r47"></script>
-  <script src="core/topologyReconcile.js?v=10.47-r47"></script>
-  <script src="core/validation.js?v=10.47-r47"></script>
-  <script src="core/reducer.js?v=10.47-r47"></script>
-  <script src="core/productPlacementService.js?v=10.47-r47"></script>
-  <script src="core/projectCommandCatalog.js?v=10.47-r47"></script>
-  <script src="core/projectCommandService.js?v=10.47-r47"></script>
-  <script src="history/historyManager.js?v=10.47-r47"></script>
-  <script src="history/transactionCommandEngine.js?v=10.47-r47"></script>
-  <script src="persistence/revisionCore.js?v=10.47-r47"></script>
-  <script src="persistence/schemaRegistryCenter.js?v=10.47-r47"></script>
-  <script src="src/deploymentProfile.js?v=10.47-r47"></script>
-  <script src="core/accessPolicy.js?v=10.47-r47"></script>
-  <script src="core/productAccessTicket.js?v=10.47-r47"></script>
-  <script src="persistence/schema.js?v=10.47-r47"></script>
-  <script src="render/renderPipeline.js?v=10.47-r47"></script>
-  <script src="blocks/filteredBlocks.js?v=10.47-r47"></script>
-  <script src="src/peri01ExcelBridge.js?v=10.47-r47"></script>
-  <script src="src/peri01Geometry.js?v=10.47-r47"></script>
-  <script src="products/product-registry.js?v=10.47-r47"></script>
-  <script src="core/coordinateTransformService.js?v=10.47-r47"></script>
-  <script src="core/sceneGraph.js?v=10.47-r47"></script>
-  <script src="products/product-adapter-utils.js?v=10.47-r47"></script>
-  <script src="products/product-adapter-factory.js?v=10.47-r47"></script>
-  <script src="products/pergo-rise/pergo-rise-adapter.js?v=10.47-r47"></script>
-  <script src="products/p3dv/p3dv-product-adapters.js?v=10.47-r47"></script>
-  <script src="modules/p3dv/products/bcube-freedom/freedom-multi-position.js?v=10.47-r47"></script>
-  <script src="modules/p3dv/products/bio-rise/bio-rise-multi-position.js?v=10.47-r47"></script>
-  <script src="modules/p3dv/products/bcube-galaxy/galaxy-multi-position.js?v=10.47-r47"></script>
-  <script src="technical2d/freedom2d-adapter.js?v=10.47-r47"></script>
-  <script src="technical2d/galaxy2d-adapter.js?v=10.47-r47"></script>
-  <script src="technical2d/biorise2d-adapter.js?v=10.47-r47"></script>
-  <script src="technical2d/technical2d-workspace.js?v=10.47-r47"></script>
-  <script src="technical2d/technical2d-export.js?v=10.47-r47"></script>
-  <script src="products/bcube-freedom/freedom-adapter.js?v=10.47-r47"></script>
-  <script src="products/sliding/sliding-adapter.js?v=10.47-r47"></script>
-  <script src="products/guillotine/guillotine-adapter.js?v=10.47-r47"></script>
-  <script src="products/zip-screen/zip-screen-adapter.js?v=10.47-r47"></script>
-  <script src="products/standalone/facade-product-adapters.js?v=10.47-r47"></script>
-  <script src="technical2d/facade2d-native-reuse.js?v=10.47-r47"></script>
-  <script src="export/layerNamespaceManager.js?v=10.47-r47"></script>
-  <script src="export/drawingEntityValidator.js?v=10.47-r47"></script>
-  <script src="export/exportService.js?v=10.47-r47"></script>
-  <script src="export/pdfFontData.js?v=10.47-r47"></script>
-  <script src="export/vectorPdfEngine.js?v=10.47-r47"></script>
-<script src="export/printComposer.js?v=10.47-r47"></script>
-  <script src="src/modernDxfTemplate.js?v=10.47-r47"></script>
-  <script src="src/dxfModernEngine.js?v=10.47-r47"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="src/supabaseConfig.js?v=10.47-r47"></script>
-  <script src="src/adminUsersApi.js?v=10.47-r47"></script>
-  <script src="src/activityTracker.js?v=10.47-r47"></script>
-  <script src="src/productRouter.js?v=10.47-r47"></script>
-  <script src="ui/projectWizard.js?v=10.47-r47"></script>
-  <script src="ui/projectWizardController.js?v=10.47-r47"></script>
-  <script src="ui/contextualToolbox.js?v=10.47-r47"></script>
-  <script src="ui/contextualToolboxController.js?v=10.47-r47"></script>
-  <script src="ai/assistantIntentRouter.js?v=10.47-r47"></script>
-  <script src="ai/projectScanner.js?v=10.47-r47"></script>
-  <script src="ai/drawingCopilot.js?v=10.47-r47"></script>
-  <script src="ai/naturalLanguageDraft.js?v=10.47-r47"></script>
-  <script src="ai/geometryValidator.js?v=10.47-r47"></script>
-  <script src="voice/voiceCommandService.js?v=10.47-r47"></script>
-  <script src="voice/voiceFormAssistant.js?v=10.47-r47"></script>
-  <script src="ui/commandPalette.js?v=10.47-r47"></script>
-  <script src="templates/presetLibrary.js?v=10.47-r47"></script>
-  <script src="ui/recoveryCoach.js?v=10.47-r47"></script>
-  <script src="interaction/hitTestEngine.js?v=10.47-r47"></script>
-  <script src="dimensions/parametricDimensionEditor.js?v=10.47-r47"></script>
-  <script src="core/viewSyncService.js?v=10.47-r47"></script>
-  <script src="catalog/componentCatalog.js?v=10.47-r47"></script>
-  <script src="import/cadInteropLab.js?v=10.47-r47"></script>
-  <script src="bridge/p3dvBridge.js?v=10.47-r47"></script>
-  <script src="revision/revisionDiff.js?v=10.47-r47"></script>
-  <script src="review/reviewWorkflow.js?v=10.47-r47"></script>
-  <script src="recovery/offlineRecoveryStore.js?v=10.47-r47"></script>
-  <script src="services/projectRevisionAuditService.js?v=10.47-r47"></script>
-  <script src="security/browserSecurity.js?v=10.47-r47"></script>
-  <script src="ui/accessibilityI18nMobile.js?v=10.47-r47"></script>
-  <script src="geometry/incrementalGeometryEngine.js?v=10.47-r47"></script>
-  <script src="diagnostics/supportBundle.js?v=10.47-r47"></script>
-  <script src="plugins/pluginSandbox.js?v=10.47-r47"></script>
-  <script src="production/bomEngine.js?v=10.47-r47"></script>
-  <script src="commercial/quoteEngine.js?v=10.47-r47"></script>
-  <script src="telemetry/telemetryService.js?v=10.47-r47"></script>
-  <script src="release/releaseOperations.js?v=10.47-r47"></script>
-  <script src="release/finalAudit.js?v=10.47-r47"></script>
-  <script src="src/app.js?v=10.47-r47"></script>
-  <script src="ui/unifiedWorkspace.js?v=10.47-r47"></script>
-  <script src="recovery/recoveryManager.js?v=10.47-r47"></script>
-  <script src="src/cloudProjects.js?v=10.47-r47"></script>
-  <script src="src/adminPanel.js?v=10.47-r47"></script>
-  <script src="ui/erpWorkspace.js?v=10.47-r47"></script>
 </body>
 </html>
