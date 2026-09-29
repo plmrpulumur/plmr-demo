@@ -11,13 +11,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Pülümür Automation Studio" />
   <title>Pülümür Automation Studio</title>
-  <script src="src/buildBootstrap.js?v=10.36-r36"></script>
-  <link rel="manifest" href="manifest.webmanifest?v=10.36-r36" />
+  <script src="src/buildBootstrap.js?v=10.47-r47"></script>
+  <link rel="manifest" href="manifest.webmanifest?v=10.47-r47" />
   <link rel="icon" type="image/png" sizes="64x64" href="assets/icons/favicon-64.png" />
   <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
-  <link rel="stylesheet" href="assets/styles/app.css?v=10.36-r36" />
-  <link rel="preload" href="blocks/filteredBlocks.js?v=10.36-r36" as="script" />
-  <link rel="preload" href="src/peri01Geometry.js?v=10.36-r36" as="script" />
+  <link rel="stylesheet" href="assets/styles/app.css?v=10.47-r47" />
+  <link rel="preload" href="blocks/filteredBlocks.js?v=10.47-r47" as="script" />
+  <link rel="preload" href="src/peri01Geometry.js?v=10.47-r47" as="script" />
 </head>
 <body class="auth-pending v13-8-premium v13-9-premium v13-10-premium v13-11-premium v13-12-premium v13-13-premium v13-14-premium v13-15-premium v13-28-premium v13-29-premium v13-30-premium">
   <section id="authGate" class="auth-gate" aria-label="Kullanıcı girişi">
@@ -44,40 +44,34 @@
     </form>
   </section>
 
-  <header class="app-header">
-    <div class="brand-row">
-      <div class="brand-mark"><img src="assets/plmr-logo-header.png" alt="PLMR" class="brand-logo" /></div>
-      <div>
-        <h1 id="appTitle"><span id="appTitleMain">Pülümür Automation Studio</span><span id="appTitleSub">| Parametrik Çizim ve Proje Otomasyonu | Hazırlayan / Geliştiren : Ayetullah KILINÇ</span></h1>
-      </div>
-    </div>
-      <div class="selector-grid header-selector-grid">
-        <label class="selector-product">
-          <span id="labelProduct">Ürün</span>
-          <select id="product">
-            <option value="Pergo Rise">Pergola</option>
-            <option value="P3DV_ROLLING_ROOF">Rolling Roof (Retractable)</option>
-            <option selected value="P3DV_BIOCLIMATIC">Bioclimatic (Tilt)</option>
-            <option value="P3DV_ECO_BIOCLIMATIC">Eco-Bioclimatic (Tilt)</option>
-            <option value="SLIDING" disabled aria-disabled="true" data-demo-disabled="true">Sürme</option>
-            <option value="GUILLOTINE" disabled aria-disabled="true" data-demo-disabled="true">Giyotin</option>
-            <option value="ZIP_SCREEN" disabled aria-disabled="true" data-demo-disabled="true">Zip Perde</option>
-            <option value="DOOR" disabled aria-disabled="true" data-demo-disabled="true">Kapı</option>
-            <option value="FIXED_JOINERY" disabled aria-disabled="true" data-demo-disabled="true">Sabit Doğrama</option>
-            <option value="FOLDING_GLASS" disabled aria-disabled="true" data-demo-disabled="true">Katlanır Cam</option>
-          </select>
-        </label>
-        <label class="selector-module">
-          <span id="labelModule">Modül</span>
-          <select id="moduleName">
-            <option selected>Module 1</option>
-          </select>
-        </label>
-        <select id="engine" class="shell-state-control" disabled hidden aria-hidden="true" tabindex="-1" aria-label="Aktif çizim motoru">
-          <option value="2d">Web DXF / 2D</option>
-          <option selected value="3d">Web 3D</option>
+  <div id="legacyControlStaging" class="legacy-control-staging" hidden aria-hidden="true" style="display:none!important">
+    <div class="selector-grid header-selector-grid">
+      <label class="selector-product">
+        <span id="labelProduct">Ürün</span>
+        <select id="product">
+          <option value="Pergo Rise">Pergola</option>
+          <option value="P3DV_ROLLING_ROOF">Rolling Roof (Retractable)</option>
+          <option selected value="P3DV_BIOCLIMATIC">Bioclimatic (Tilt)</option>
+          <option value="P3DV_ECO_BIOCLIMATIC">Eco-Bioclimatic (Tilt)</option>
+          <option value="SLIDING">Sürme</option>
+          <option value="GUILLOTINE">Giyotin</option>
+          <option value="ZIP_SCREEN">Zip Perde</option>
+          <option value="DOOR">Kapı</option>
+          <option value="FIXED_JOINERY">Sabit Doğrama</option>
+          <option value="FOLDING_GLASS">Katlanır Cam</option>
         </select>
-      </div>
+      </label>
+      <label class="selector-module">
+        <span id="labelModule">Modül</span>
+        <select id="moduleName">
+          <option selected>Module 1</option>
+        </select>
+      </label>
+      <select id="engine" class="shell-state-control" disabled hidden aria-hidden="true" tabindex="-1" aria-label="Aktif çizim motoru">
+        <option value="2d">Web DXF / 2D</option>
+        <option selected value="3d">Web 3D</option>
+      </select>
+    </div>
     <div class="top-actions header-account-actions">
       <button id="installBtn" class="soft-btn install-btn" type="button">Ana Ekrana Ekle</button>
       <div class="header-user-summary" aria-label="Aktif kullanıcı bilgileri">
@@ -94,26 +88,152 @@
         </select>
       </label>
       <button id="helpBtn" class="soft-btn header-help-btn" type="button">Yardım</button>
-      <span class="plmr-release-badge" aria-label="Demo sürümü">PLMR DEMO</span>
+      <span class="plmr-release-badge" aria-label="Müşteri sürümü">PLMR FULL</span>
     </div>
-  </header>
+  </div>
 
 
   <div id="backendWarningBanner" class="backend-warning-banner" role="status" aria-live="polite" hidden></div>
+
+  <section id="erpShell" class="erp-shell" aria-label="PLMR çalışma alanı" hidden>
+    <aside id="erpSidebar" class="erp-sidebar" aria-label="Ana menü">
+      <div class="erp-sidebar-head">
+        <div class="erp-company-block">
+          <div class="erp-company-logo-wrap"><img id="erpCompanyLogo" src="assets/plmr-logo-header.png" alt="Firma logosu" class="erp-company-logo" /></div>
+          <div id="erpIdentitySlot" class="erp-identity-slot"></div>
+        </div>
+        <button id="erpSidebarToggle" class="erp-sidebar-toggle" type="button" aria-label="Menüyü daralt" title="Menüyü daralt">«</button>
+      </div>
+      <div id="erpLanguageSlot" class="erp-language-slot"></div>
+      <nav id="erpSidebarMenu" class="erp-sidebar-menu" aria-label="PLMR modülleri"></nav>
+      <div class="erp-sidebar-version"><span>PLMR</span><strong>V39</strong><small>Makrosky çalışma arayüzü</small></div>
+    </aside>
+
+    <main class="erp-main">
+      <div id="erpTabs" class="erp-tabs" role="tablist" aria-label="Açık çalışma sekmeleri"></div>
+      <div id="erpWorkspace" class="erp-workspace">
+        <section id="erpHomePanel" class="erp-panel-view erp-home-panel" data-erp-panel="home">
+          <article class="erp-hero-card">
+            <div class="erp-hero-copy">
+              <span class="erp-kicker">PLMR</span>
+              <h2>Projenize başlayın</h2>
+              <p>Proje çizimi, teklif, üretim ve cari süreçlerini aynı çalışma alanından yönetin.</p>
+              <div class="erp-hero-actions">
+                <button type="button" class="erp-action erp-action-primary" data-erp-action="project-new">Yeni Proje</button>
+                <button type="button" class="erp-action" data-erp-action="projects">Projelerim</button>
+                <button type="button" class="erp-action" data-erp-action="project-import">Proje Dosyası Aç</button>
+              </div>
+            </div>
+            <div class="erp-hero-visual" aria-hidden="true">
+              <div class="erp-hero-frame"><span></span><i></i><b></b></div>
+            </div>
+          </article>
+
+          <div class="erp-status-grid" aria-label="Modül durumu">
+            <article class="erp-status-card is-live"><span class="erp-status-icon">◇</span><div><small>Proje Çizimi</small><strong>Aktif</strong><em>Mevcut PLMR proje akışı bağlı</em></div></article>
+            <article class="erp-status-card"><span class="erp-status-icon">▤</span><div><small>Teklif</small><strong>Hazırlanıyor</strong><em>Ticari modül henüz bağlı değil</em></div></article>
+            <article class="erp-status-card"><span class="erp-status-icon">⚙</span><div><small>Üretim BOM</small><strong>Hazırlanıyor</strong><em>ERP üretim ekranı henüz bağlı değil</em></div></article>
+            <article class="erp-status-card"><span class="erp-status-icon">◎</span><div><small>Cariler</small><strong>Hazırlanıyor</strong><em>CRM/cari veri katmanı henüz yok</em></div></article>
+          </div>
+
+          <div class="erp-home-grid">
+            <article class="erp-card">
+              <div class="erp-card-head"><div><span class="erp-card-icon">⚡</span><h3>Hızlı İşlemler</h3></div></div>
+              <div class="erp-quick-grid">
+                <button type="button" data-erp-action="project-new"><strong>Yeni Proje</strong><small>Yeni çizim projesi oluştur</small></button>
+                <button type="button" data-erp-action="projects"><strong>Projelerim</strong><small>Kayıtlı projeleri aç</small></button>
+                <button type="button" data-erp-action="project-import"><strong>Proje Dosyası Aç</strong><small>Yerel PLMR proje dosyasını yükle</small></button>
+                <button type="button" data-erp-action="management"><strong>Yönetim</strong><small>Kullanıcı ve menü ayarları</small></button>
+              </div>
+            </article>
+            <article class="erp-card erp-info-card">
+              <div class="erp-card-head"><div><span class="erp-card-icon">i</span><h3>Çalışma Alanı</h3></div></div>
+              <ul>
+                <li>Sol menü istenildiğinde daraltılıp yeniden açılabilir.</li>
+                <li>Açtığınız modüller üstte sekme olarak kalır; sekmeler arasında hızlı geçiş yapılır.</li>
+                <li>Henüz geliştirilmemiş modüller görünür fakat pasiftir.</li>
+                <li>Proje çizimi mevcut PLMR mühendislik motorunu kullanır.</li>
+              </ul>
+            </article>
+          </div>
+        </section>
+
+        <section id="erpManagementPanel" class="erp-panel-view erp-management-panel" data-erp-panel="management" hidden>
+          <div class="erp-page-heading">
+            <div><span class="erp-page-icon">⚙</span><div><h2>Yönetim</h2><p>Kullanıcı yönetimini açın veya sol menü yapısını metin tabanlı hiyerarşiyle düzenleyin.</p></div></div>
+          </div>
+          <div class="erp-management-grid">
+            <article class="erp-card erp-menu-editor-card">
+              <div class="erp-card-head"><div><span class="erp-card-icon">☷</span><h3>Menü ve Sayfa Yapılandırma</h3></div><button id="erpLoadMenuExampleBtn" type="button" class="erp-small-btn">Örnek Yükle</button></div>
+              <p class="erp-help-text">Her satır bir menü öğesidir. Ana öğe için düz metin, alt menü için <code>_</code>, bir alt seviye için <code>__</code> kullanın.</p>
+              <textarea id="erpMenuDefinition" class="erp-menu-definition" spellcheck="false" aria-label="Menü tanımı"></textarea>
+              <div class="erp-editor-actions">
+                <button id="erpApplyMenuBtn" type="button" class="erp-action erp-action-primary">Menüyü Uygula</button>
+                <button id="erpResetMenuBtn" type="button" class="erp-action">Varsayılana Dön</button>
+                <button id="erpOpenAdminBtn" type="button" class="erp-action">Kullanıcı Yönetimini Aç</button>
+              </div>
+              <p id="erpMenuStatus" class="erp-menu-status" role="status" aria-live="polite"></p>
+              <div class="erp-local-note">Bu sürümde özel menü düzeni yalnız bu tarayıcıda saklanır. Şirket genelinde sunucuya yayınlama henüz bağlanmadı.</div>
+            </article>
+            <article class="erp-card erp-menu-preview-card">
+              <div class="erp-card-head"><div><span class="erp-card-icon">◉</span><h3>Canlı Menü Önizleme</h3></div></div>
+              <div id="erpMenuPreview" class="erp-menu-preview"></div>
+            </article>
+          </div>
+        </section>
+
+        <section id="erpDrawingPanel" class="erp-panel-view erp-drawing-panel" data-erp-panel="drawing" hidden>
+          <div id="erpDrawingToolbar" class="erp-drawing-toolbar">
+            <div id="erpDrawingSelectors" class="erp-drawing-selectors"></div>
+            <div id="erpDrawingProjectActions" class="erp-drawing-project-actions"></div>
+          </div>
+          <div id="erpDrawingEmpty" class="erp-empty-state">
+            <span class="erp-empty-icon">◇</span>
+            <h2>Proje Çizimi</h2>
+            <p>Yeni bir proje oluşturun, kayıtlı projenizi açın veya proje dosyası yükleyin.</p>
+            <div class="erp-hero-actions">
+              <button type="button" class="erp-action erp-action-primary" data-erp-action="project-new">Yeni Proje</button>
+              <button type="button" class="erp-action" data-erp-action="projects">Projelerim</button>
+              <button type="button" class="erp-action" data-erp-action="project-import">Proje Dosyası Aç</button>
+            </div>
+          </div>
+          <div id="erpDedicatedProductHost" class="erp-dedicated-product-host" hidden>
+            <iframe id="erpDedicatedProductFrame" class="erp-dedicated-product-frame" title="PLMR ürün çizim motoru" loading="eager"></iframe>
+          </div>
+          <div id="erpLegacyHost" class="erp-legacy-host"></div>
+        </section>
+
+        <section id="erpHelpPanel" class="erp-panel-view erp-help-panel" data-erp-panel="help" hidden>
+          <div class="erp-page-heading"><div><span class="erp-page-icon">?</span><div><h2>Yardım</h2><p>Mevcut PLMR kullanım kılavuzu.</p></div></div></div>
+          <article class="erp-card"><pre id="erpHelpContent" class="erp-help-content"></pre></article>
+        </section>
+
+        <section id="erpProjectsPanel" class="erp-panel-view erp-projects-panel" data-erp-panel="projects" hidden>
+          <div class="erp-page-heading"><div><span class="erp-page-icon">☷</span><div><h2>Projelerim</h2><p>Mevcut PLMR proje yöneticisi bu sekmeyle bağlantılıdır.</p></div></div></div>
+          <article class="erp-card erp-bridge-card">
+            <h3>Proje Listesi</h3>
+            <p>Kayıtlı projelerin mevcut güvenli proje yöneticisini açmak için aşağıdaki düğmeyi kullanın.</p>
+            <button id="erpOpenProjectsDialogBtn" type="button" class="erp-action erp-action-primary">Proje Listesini Aç</button>
+          </article>
+        </section>
+      </div>
+    </main>
+  </section>
+
 
   <section id="projectStartScreen" class="project-start-screen" aria-label="Proje başlangıcı" hidden>
     <div class="project-start-card">
       <div class="project-start-copy">
         <span class="project-start-kicker">PLMR</span>
-        <h2 id="projectStartTitle">PLMR Demo · Hızlı Çizim ile başlayın</h2>
-        <p id="projectStartText">Hızlı Çizim ile ürünleri yapılandırın ve teknik çıktıları inceleyin. Proje yönetimi tam sürümde kullanılabilir.</p>
+        <h2 id="projectStartTitle">PLMR · Projenize başlayın</h2>
+        <p id="projectStartText">Yeni bir proje oluşturun, kayıtlı çalışmanızı açın veya hızlı çizimle başlayın.</p>
       </div>
       <div class="project-start-actions">
-        <button id="startNewProjectBtn" type="button" class="primary-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Yeni Proje</button>
+        <button id="startNewProjectBtn" type="button" class="primary-btn" data-project-capability="project_access">Yeni Proje</button>
         <button id="startQuickDrawingBtn" type="button" class="accent-btn">Hızlı Çizim</button>
-        <button id="startWizardBtn" type="button" class="secondary-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Akıllı Proje Sihirbazı</button>
-        <button id="startOpenProjectsBtn" type="button" class="secondary-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Projelerim</button>
-        <button id="startImportProjectBtn" type="button" class="soft-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Proje Dosyası Aç</button>
+        <button id="startWizardBtn" type="button" class="secondary-btn" data-project-capability="project_access">Akıllı Proje Sihirbazı</button>
+        <button id="startOpenProjectsBtn" type="button" class="secondary-btn" data-project-capability="project_access">Projelerim</button>
+        <button id="startImportProjectBtn" type="button" class="soft-btn" data-project-capability="project_access">Proje Dosyası Aç</button>
         <button id="startLogoutBtn" type="button" class="soft-btn welcome-logout-btn">Çıkış</button>
       </div>
       <div class="plmr-premium-preview">
@@ -134,14 +254,14 @@
           <div><span>Durum</span><strong id="cloudSaveState" data-state="new">Kaydedilmedi</strong></div>
         </div>
         <div class="cloud-project-actions">
-          <button id="projectImportBtn" class="soft-btn project-file-action demo-disabled-control" data-project-capability="project_access" type="button" disabled aria-disabled="true" title="Demo sürümünde pasif">Proje Dosyası Aç</button>
+          <button id="projectImportBtn" class="soft-btn project-file-action" data-project-capability="project_access" type="button">Proje Dosyası Aç</button>
           <input id="projectImportInput" type="file" accept=".plmr,.json,application/json,text/plain" hidden />
-          <button id="newCloudProjectBtn" type="button" class="soft-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Yeni Proje</button>
-          <button id="saveCloudProjectBtn" type="button" class="primary-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Kaydet</button>
-          <button id="convertQuickDrawingBtn" type="button" class="accent-btn quick-convert-action demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif" hidden>Projeye Dönüştür</button>
-          <button id="newRevisionBtn" type="button" class="accent-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Yeni Revizyon</button>
-          <button id="openCloudProjectsBtn" type="button" class="secondary-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Projelerim</button>
-          <button id="revisionHistoryBtn" type="button" class="soft-btn demo-disabled-control" data-project-capability="project_access" disabled aria-disabled="true" title="Demo sürümünde pasif">Revizyonlar</button>
+          <button id="newCloudProjectBtn" type="button" class="soft-btn" data-project-capability="project_access">Yeni Proje</button>
+          <button id="saveCloudProjectBtn" type="button" class="primary-btn" data-project-capability="project_access">Kaydet</button>
+          <button id="convertQuickDrawingBtn" type="button" class="accent-btn quick-convert-action" data-project-capability="project_access" hidden>Projeye Dönüştür</button>
+          <button id="newRevisionBtn" type="button" class="accent-btn" data-project-capability="project_access">Yeni Revizyon</button>
+          <button id="openCloudProjectsBtn" type="button" class="secondary-btn" data-project-capability="project_access">Projelerim</button>
+          <button id="revisionHistoryBtn" type="button" class="soft-btn" data-project-capability="project_access">Revizyonlar</button>
         </div>
         <div class="cloud-side-footer">
           <button id="logoutBtn" type="button" class="danger-btn">Çıkış</button>
@@ -780,104 +900,106 @@
     </form>
   </dialog>
 
-  <script src="core/productPresentation.js?v=10.36-r36"></script>
-  <script src="ui/shellPresentation.js?v=10.36-r36"></script>
-  <script src="core/backendCompatibility.js?v=10.36-r36"></script>
-  <script src="diagnostics/runtimeMonitor.js?v=10.36-r36"></script>
-  <script src="src/appLimits.js?v=10.36-r36"></script>
-  <script src="ui/inputLimitPolicy.js?v=10.36-r36"></script>
-  <script src="core/actions.js?v=10.36-r36"></script>
-  <script src="core/multiPositionRules.js?v=10.36-r36"></script>
-  <script src="core/projectModel.js?v=10.36-r36"></script>
-  <script src="core/topologyReconcile.js?v=10.36-r36"></script>
-  <script src="core/validation.js?v=10.36-r36"></script>
-  <script src="core/reducer.js?v=10.36-r36"></script>
-  <script src="core/productPlacementService.js?v=10.36-r36"></script>
-  <script src="core/projectCommandCatalog.js?v=10.36-r36"></script>
-  <script src="core/projectCommandService.js?v=10.36-r36"></script>
-  <script src="history/historyManager.js?v=10.36-r36"></script>
-  <script src="history/transactionCommandEngine.js?v=10.36-r36"></script>
-  <script src="persistence/revisionCore.js?v=10.36-r36"></script>
-  <script src="persistence/schemaRegistryCenter.js?v=10.36-r36"></script>
-  <script src="core/accessPolicy.js?v=10.36-r36"></script>
-  <script src="core/productAccessTicket.js?v=10.36-r36"></script>
-  <script src="persistence/schema.js?v=10.36-r36"></script>
-  <script src="render/renderPipeline.js?v=10.36-r36"></script>
-  <script src="blocks/filteredBlocks.js?v=10.36-r36"></script>
-  <script src="src/peri01ExcelBridge.js?v=10.36-r36"></script>
-  <script src="src/peri01Geometry.js?v=10.36-r36"></script>
-  <script src="products/product-registry.js?v=10.36-r36"></script>
-  <script src="core/coordinateTransformService.js?v=10.36-r36"></script>
-  <script src="core/sceneGraph.js?v=10.36-r36"></script>
-  <script src="products/product-adapter-utils.js?v=10.36-r36"></script>
-  <script src="products/product-adapter-factory.js?v=10.36-r36"></script>
-  <script src="products/pergo-rise/pergo-rise-adapter.js?v=10.36-r36"></script>
-  <script src="products/p3dv/p3dv-product-adapters.js?v=10.36-r36"></script>
-  <script src="modules/p3dv/products/bcube-freedom/freedom-multi-position.js?v=10.36-r36"></script>
-  <script src="modules/p3dv/products/bio-rise/bio-rise-multi-position.js?v=10.36-r36"></script>
-  <script src="modules/p3dv/products/bcube-galaxy/galaxy-multi-position.js?v=10.36-r36"></script>
-  <script src="technical2d/freedom2d-adapter.js?v=10.36-r36"></script>
-  <script src="technical2d/galaxy2d-adapter.js?v=10.36-r36"></script>
-  <script src="technical2d/biorise2d-adapter.js?v=10.36-r36"></script>
-  <script src="technical2d/technical2d-workspace.js?v=10.36-r36"></script>
-  <script src="technical2d/technical2d-export.js?v=10.36-r36"></script>
-  <script src="products/bcube-freedom/freedom-adapter.js?v=10.36-r36"></script>
-  <script src="products/sliding/sliding-adapter.js?v=10.36-r36"></script>
-  <script src="products/guillotine/guillotine-adapter.js?v=10.36-r36"></script>
-  <script src="products/zip-screen/zip-screen-adapter.js?v=10.36-r36"></script>
-  <script src="products/standalone/facade-product-adapters.js?v=10.36-r36"></script>
-  <script src="technical2d/facade2d-native-reuse.js?v=10.36-r36"></script>
-  <script src="export/layerNamespaceManager.js?v=10.36-r36"></script>
-  <script src="export/drawingEntityValidator.js?v=10.36-r36"></script>
-  <script src="export/exportService.js?v=10.36-r36"></script>
-  <script src="export/pdfFontData.js?v=10.36-r36"></script>
-  <script src="export/vectorPdfEngine.js?v=10.36-r36"></script>
-<script src="export/printComposer.js?v=10.36-r36"></script>
-  <script src="src/modernDxfTemplate.js?v=10.36-r36"></script>
-  <script src="src/dxfModernEngine.js?v=10.36-r36"></script>
+  <script src="core/productPresentation.js?v=10.47-r47"></script>
+  <script src="ui/shellPresentation.js?v=10.47-r47"></script>
+  <script src="core/backendCompatibility.js?v=10.47-r47"></script>
+  <script src="diagnostics/runtimeMonitor.js?v=10.47-r47"></script>
+  <script src="src/appLimits.js?v=10.47-r47"></script>
+  <script src="ui/inputLimitPolicy.js?v=10.47-r47"></script>
+  <script src="core/actions.js?v=10.47-r47"></script>
+  <script src="core/multiPositionRules.js?v=10.47-r47"></script>
+  <script src="core/projectModel.js?v=10.47-r47"></script>
+  <script src="core/topologyReconcile.js?v=10.47-r47"></script>
+  <script src="core/validation.js?v=10.47-r47"></script>
+  <script src="core/reducer.js?v=10.47-r47"></script>
+  <script src="core/productPlacementService.js?v=10.47-r47"></script>
+  <script src="core/projectCommandCatalog.js?v=10.47-r47"></script>
+  <script src="core/projectCommandService.js?v=10.47-r47"></script>
+  <script src="history/historyManager.js?v=10.47-r47"></script>
+  <script src="history/transactionCommandEngine.js?v=10.47-r47"></script>
+  <script src="persistence/revisionCore.js?v=10.47-r47"></script>
+  <script src="persistence/schemaRegistryCenter.js?v=10.47-r47"></script>
+  <script src="src/deploymentProfile.js?v=10.47-r47"></script>
+  <script src="core/accessPolicy.js?v=10.47-r47"></script>
+  <script src="core/productAccessTicket.js?v=10.47-r47"></script>
+  <script src="persistence/schema.js?v=10.47-r47"></script>
+  <script src="render/renderPipeline.js?v=10.47-r47"></script>
+  <script src="blocks/filteredBlocks.js?v=10.47-r47"></script>
+  <script src="src/peri01ExcelBridge.js?v=10.47-r47"></script>
+  <script src="src/peri01Geometry.js?v=10.47-r47"></script>
+  <script src="products/product-registry.js?v=10.47-r47"></script>
+  <script src="core/coordinateTransformService.js?v=10.47-r47"></script>
+  <script src="core/sceneGraph.js?v=10.47-r47"></script>
+  <script src="products/product-adapter-utils.js?v=10.47-r47"></script>
+  <script src="products/product-adapter-factory.js?v=10.47-r47"></script>
+  <script src="products/pergo-rise/pergo-rise-adapter.js?v=10.47-r47"></script>
+  <script src="products/p3dv/p3dv-product-adapters.js?v=10.47-r47"></script>
+  <script src="modules/p3dv/products/bcube-freedom/freedom-multi-position.js?v=10.47-r47"></script>
+  <script src="modules/p3dv/products/bio-rise/bio-rise-multi-position.js?v=10.47-r47"></script>
+  <script src="modules/p3dv/products/bcube-galaxy/galaxy-multi-position.js?v=10.47-r47"></script>
+  <script src="technical2d/freedom2d-adapter.js?v=10.47-r47"></script>
+  <script src="technical2d/galaxy2d-adapter.js?v=10.47-r47"></script>
+  <script src="technical2d/biorise2d-adapter.js?v=10.47-r47"></script>
+  <script src="technical2d/technical2d-workspace.js?v=10.47-r47"></script>
+  <script src="technical2d/technical2d-export.js?v=10.47-r47"></script>
+  <script src="products/bcube-freedom/freedom-adapter.js?v=10.47-r47"></script>
+  <script src="products/sliding/sliding-adapter.js?v=10.47-r47"></script>
+  <script src="products/guillotine/guillotine-adapter.js?v=10.47-r47"></script>
+  <script src="products/zip-screen/zip-screen-adapter.js?v=10.47-r47"></script>
+  <script src="products/standalone/facade-product-adapters.js?v=10.47-r47"></script>
+  <script src="technical2d/facade2d-native-reuse.js?v=10.47-r47"></script>
+  <script src="export/layerNamespaceManager.js?v=10.47-r47"></script>
+  <script src="export/drawingEntityValidator.js?v=10.47-r47"></script>
+  <script src="export/exportService.js?v=10.47-r47"></script>
+  <script src="export/pdfFontData.js?v=10.47-r47"></script>
+  <script src="export/vectorPdfEngine.js?v=10.47-r47"></script>
+<script src="export/printComposer.js?v=10.47-r47"></script>
+  <script src="src/modernDxfTemplate.js?v=10.47-r47"></script>
+  <script src="src/dxfModernEngine.js?v=10.47-r47"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.2" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="src/supabaseConfig.js?v=10.36-r36"></script>
-  <script src="src/adminUsersApi.js?v=10.36-r36"></script>
-  <script src="src/activityTracker.js?v=10.36-r36"></script>
-  <script src="src/productRouter.js?v=10.36-r36"></script>
-  <script src="ui/projectWizard.js?v=10.36-r36"></script>
-  <script src="ui/projectWizardController.js?v=10.36-r36"></script>
-  <script src="ui/contextualToolbox.js?v=10.36-r36"></script>
-  <script src="ui/contextualToolboxController.js?v=10.36-r36"></script>
-  <script src="ai/assistantIntentRouter.js?v=10.36-r36"></script>
-  <script src="ai/projectScanner.js?v=10.36-r36"></script>
-  <script src="ai/drawingCopilot.js?v=10.36-r36"></script>
-  <script src="ai/naturalLanguageDraft.js?v=10.36-r36"></script>
-  <script src="ai/geometryValidator.js?v=10.36-r36"></script>
-  <script src="voice/voiceCommandService.js?v=10.36-r36"></script>
-  <script src="voice/voiceFormAssistant.js?v=10.36-r36"></script>
-  <script src="ui/commandPalette.js?v=10.36-r36"></script>
-  <script src="templates/presetLibrary.js?v=10.36-r36"></script>
-  <script src="ui/recoveryCoach.js?v=10.36-r36"></script>
-  <script src="interaction/hitTestEngine.js?v=10.36-r36"></script>
-  <script src="dimensions/parametricDimensionEditor.js?v=10.36-r36"></script>
-  <script src="core/viewSyncService.js?v=10.36-r36"></script>
-  <script src="catalog/componentCatalog.js?v=10.36-r36"></script>
-  <script src="import/cadInteropLab.js?v=10.36-r36"></script>
-  <script src="bridge/p3dvBridge.js?v=10.36-r36"></script>
-  <script src="revision/revisionDiff.js?v=10.36-r36"></script>
-  <script src="review/reviewWorkflow.js?v=10.36-r36"></script>
-  <script src="recovery/offlineRecoveryStore.js?v=10.36-r36"></script>
-  <script src="services/projectRevisionAuditService.js?v=10.36-r36"></script>
-  <script src="security/browserSecurity.js?v=10.36-r36"></script>
-  <script src="ui/accessibilityI18nMobile.js?v=10.36-r36"></script>
-  <script src="geometry/incrementalGeometryEngine.js?v=10.36-r36"></script>
-  <script src="diagnostics/supportBundle.js?v=10.36-r36"></script>
-  <script src="plugins/pluginSandbox.js?v=10.36-r36"></script>
-  <script src="production/bomEngine.js?v=10.36-r36"></script>
-  <script src="commercial/quoteEngine.js?v=10.36-r36"></script>
-  <script src="telemetry/telemetryService.js?v=10.36-r36"></script>
-  <script src="release/releaseOperations.js?v=10.36-r36"></script>
-  <script src="release/finalAudit.js?v=10.36-r36"></script>
-  <script src="src/app.js?v=10.36-r36"></script>
-  <script src="ui/unifiedWorkspace.js?v=10.36-r36"></script>
-  <script src="recovery/recoveryManager.js?v=10.36-r36"></script>
-  <script src="src/cloudProjects.js?v=10.36-r36"></script>
-  <script src="src/adminPanel.js?v=10.36-r36"></script>
+  <script src="src/supabaseConfig.js?v=10.47-r47"></script>
+  <script src="src/adminUsersApi.js?v=10.47-r47"></script>
+  <script src="src/activityTracker.js?v=10.47-r47"></script>
+  <script src="src/productRouter.js?v=10.47-r47"></script>
+  <script src="ui/projectWizard.js?v=10.47-r47"></script>
+  <script src="ui/projectWizardController.js?v=10.47-r47"></script>
+  <script src="ui/contextualToolbox.js?v=10.47-r47"></script>
+  <script src="ui/contextualToolboxController.js?v=10.47-r47"></script>
+  <script src="ai/assistantIntentRouter.js?v=10.47-r47"></script>
+  <script src="ai/projectScanner.js?v=10.47-r47"></script>
+  <script src="ai/drawingCopilot.js?v=10.47-r47"></script>
+  <script src="ai/naturalLanguageDraft.js?v=10.47-r47"></script>
+  <script src="ai/geometryValidator.js?v=10.47-r47"></script>
+  <script src="voice/voiceCommandService.js?v=10.47-r47"></script>
+  <script src="voice/voiceFormAssistant.js?v=10.47-r47"></script>
+  <script src="ui/commandPalette.js?v=10.47-r47"></script>
+  <script src="templates/presetLibrary.js?v=10.47-r47"></script>
+  <script src="ui/recoveryCoach.js?v=10.47-r47"></script>
+  <script src="interaction/hitTestEngine.js?v=10.47-r47"></script>
+  <script src="dimensions/parametricDimensionEditor.js?v=10.47-r47"></script>
+  <script src="core/viewSyncService.js?v=10.47-r47"></script>
+  <script src="catalog/componentCatalog.js?v=10.47-r47"></script>
+  <script src="import/cadInteropLab.js?v=10.47-r47"></script>
+  <script src="bridge/p3dvBridge.js?v=10.47-r47"></script>
+  <script src="revision/revisionDiff.js?v=10.47-r47"></script>
+  <script src="review/reviewWorkflow.js?v=10.47-r47"></script>
+  <script src="recovery/offlineRecoveryStore.js?v=10.47-r47"></script>
+  <script src="services/projectRevisionAuditService.js?v=10.47-r47"></script>
+  <script src="security/browserSecurity.js?v=10.47-r47"></script>
+  <script src="ui/accessibilityI18nMobile.js?v=10.47-r47"></script>
+  <script src="geometry/incrementalGeometryEngine.js?v=10.47-r47"></script>
+  <script src="diagnostics/supportBundle.js?v=10.47-r47"></script>
+  <script src="plugins/pluginSandbox.js?v=10.47-r47"></script>
+  <script src="production/bomEngine.js?v=10.47-r47"></script>
+  <script src="commercial/quoteEngine.js?v=10.47-r47"></script>
+  <script src="telemetry/telemetryService.js?v=10.47-r47"></script>
+  <script src="release/releaseOperations.js?v=10.47-r47"></script>
+  <script src="release/finalAudit.js?v=10.47-r47"></script>
+  <script src="src/app.js?v=10.47-r47"></script>
+  <script src="ui/unifiedWorkspace.js?v=10.47-r47"></script>
+  <script src="recovery/recoveryManager.js?v=10.47-r47"></script>
+  <script src="src/cloudProjects.js?v=10.47-r47"></script>
+  <script src="src/adminPanel.js?v=10.47-r47"></script>
+  <script src="ui/erpWorkspace.js?v=10.47-r47"></script>
 </body>
 </html>

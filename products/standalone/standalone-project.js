@@ -22,18 +22,19 @@
       { key: 'panelCount', label: 'Panel sayısı', type: 'number', min: 2, max: 100 }
     ]),
     GUILLOTINE: Object.freeze([
-      { key: 'series', label: 'Seri', type: 'select', values: ['A SERIES', 'K SERIES'] },
-      { key: 'type', label: 'Tip', type: 'select', values: ['STANDARD', 'CLEANABLE', 'UPWARD COLLECTING', 'DOWNWARD COLLECTING'] },
-      { key: 'mechanism', label: 'Mekanizma', type: 'select', values: ['CHAIN', 'BELT'] },
-      { key: 'glassThickness', label: 'Cam kalınlığı', type: 'select', values: ['8 MM', 'INSULATED GLASS'] },
-      { key: 'glassColor', label: 'Cam rengi', type: 'select-custom', values: ['TRANSPARENT', 'GREY', 'BRONZE', 'LOW-E GLASS', 'OTHER'] },
-      { key: 'panelCount', label: 'Panel düzeni', type: 'select', values: ['1+1', '1+2'] },
-      { key: 'motorDirection', label: 'Motor yönü', type: 'select', values: ['RIGHT', 'LEFT'] },
-      { key: 'view', label: 'Görünüş', type: 'select', values: ['INSIDE VIEW', 'OUTSIDE VIEW'] },
-      { key: 'motorType', label: 'Motor', type: 'select', values: ['SOMFY RTS', 'SOMFY IO', 'RISING'] },
-      { key: 'remoteControl', label: 'Kumanda', type: 'select', values: ['1 CHANNEL', '2 CHANNELS', '4 CHANNELS', '6 CHANNELS', '16 CHANNELS', '40 CHANNELS'] },
-      { key: 'bottomPanelState', label: 'Alt panel', type: 'select', values: ['OPEN', 'CLOSED'] },
-      { key: 'collectionState', label: 'Gösterim', type: 'select', values: ['NORMAL', 'COLLECTED'] }
+      { key: 'color', label: 'Renk', type: 'text' },
+      { key: 'glassThickness', label: 'Cam Kalınlığı', type: 'select-custom', values: ['8 MM', 'INSULATED GLASS', 'OTHER'] },
+      { key: 'glassColor', label: 'Cam Rengi', type: 'select-custom', values: ['TRANSPARENT', 'SMOKED', 'BRONZE', 'LOW-E GLASS', 'OTHER'] },
+      { key: 'type', label: 'Tip', type: 'select-custom', values: ['STANDARD', 'CLEANABLE', 'UPWARD COLLECTING', 'OTHER'] },
+      { key: 'mechanism', label: 'Mekanizma', type: 'select-custom', values: ['CHAIN', 'BELT', 'OTHER'] },
+      { key: 'panelCount', label: 'Panel Düzeni', type: 'select-custom', values: ['1+1', '1+2', '1+3', 'OTHER'] },
+      { key: 'motorDirection', label: 'Motor Yönü', type: 'select-custom', values: ['RIGHT', 'LEFT', 'OTHER'] },
+      { key: 'view', label: 'Görünüş', type: 'select-custom', values: ['INSIDE VIEW', 'OUTSIDE VIEW', 'OTHER'] },
+      { key: 'motorType', label: 'Motor', type: 'select-custom', values: ['SOMFY RTS', 'SOMFY IO', 'CUPPON', 'OTHER'] },
+      { key: 'remoteControl', label: 'Kumanda', type: 'select-custom', values: ['1 CHANNEL', '2 CHANNELS', '4 CHANNELS', '6 CHANNELS', '16 CHANNELS', '40 CHANNELS', 'OTHER'] },
+      { key: 'remoteQuantity', label: 'Kumanda Adet', type: 'number', min: 0, max: 999 },
+      { key: 'bottomPanelState', label: 'Alt Panel', type: 'select', values: ['OPEN', 'CLOSED'] },
+      { key: 'displayState', label: 'Gösterim', type: 'select', values: ['OPEN', 'CLOSED'] }
     ]),
     ZIP_SCREEN: Object.freeze([
       { key: 'series', label: 'Seri', type: 'select', values: ['G SERIES', 'P SERIES'] },
@@ -148,11 +149,15 @@
       if (input.panelCountMode === 'AUTO' && context && Number(context.width) > 0) set('panelCount', slidingPanelCount(context.width, input.openingType), 'Panel sayısı otomatik hesaplandı.');
       else input.panelCount = Math.max(2, Math.trunc(Number(input.panelCount) || 2));
     } else if (type === 'GUILLOTINE') {
+      // Standalone has no series selection; presentation always starts closed.
+      input.series = 'A SERIES';
       if (input.series === 'K SERIES' && input.glassThickness === '8 MM') set('glassThickness', 'INSULATED GLASS', 'K SERIES 8 MM camla uyumlu değil.');
       if (input.series === 'K SERIES' && ['UPWARD COLLECTING','DOWNWARD COLLECTING'].includes(input.type)) set('type', 'CLEANABLE', 'K SERIES toplanır tip ile uyumlu değil.');
       if (input.series === 'K SERIES' && input.mechanism === 'CHAIN') set('mechanism', 'BELT', 'K SERIES zincir mekanizma ile uyumlu değil.');
       if (input.glassColor === 'LOW-E GLASS' && input.glassThickness !== 'INSULATED GLASS') set('glassColor', 'TRANSPARENT', 'LOW-E GLASS yalnız ısıcamla kullanılabilir.');
-      input.bottomPanelState = input.bottomPanelState === 'CLOSED' ? 'CLOSED' : 'OPEN';
+      input.bottomPanelState = 'CLOSED';
+      input.displayState = 'CLOSED';
+      input.remoteQuantity = Math.max(0, Math.trunc(Number(input.remoteQuantity) || 0));
       input.collectionState = ['UPWARD COLLECTING','DOWNWARD COLLECTING'].includes(input.type) && input.collectionState === 'COLLECTED' ? 'COLLECTED' : 'NORMAL';
     } else if (type === 'ZIP_SCREEN') {
       const allowedTypes = input.series === 'P SERIES' ? ['115X115 BOX', '130X130 BOX'] : ['100X100 BOX', '110X110 BOX', 'HERCULE'];
@@ -239,11 +244,11 @@
       schema: SCHEMA,
       schemaVersion: 2,
       projectInfo: {
-        customerName: '', projectName: 'Bağımsız Ürün Projesi', projectCode: '', revision: 'R00', designer: '', date: '',
+        customerName: '', projectName: '', projectCode: '', revision: 'R01', designer: '', date: '',
         ...(source.projectInfo || {})
       },
       commonSettings: {
-        color: 'NATURAL', glassType: 'CLEAR', generalDescription: '', outputScale: 'AUTO', expandQuantity: false, defaultProductType: initialProductType,
+        color: '', glassType: 'CLEAR', generalDescription: '', outputScale: 'AUTO', expandQuantity: false, defaultProductType: initialProductType,
         ...(source.commonSettings || {}), defaultsByProduct
       },
       layout: {

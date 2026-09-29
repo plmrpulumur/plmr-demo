@@ -4,134 +4,191 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PLMR Çoklu Poz Ürün Çizimi</title>
-  <link rel="stylesheet" href="standalone.css?v=10.36-r36" />
-  <script src="../../core/productPresentation.js?v=10.36-r36"></script>
-  <script src="../../core/accessPolicy.js?v=10.36-r36"></script>
-  <script src="../../core/productAccessTicket.js?v=10.36-r36"></script>
-  <script src="../../core/directProductAccessGuard.js?v=10.36-r36" data-product-param="product" data-fallback="../../index.html"></script>
+  <script src="../embedded-host.js?v=10.47-r47"></script>
+  <link rel="stylesheet" href="standalone.css?v=10.47-r47" />
+  <script src="../../core/productPresentation.js?v=10.47-r47"></script>
+  <script src="../../core/accessPolicy.js?v=10.47-r47"></script>
+  <script src="../../core/productAccessTicket.js?v=10.47-r47"></script>
+  <script src="../../core/directProductAccessGuard.js?v=10.47-r47" data-product-param="product" data-fallback="../../index.html"></script>
 </head>
 <body>
   <header class="app-header">
     <a href="../../index.html" class="back-link">← PLMR</a>
-    <div><h1>Bağımsız Ürün Çizimi</h1><span class="version">V14.16 · Standalone Cephe Ürünleri</span></div>
-    <div class="header-actions"><button id="newProjectBtn" class="ghost">Yeni Proje</button><label class="file compact">.plmr Aç<input id="openInput" type="file" accept=".plmr,application/json" /></label></div>
+    <div><h1>Bağımsız Ürün Çizimi</h1><span class="version">V14.17 · Standalone Cephe Ürünleri</span></div>
+    <div class="header-actions"><label class="file compact">.plmr Aç<input id="openInput" type="file" accept=".plmr,application/json" /></label></div>
   </header>
 
   <main>
     <section class="workspace" aria-label="Çoklu poz veri girişi">
-      <div class="card">
-        <div class="section-heading"><div><span class="eyebrow">01</span><h2>Proje Bilgileri</h2></div><span class="hint">Çıktı başlıklarında kullanılır</span></div>
-        <div class="form-grid project-grid">
-          <label>Müşteri<input id="customerName" autocomplete="organization" /></label>
-          <label>Proje adı<input id="projectName" value="Bağımsız Ürün Projesi" /></label>
-          <label>Proje kodu<input id="projectCode" /></label>
-          <label>Revizyon<input id="revision" value="R00" /></label>
-          <label>Çizen<input id="designer" /></label>
-          <label>Tarih<input id="projectDate" type="date" /></label>
+      <div class="entry-table-grid" aria-label="Proje ve ortak ürün bilgileri">
+        <div class="card summary-card" id="projectInfoCard">
+          <div class="section-heading"><div><span class="eyebrow">01</span><h2>Proje Bilgileri</h2></div><button id="editProjectInfoBtn" type="button" class="secondary compact-btn">Düzenle</button></div>
+          <div class="summary-table" id="projectInfoSummary">
+            <div><span>Proje Kodu</span><strong id="projectInfoCode">—</strong></div>
+            <div><span>Müşteri</span><strong id="projectInfoCustomer">—</strong></div>
+            <div><span>Proje</span><strong id="projectInfoName">—</strong></div>
+            <div><span>Revizyon</span><strong id="projectInfoRevision">R01</strong></div>
+            <div><span>Çizen</span><strong id="projectInfoDesigner">—</strong></div>
+            <div><span>Tarih</span><strong id="projectInfoDate">—</strong></div>
+          </div>
         </div>
-      </div>
 
-      <div class="card collapsible-card" id="commonSettingsCard">
-        <div class="section-heading collapsible-heading">
-          <div><span class="eyebrow">02</span><h2>Ortak Ürün Ayarları</h2></div>
-          <div class="section-actions">
-            <span class="hint">Kaydet ile uygulanır</span>
-            <button id="commonSettingsExpand" type="button" class="icon-toggle" aria-expanded="true" aria-controls="commonSettingsBody" title="Ortak ürün ayarlarını aç / kapat">▾</button>
-            <button id="commonSettingsPin" type="button" class="icon-toggle" aria-pressed="false" title="Ortak ürün ayarlarını sabitle">📌</button>
-          </div>
-        </div>
-        <div id="commonSettingsBody" class="section-body">
-          <div class="form-grid common-grid">
-            <label>Varsayılan ürün<select id="productType"></select></label>
-            <label>Renk<select id="commonColor"><option value="NATURAL">Naturel</option><option value="ANTHRACITE">Antrasit</option><option value="BLACK">Siyah</option><option value="WHITE">Beyaz</option></select></label>
-            <label>Cam / dolgu<select id="commonGlass"><option value="CLEAR">Şeffaf</option><option value="SMOKED">Füme</option><option value="LAMINATED">Lamine</option><option value="FABRIC">Kumaş</option></select></label>
-            <label>Yerleşim<select id="layoutMode"></select></label>
-            <label class="wide">Genel açıklama<input id="generalDescription" /></label>
-            <label class="check"><input id="expandQuantity" type="checkbox" /> Her adedi ayrı poz olarak oluştur</label>
-          </div>
-          <div id="commonProductOptions" class="form-grid dynamic-options" aria-label="Ürüne özel ortak ayarlar"></div>
-          <div class="common-save-row">
-            <span id="commonSettingsStatus" class="hint">Kaydedilmedi</span>
-            <button id="saveCommonSettingsBtn" type="button" class="secondary save-common-btn" title="Ortak ürün ayarlarını kaydet">💾 Kaydet</button>
-          </div>
+        <div class="card summary-card" id="commonSettingsCard">
+          <div class="section-heading"><div><span class="eyebrow">02</span><h2>Ortak Ürün Ayarları</h2></div><button id="editCommonSettingsBtn" type="button" class="secondary compact-btn">Düzenle</button></div>
+          <div class="summary-table summary-table-common" id="commonSettingsSummary"></div>
         </div>
       </div>
 
       <div class="card positions-card">
-        <div class="section-heading positions-heading"><div><span class="eyebrow">03</span><h2>Poz Listesi</h2><span id="positionCount" class="count-badge">1 poz</span></div><div class="toolbar"><button id="addBtn">+ Yeni Poz</button><button id="copyLastBtn" class="secondary">Öncekini Kopyala</button><button id="bulkCreateBtn" class="secondary">Çoklu Oluştur</button><button id="importPositionsBtn" class="secondary">CSV / Excel İçe Aktar</button></div></div>
-        <div class="bulk-bar" id="bulkBar">
-          <strong><span id="selectedCount">0</span> seçili</strong>
-          <select id="bulkProduct"><option value="">Ürünü koru</option></select>
-          <input id="bulkDescription" placeholder="Açıklama uygula" />
-          <button id="applySelectedBtn" class="secondary">Açıklamayı Uygula</button>
-          <button id="bulkOptionsBtn" class="secondary">Seçenek Uygula</button>
-          <button id="deleteSelectedBtn" class="danger">Seçilenleri Sil</button>
-          <button id="renumberBtn" class="secondary">Yeniden Numaralandır</button>
+        <div class="section-heading positions-heading">
+          <div><span class="eyebrow">03</span><h2>Poz Listesi</h2><span id="positionCount" class="count-badge">1 poz</span></div>
+          <div class="toolbar"><button id="bulkCreateBtn" type="button" class="secondary">Çoklu Oluştur</button><button id="editPositionsBtn" type="button" class="secondary">Düzenle</button></div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th><input id="selectAll" type="checkbox" aria-label="Tüm pozları seç" /></th><th>Poz</th><th>Ürün</th><th>Genişlik</th><th>Yükseklik</th><th>Adet</th><th>Özet</th><th>Açıklama</th><th>İşlemler</th></tr></thead>
+        <div class="bulk-bar bulk-bar-v45" id="bulkBar">
+          <strong><span id="selectedCount">0</span> seçili</strong>
+          <input id="bulkDescription" placeholder="Açıklama uygula" />
+          <button id="applySelectedBtn" type="button" class="secondary">Açıklamayı Uygula</button>
+          <button id="bulkOptionsBtn" type="button" class="secondary">Seçenek Uygula</button>
+          <button id="deleteSelectedBtn" type="button" class="danger">Seçilenleri Sil</button>
+        </div>
+        <div class="table-wrap position-readonly-wrap">
+          <table class="positions-readonly-table">
+            <thead><tr><th class="select-column"><input id="selectAll" type="checkbox" aria-label="Tüm pozları seç" /></th><th>Poz</th><th>Genişlik</th><th>Yükseklik</th><th>Adet</th><th>Açıklama</th><th>Sıra</th></tr></thead>
             <tbody id="positionRows"></tbody>
           </table>
         </div>
         <div id="validationSummary" class="validation-summary" hidden></div>
       </div>
 
-      <div class="action-dock">
+      <div class="action-dock action-dock-v41">
+        <button id="renumberBtn" class="secondary">Yeniden Numaralandır</button>
+        <label class="dock-field"><span>Yerleşim</span><select id="layoutMode"></select></label>
+        <label class="dock-check"><input id="expandQuantity" type="checkbox" /> Her adedi ayrı poz</label>
         <button id="validateBtn" class="secondary">Tümünü Doğrula</button>
         <button id="drawBtn">Çizimi Oluştur</button>
         <button id="dxfBtn" class="export">DXF</button>
         <button id="pdfBtn" class="export">PDF</button>
         <button id="productionBtn" class="production-cta">Üretim Paketini Oluştur</button>
-        <button id="saveBtn" class="export">.plmr Kaydet</button>
+        <button id="cloudSaveBtn" class="secondary">Kaydet</button>
+        <button id="saveBtn" class="export">.plmr Dosyası İndir</button>
         <p id="status" role="status" aria-live="polite"></p>
       </div>
     </section>
 
     <section class="preview-panel" aria-label="Çizim önizlemesi">
-      <div class="preview-header"><div><span class="eyebrow">04</span><h2>Üretim Önizlemesi</h2></div><span id="previewMeta">Henüz çizim yok</span></div>
+      <div class="preview-header"><div><span class="eyebrow">04</span><h2>Çizim Önizlemesi</h2></div><div class="preview-tools"><div class="segmented" role="tablist" aria-label="Çizim görünümü"><button id="preview2dBtn" type="button" class="preview-toggle is-active" aria-pressed="true">2D</button><button id="preview3dBtn" type="button" class="preview-toggle" aria-pressed="false">3D</button></div><button id="toggleDimensionsBtn" type="button" class="secondary compact-btn">Ölçüleri Göster</button><button id="toggleOpenStateBtn" type="button" class="secondary compact-btn">Kapalı</button><span id="previewMeta">Henüz çizim yok</span></div></div>
       <div id="preview" tabindex="0" aria-label="Çoklu poz çizim önizlemesi"></div>
+      <div id="canonical3dHost" class="canonical-3d-host" hidden>
+        <iframe id="canonical3dFrame" title="PLMR Giyotin 3D Önizleme" allow="fullscreen" src="../../modules/p3dv/index.html?embedded=1&amp;standalonePreview=guillotine&amp;v=10.47-r47"></iframe>
+        <div id="canonical3dSelectionActions" class="canonical-3d-selection-actions" hidden>
+          <strong id="canonical3dSelectionLabel">Poz</strong>
+          <button id="canonical3dEditDimensionBtn" type="button" class="secondary compact-btn">Ölçüyü Düzenle</button>
+          <button id="canonical3dEditDetailBtn" type="button" class="secondary compact-btn">Detayları Düzenle</button>
+        </div>
+      </div>
     </section>
   </main>
 
-  <dialog id="detailDialog">
-    <form method="dialog" id="detailForm">
-      <div class="dialog-header"><div><span class="eyebrow">POZ DETAYI</span><h2 id="detailTitle">Poz Düzenle</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
-      <div id="productOptions" class="form-grid detail-grid"></div>
-      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="detailSaveBtn" value="default">Kaydet ve Çiz</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="bulkDialog">
-    <form method="dialog" id="bulkForm">
-      <div class="dialog-header"><div><span class="eyebrow">HIZLI OLUŞTUR</span><h2>Çoklu Poz Oluştur</h2></div><button value="cancel" class="icon-btn">×</button></div>
-      <div class="form-grid detail-grid"><label>Poz başlangıcı<input id="bulkStartNo" value="P01" /></label><label>Adet<input id="bulkCount" type="number" min="1" max="100" value="4" /></label><label>Genişlik<input id="bulkWidth" type="number" value="1500" /></label><label>Yükseklik<input id="bulkHeight" type="number" value="2400" /></label></div>
-      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="bulkConfirmBtn" value="default">Pozları Oluştur</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="importDialog">
-    <form method="dialog" id="importForm">
-      <div class="dialog-header"><div><span class="eyebrow">DRY-RUN</span><h2>Toplu Poz İçe Aktar</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
-      <label class="file">CSV / Excel (.xlsx)<input id="importFile" type="file" accept=".csv,.tsv,.txt,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" /></label>
-      <label class="wide">CSV / TSV verisi<textarea id="importText" rows="7"></textarea></label>
-      <div class="dialog-actions"><button id="importDryRunBtn" type="button" class="secondary">Dry-run Doğrula</button><label class="check"><input id="importAllowPartial" type="checkbox" /> Yalnız geçerli satırları uygula</label></div>
-      <p id="importSummary" class="dialog-note" aria-live="polite"></p>
-      <div class="table-wrap import-preview"><table><thead><tr><th>Satır</th><th>Poz</th><th>Ürün</th><th>G</th><th>Y</th><th>Durum</th><th>Hata</th></tr></thead><tbody id="importPreviewRows"></tbody></table></div>
-      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="importApplyBtn" value="default" disabled>Geçerli Pozları Uygula</button></div>
-    </form>
-  </dialog>
-
-  <dialog id="applyDialog">
-    <form method="dialog" id="applyForm">
-      <div class="dialog-header"><div><span class="eyebrow">TOPLU İŞLEM</span><h2>Seçilen Pozlara Uygula</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
-      <div class="form-grid detail-grid">
-        <label>Ürün<select id="applyProduct"><option value="">Ürünü koru</option></select></label>
-        <label>Açıklama<input id="applyDescription" placeholder="Değiştirme" /></label>
+  <dialog id="projectInfoDialog" class="editor-dialog compact-editor-dialog">
+    <form method="dialog" id="projectInfoForm">
+      <div class="dialog-header"><div><span class="eyebrow">PROJE</span><h2>Proje Bilgilerini Düzenle</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <div class="modal-form-table">
+        <label><span>Proje Kodu</span><input id="customerProjectCode" readonly aria-readonly="true" placeholder="Otomatik oluşturulacak" /></label>
+        <label><span>Müşteri</span><input id="customerName" placeholder="Cari seçiminden otomatik gelecektir" /></label>
+        <label><span>Proje Adı</span><input id="projectName" placeholder="İsim verilmezse proje kodu yazılacaktır" /></label>
+        <label><span>Revizyon</span><input id="revision" value="R01" /></label>
+        <label><span>Çizen</span><input id="designer" placeholder="Kullanıcı Adı Soyadı" /></label>
+        <label><span>Tarih</span><input id="projectDate" type="date" /></label>
       </div>
-      <div id="applyProductOptions" class="form-grid detail-grid dynamic-options"></div>
-      <p class="dialog-note">Boş bırakılan alanlar değiştirilmez. Ürün değiştirilirse uyumsuz eski ürün seçenekleri temizlenir.</p>
-      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="applyConfirmBtn" value="default">Seçilenlere Uygula</button></div>
+      <p class="dialog-note">Müşteri cari seçiminden otomatik gelebilir; gerektiğinde manuel olarak değiştirilebilir. Proje adı boş bırakılırsa Proje Kodu kullanılır.</p>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="projectInfoSaveBtn" type="button">Kaydet</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="commonSettingsDialog" class="editor-dialog common-editor-dialog">
+    <form method="dialog" id="commonSettingsForm">
+      <div class="dialog-header"><div><span class="eyebrow">ÜRÜN</span><h2>Ortak Ürün Ayarlarını Düzenle</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <div class="modal-form-table common-base-fields">
+        <label><span>Renk</span><div class="color-selection-stack"><button id="commonColorButton" type="button" class="color-picker-button"><i id="commonColorSwatch"></i><strong id="commonColorLabel">Renk seç</strong><em>Renk kartelasını aç</em></button><input id="commonColor" type="hidden" /><input id="commonColorCustom" placeholder="Diğer renk" hidden /><select id="commonColorFinish" hidden aria-hidden="true"><option value=""></option><option value="PARLAK">Parlak</option><option value="MAT">Mat</option><option value="TEXTURE">Texture</option></select></div></label>
+        <label data-giyotin-common="glassThickness"><span>Cam Kalınlığı</span><div class="inline-custom-field"><select id="gGlassThickness"><option value="8 MM">8 mm</option><option value="INSULATED GLASS">Isıcam</option><option value="OTHER">Diğer</option></select><input id="gGlassThicknessCustom" placeholder="Diğer" hidden /></div></label>
+        <label data-giyotin-common="glassColor"><span>Cam Rengi</span><div class="inline-custom-field"><select id="gGlassColor"><option value="TRANSPARENT">Şeffaf</option><option value="SMOKED">Füme</option><option value="BRONZE">Bronz</option><option value="LOW-E GLASS">Low-e</option><option value="OTHER">Diğer</option></select><input id="gGlassColorCustom" placeholder="Diğer" hidden /></div></label>
+        <label><span>Genel Açıklama</span><input id="generalDescription" /></label>
+      </div>
+      <div id="giyotinCommonFields" class="modal-form-table product-option-table">
+        <label><span>Tip</span><div class="inline-custom-field"><select id="gType"><option value="STANDARD">Standart</option><option value="CLEANABLE">Silinebilir</option><option value="UPWARD COLLECTING">Yukarı Toplanan</option><option value="OTHER">Diğer</option></select><input id="gTypeCustom" placeholder="Diğer" hidden /></div></label>
+        <label><span>Mekanizma</span><div class="inline-custom-field"><select id="gMechanism"><option value="CHAIN">Zincir</option><option value="BELT">Kayış</option><option value="OTHER">Diğer</option></select><input id="gMechanismCustom" placeholder="Diğer" hidden /></div></label>
+        <label><span>Panel Düzeni</span><div class="inline-custom-field"><select id="gPanelCount"><option value="1+1">1+1</option><option value="1+2">1+2</option><option value="1+3">1+3</option><option value="OTHER">Diğer</option></select><input id="gPanelCountCustom" placeholder="Diğer" hidden /></div></label>
+        <label><span>Motor Yönü</span><div class="inline-custom-field"><select id="gMotorDirection"><option value="RIGHT">Sağ</option><option value="LEFT">Sol</option><option value="OTHER">Diğer</option></select><input id="gMotorDirectionCustom" placeholder="Diğer" hidden /></div></label>
+        <label><span>Görünüş</span><div class="inline-custom-field"><select id="gView"><option value="INSIDE VIEW">İç Bakış</option><option value="OUTSIDE VIEW">Dış Bakış</option><option value="OTHER">Diğer</option></select><input id="gViewCustom" placeholder="Diğer" hidden /></div></label>
+        <label><span>Motor</span><div class="inline-custom-field"><select id="gMotorType"><option value="SOMFY RTS">Somfy RTS</option><option value="SOMFY IO">Somfy IO</option><option value="CUPPON">Cuppon</option><option value="OTHER">Diğer</option></select><input id="gMotorTypeCustom" placeholder="Diğer" hidden /></div></label>
+        <label><span>Kumanda</span><div class="inline-custom-field"><select id="gRemoteControl"><option value="1 CHANNEL">1 Kanal</option><option value="2 CHANNELS">2 Kanal</option><option value="4 CHANNELS">4 Kanal</option><option value="6 CHANNELS">6 Kanal</option><option value="16 CHANNELS">16 Kanal</option><option value="40 CHANNELS">40 Kanal</option><option value="OTHER">Diğer</option></select><input id="gRemoteControlCustom" placeholder="Diğer" hidden /></div></label>
+        <label><span>Kumanda Adet</span><input id="gRemoteQuantity" type="number" min="0" step="1" inputmode="numeric" /></label>
+        <label hidden><span>Alt Panel</span><select id="gBottomPanel"><option value="OPEN">Açık</option><option value="CLOSED">Kapalı</option></select></label>
+        <label hidden><span>Gösterim</span><select id="gDisplayState"><option value="OPEN">Açık</option><option value="CLOSED">Kapalı</option></select></label>
+      </div>
+      <div id="genericCommonFields" class="modal-form-table product-option-table" hidden></div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="commonSettingsSaveBtn" type="button">Kaydet</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="ralDialog" class="editor-dialog ral-dialog">
+    <div class="dialog-header"><div><span class="eyebrow">RENK</span><h2>RAL Renk Kartelası</h2></div><button id="ralCloseBtn" type="button" class="icon-btn" aria-label="Kapat">×</button></div>
+    <div id="ralCatalogStage">
+      <div class="ral-toolbar"><input id="ralSearch" type="search" placeholder="RAL kodu ara" /><label><input id="ralStandardOnly" type="checkbox" checked /> Standart renkler</label><button id="ralOtherBtn" type="button" class="secondary compact-btn">Diğer</button></div>
+      <div id="ralGrid" class="ral-grid"></div>
+    </div>
+    <div id="ralFinishStage" class="ral-finish-stage" hidden>
+      <div class="ral-finish-head"><button id="ralFinishBackBtn" type="button" class="secondary compact-btn">← Renge Dön</button><strong id="ralFinishSummary">RAL</strong></div>
+      <label id="ralManualColorRow" class="ral-manual-color" hidden><span>Manuel Renk</span><input id="ralManualColorInput" placeholder="Örn. Özel Antrasit" /></label>
+      <p>Seçilen renk için yüzey tipini seçin.</p>
+      <div class="ral-finish-grid">
+        <button type="button" class="ral-finish-option" data-finish="PARLAK"><i class="finish-sample gloss"></i><strong>Parlak</strong><span>Yüksek parlaklık</span></button>
+        <button type="button" class="ral-finish-option" data-finish="MAT"><i class="finish-sample matte"></i><strong>Mat</strong><span>Düşük parlaklık</span></button>
+        <button type="button" class="ral-finish-option" data-finish="TEXTURE"><i class="finish-sample texture"></i><strong>Texture</strong><span>Dokulu yüzey</span></button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="dimensionDialog" class="editor-dialog compact-editor-dialog">
+    <form method="dialog" id="dimensionForm">
+      <div class="dialog-header"><div><span class="eyebrow">3D POZ</span><h2 id="dimensionTitle">Poz Ölçülerini Düzenle</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <div class="modal-form-table">
+        <label><span>Genişlik</span><input id="dimensionWidth" type="number" min="1" /></label>
+        <label><span>Yükseklik</span><input id="dimensionHeight" type="number" min="1" /></label>
+        <label><span>Adet</span><input id="dimensionQuantity" type="number" min="1" step="1" /></label>
+      </div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="dimensionSaveBtn" type="button">Kaydet</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="positionsDialog" class="editor-dialog positions-editor-dialog">
+    <form method="dialog" id="positionsForm">
+      <div class="dialog-header"><div><span class="eyebrow">POZ</span><h2>Poz Listesini Düzenle</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <div class="table-wrap poz-edit-wrap"><table class="poz-edit-table"><thead><tr><th>Poz</th><th>Genişlik</th><th>Yükseklik</th><th>Adet</th><th>Açıklama</th><th>Detay</th><th>Kopyala</th><th>Sıra</th><th>Sil</th></tr></thead><tbody id="positionEditRows"></tbody></table></div>
+      <button id="addPositionRowBtn" type="button" class="add-row-btn" aria-label="Yeni satır ekle">+</button>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="positionsSaveBtn" type="button">Kaydet</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="bulkCreateDialog" class="editor-dialog compact-editor-dialog">
+    <form method="dialog" id="bulkCreateForm">
+      <div class="dialog-header"><div><span class="eyebrow">HIZLI OLUŞTUR</span><h2>Çoklu Poz Oluştur</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <div class="modal-form-table">
+        <label><span>Poz başlangıcı</span><input id="bulkStartNo" value="P01" /></label>
+        <label><span>Adet</span><input id="bulkCount" type="number" min="1" max="100" value="4" /></label>
+        <label><span>Genişlik</span><input id="bulkWidth" type="number" min="1" value="3000" /></label>
+        <label><span>Yükseklik</span><input id="bulkHeight" type="number" min="1" value="2400" /></label>
+      </div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="bulkConfirmBtn" type="button">Pozları Oluştur</button></div>
+    </form>
+  </dialog>
+
+  <dialog id="detailDialog" class="editor-dialog common-editor-dialog">
+    <form method="dialog" id="detailForm">
+      <div class="dialog-header"><div><span class="eyebrow">POZ DETAYI</span><h2 id="detailTitle">Poz Detayı</h2></div><button value="cancel" class="icon-btn" aria-label="Kapat">×</button></div>
+      <p class="dialog-note">Buradaki değişiklikler yalnız seçili poza uygulanır; Ortak Ürün Ayarlarını değiştirmez.</p>
+      <div id="productOptions" class="modal-form-table product-option-table"></div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">Vazgeç</button><button id="detailSaveBtn" type="button">Kaydet</button></div>
     </form>
   </dialog>
 
@@ -179,12 +236,14 @@
     </div>
   </dialog>
 
-  <script src="../../blocks/filteredBlocks.js?v=10.36-r36"></script><script src="../../src/peri01ExcelBridge.js?v=10.36-r36"></script><script src="../../src/peri01Geometry.js?v=10.36-r36"></script>
-  <script src="../../export/layerNamespaceManager.js?v=10.36-r36"></script><script src="../../export/drawingEntityValidator.js?v=10.36-r36"></script><script src="../../export/exportService.js?v=10.36-r36"></script><script src="../../export/pdfFontData.js?v=10.36-r36"></script><script src="../../export/vectorPdfEngine.js?v=10.36-r36"></script><script src="../../src/modernDxfTemplate.js?v=10.36-r36"></script><script src="../../src/dxfModernEngine.js?v=10.36-r36"></script>
-  <script src="../product-registry.js?v=10.36-r36"></script><script src="../../core/coordinateTransformService.js?v=10.36-r36"></script><script src="../../core/sceneGraph.js?v=10.36-r36"></script><script src="../product-adapter-utils.js?v=10.36-r36"></script><script src="../product-adapter-factory.js?v=10.36-r36"></script>
-  <script src="../sliding/sliding-adapter.js?v=10.36-r36"></script><script src="../guillotine/guillotine-adapter.js?v=10.36-r36"></script><script src="../zip-screen/zip-screen-adapter.js?v=10.36-r36"></script><script src="facade-product-adapters.js?v=10.36-r36"></script>
-  <script src="../../persistence/schemaRegistryCenter.js?v=10.36-r36"></script><script src="../../ai/assistantIntentRouter.js?v=10.36-r36"></script><script src="../../ai/projectScanner.js?v=10.36-r36"></script><script src="../../ai/drawingCopilot.js?v=10.36-r36"></script><script src="../../ai/naturalLanguageDraft.js?v=10.36-r36"></script><script src="../../ai/geometryValidator.js?v=10.36-r36"></script><script src="../../import/xlsxLite.js?v=10.36-r36"></script><script src="../../import/bulkPositionImport.js?v=10.36-r36"></script>
-  <script src="../../production/productionProfileRegistry.js?v=10.36-r36"></script><script src="../../production/productionPackageModel.js?v=10.36-r36"></script><script src="../../production/optimization/deterministicCutOptimizer.js?v=10.36-r36"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/config.js?v=10.36-r36"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/stock.js?v=10.36-r36"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/rules.js?v=10.36-r36"></script><script src="../../production/export/xlsxWorkbookWriter.js?v=10.36-r36"></script>
-  <script src="standalone-project.js?v=10.36-r36"></script><script src="standalone-layout.js?v=10.36-r36"></script><script src="../../core/constraintEngine.js?v=10.36-r36"></script><script src="../../export/printComposer.js?v=10.36-r36"></script><script src="standalone-export.js?v=10.36-r36"></script><script src="standalone-app.js?v=10.36-r36"></script><script src="standalone-production-ui.js?v=10.36-r36"></script><script src="../../import/bulkImportController.js?v=10.36-r36"></script>
+
+  <script src="../../blocks/filteredBlocks.js?v=10.47-r47"></script><script src="../../src/peri01ExcelBridge.js?v=10.47-r47"></script><script src="../../src/peri01Geometry.js?v=10.47-r47"></script>
+  <script src="../../export/layerNamespaceManager.js?v=10.47-r47"></script><script src="../../export/drawingEntityValidator.js?v=10.47-r47"></script><script src="../../export/exportService.js?v=10.47-r47"></script><script src="../../export/pdfFontData.js?v=10.47-r47"></script><script src="../../export/vectorPdfEngine.js?v=10.47-r47"></script><script src="../../src/modernDxfTemplate.js?v=10.47-r47"></script><script src="../../src/dxfModernEngine.js?v=10.47-r47"></script>
+  <script src="../product-registry.js?v=10.47-r47"></script><script src="../../core/coordinateTransformService.js?v=10.47-r47"></script><script src="../../core/sceneGraph.js?v=10.47-r47"></script><script src="../product-adapter-utils.js?v=10.47-r47"></script><script src="../product-adapter-factory.js?v=10.47-r47"></script>
+  <script src="../sliding/sliding-adapter.js?v=10.47-r47"></script><script src="../guillotine/guillotine-adapter.js?v=10.47-r47"></script><script src="../zip-screen/zip-screen-adapter.js?v=10.47-r47"></script><script src="facade-product-adapters.js?v=10.47-r47"></script>
+  <script src="../../persistence/schemaRegistryCenter.js?v=10.47-r47"></script><script src="../../ai/assistantIntentRouter.js?v=10.47-r47"></script><script src="../../ai/projectScanner.js?v=10.47-r47"></script><script src="../../ai/drawingCopilot.js?v=10.47-r47"></script><script src="../../ai/naturalLanguageDraft.js?v=10.47-r47"></script><script src="../../ai/geometryValidator.js?v=10.47-r47"></script>
+  <script src="../../production/productionProfileRegistry.js?v=10.47-r47"></script><script src="../../production/productionPackageModel.js?v=10.47-r47"></script><script src="../../production/optimization/deterministicCutOptimizer.js?v=10.47-r47"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/config.js?v=10.47-r47"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/stock.js?v=10.47-r47"></script><script src="../../production/pilots/albert-genau-sliding-pilot-v1/rules.js?v=10.47-r47"></script><script src="../../production/export/xlsxWorkbookWriter.js?v=10.47-r47"></script>
+  <script src="../../modules/p3dv/src/ral-colors.js?v=10.47-r47"></script><script src="standalone-project.js?v=10.47-r47"></script><script src="standalone-layout.js?v=10.47-r47"></script><script src="../../core/constraintEngine.js?v=10.47-r47"></script><script src="../../export/printComposer.js?v=10.47-r47"></script><script src="standalone-export.js?v=10.47-r47"></script><script src="standalone-app.js?v=10.47-r47"></script><script src="standalone-production-ui.js?v=10.47-r47"></script>
+
 </body>
 </html>

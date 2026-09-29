@@ -175,3 +175,7 @@ button:disabled { cursor: not-allowed; opacity: .48; }
   .freedom-selection-bar > div { justify-content: flex-end; }
   .freedom-wall-choice-row { grid-template-columns: 1fr; }
 }
+
+/* V40 — keep the legacy Freedom engine inside the ERP drawing tab. */
+html[data-plmr-embedded="erp"] .freedom-header{display:none!important}
+html[data-plmr-embedded="erp"] .freedom-layout{min-height:100vh}

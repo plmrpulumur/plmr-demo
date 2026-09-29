@@ -10,7 +10,7 @@
     schemaVersion: 1,
     defaultWidth: 3000,
     defaultHeight: 2400,
-    defaults: { id: 'GUILLOTINE-001', pozNo: 'G01', series: 'A SERIES', type: 'CLEANABLE', mechanism: 'CHAIN', glassThickness: '8 MM', glassColor: 'TRANSPARENT', customGlassColor: '', panelCount: '1+1', motorDirection: 'RIGHT', view: 'OUTSIDE VIEW', motorType: 'SOMFY RTS', remoteControl: '1 CHANNEL', bottomPanelMode: 'VASISTAS', bottomPanelState: 'OPEN', bottomPanelHinge: 'BOTTOM', collectionState: 'NORMAL' },
+    defaults: { id: 'GUILLOTINE-001', pozNo: 'G01', series: 'A SERIES', type: 'STANDARD', mechanism: 'CHAIN', glassThickness: '8 MM', glassColor: 'TRANSPARENT', customGlassColor: '', panelCount: '1+1', motorDirection: 'RIGHT', view: 'OUTSIDE VIEW', motorType: 'SOMFY RTS', remoteControl: '1 CHANNEL', remoteQuantity: 1, bottomPanelMode: 'VASISTAS', bottomPanelState: 'OPEN', bottomPanelHinge: 'BOTTOM', displayState: 'OPEN', collectionState: 'NORMAL' },
     blockBuilder: 'buildGuillotineBlockDefinition',
     normalizePlacement(project) {
       return root.PulumurGeometry.normalizeGuillotinePlacement(project, 0);
