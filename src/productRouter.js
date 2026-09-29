@@ -73,7 +73,13 @@
     const registry = window.PulumurProductRegistry;
     const navigation = registry.resolveNavigation(adapter.id);
     try { sessionStorage.setItem('plmr_selected_product', adapter.id); } catch (_) {}
-    if (navigation.opensDedicatedPage && navigation.href) window.location.href = navigation.href;
+    if (!navigation.opensDedicatedPage || !navigation.href) return;
+    const erpHost = window.PulumurErpWorkspace;
+    if (erpHost && typeof erpHost.openProduct === 'function') {
+      erpHost.openProduct(adapter.id, navigation.href);
+      return;
+    }
+    window.location.href = navigation.href;
   }
 
   let productRequestSequence = 0;

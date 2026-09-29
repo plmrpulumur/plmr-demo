@@ -1196,7 +1196,7 @@
     }
 
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10.36-r36').catch(() => {}), { once: true });
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js?v=10.47-r47').catch(() => {}), { once: true });
     }
   }
 
@@ -9872,85 +9872,99 @@ ${err.message}`);
     $('calculatorDialog').showModal();
   }
 
-  const WEB_HELP_TEXT_TR = `PLMR DEMO SÜRÜMÜ — KISA KULLANIM
-Bu paket müşteri demosu içindir. Bazı proje yönetimi ve bazı ürünler demo kapsamında bilinçli olarak pasiftir.
+  const WEB_HELP_TEXT_TR = `PLMR — KISA KULLANIM
+Bu kurulum müşteri çalışma sürümüdür. Proje yönetimi ve firma lisansında etkin ürünler kullanılabilir.
 
 1) BAŞLANGIÇ
-- Demo kullanımına Hızlı Çizim ile başla.
-- Yeni Proje, Akıllı Proje Sihirbazı, Projelerim ve Proje Dosyası Aç demo sürümünde pasiftir.
+- Yeni Proje ile kayıtlı bir proje oluşturabilir, Projelerim ile mevcut projeleri açabilir veya Proje Dosyası Aç ile yerel .plmr/.json projesi yükleyebilirsin.
+- Hızlı Çizim geçici çalışma için kullanılabilir; uygun kullanıcılar çalışmayı daha sonra projeye dönüştürebilir.
+- Akıllı Proje Sihirbazı proje girdilerini adım adım hazırlamak için kullanılabilir.
 
-2) BIOCLIMATIC / ECO-BIOCLIMATIC / ROLLING ROOF
-- Genişlik, açılım ve yükseklik gibi ölçüleri mm olarak gir; model mevcut ürün motorundan otomatik oluşur.
-- 2D düğmesi aynı ürün verisinden teknik 2D görünümü açar; Technical2D içindeki 3D Görünüm düğmesi modele geri döner.
+2) PROJE YÖNETİMİ
+- Kaydet mevcut projeyi buluta yazar.
+- Yeni Revizyon mevcut projeyi koruyarak bir sonraki revizyonu oluşturur.
+- Revizyonlar geçmiş revizyonları görüntülemek/açmak için kullanılır.
+- Gerçek kullanılabilirlik kullanıcı rolü, firma durumu, lisans ve backend yazma yetkileriyle ayrıca kontrol edilir.
 
-3) 3D KULLANIM
-- Sol mouse ile döndür, tekerlek ile yakınlaştır/uzaklaştır, sağ mouse ile pan yap.
-- Önizlemeyi Büyüt gerçek tarayıcı tam ekranını açar; Esc ile çıkabilirsin.
-- Uygun cephe/alan seçildiğinde mevcut demo menülerinden profil ve ürün yerleştirme/düzenleme işlemleri kullanılabilir.
+3) ÜRÜNLER
+- Ürün seçicisi demo nedeniyle kilitlenmez. Seçim yine firmanın gerçek ürün lisansı/entitlement kontrolünden geçer.
+- Bioclimatic, Eco-Bioclimatic ve Rolling Roof mevcut P3DV 3D/Technical2D akışlarını kullanır.
+- Sürme, Giyotin, Zip Perde, Kapı, Sabit Doğrama ve Katlanır Cam mevcut ürün motorlarına yönlendirilir.
+- Pergola mevcut mimaride native Web DXF / 2D sahibini kullanır; bu durum demo kısıtı değil mevcut ürün mimarisidir.
 
-4) PERGOLA
-- Pergola demo kapsamında yalnız native 2D çizim kullanır. Pergola için 3D beklenmemelidir.
+4) 3D / 2D KULLANIM
+- 3D destekleyen ürünlerde sol mouse ile döndür, tekerlek ile yakınlaştır/uzaklaştır, sağ mouse ile pan yap.
+- 2D düğmesi aynı kanonik ürün verisinden teknik 2D görünümü açar; 3D Görünüm aynı ürünün 3D çalışma alanına döner.
+- Uygun cephe/alan seçildiğinde mevcut profil ve yan ürün yerleştirme/düzenleme işlemleri kullanılabilir.
 
 5) GİRİŞ FORMATLARI
 Ana 3D ürünlerde:
-- ;  yan yana modülleri ayırır.
-- :  ön/arka iki sıra tanımlar.
-- NO yalnız parserın izin verdiği son konumda özel hizalama/toplama davranışını açar. Genişlikte sondaki :NO son sırayı sağdan hizalar; açılımda :NO panelleri dış uçlara toplar.
+- ; yan yana modülleri ayırır.
+- : ön/arka iki sıra tanımlar.
+- NO yalnız parserın izin verdiği son konumda özel hizalama/toplama davranışını açar.
 Pergola native 2D'de:
 - ; çoklu poz değerlerini ayırır.
 - Genişlikte terminal ;NO kullanıldığında genişlik ve fiziksel ara boşluklar ayrı girilir; N sistem için N genişlik + N-1 boşluk gerekir ve boşluk 13 mm'den küçük olamaz.
 
-6) PDF
-- 3D ekrandaki PDF İndir, Doküman Merkezi'ni açar.
-- Ürünün gerçekten desteklediği bölümler arasından fiyat teklifi, üretim formu, ürün listesi, 3D/2D görünüş, kesim listesi, aksesuar, optimizasyon ve stok profili gibi bölümler seçilebilir. Her ürün bütün bölümleri sunmayabilir.
+6) PDF / DOKÜMAN
+- PDF İndir, desteklenen ürünlerde Doküman Merkezi'ni açar.
+- Bölümler ürünün gerçek capability'sine göre sunulur; her ürün bütün bölümleri desteklemek zorunda değildir.
+- Mevcut prototip fiyat alanları üretim/sipariş fiyatı olarak kabul edilmemelidir; ticari fiyatlandırma modülü ayrıca geliştirilecektir.
 
 7) DXF
 - DXF teknik CAD çıktısıdır. Mevcut teknik çizim exportları model alanında mm ve 1:1 ölçü mantığını kullanır.
 
-8) DEMO KISITLAMALARI
-- Sürme, Giyotin, Zip Perde, Kapı, Sabit Doğrama ve Katlanır Cam görünür fakat pasiftir.
-- Proje Kontrol Merkezi proje yönetimi işlemleri demo kapsamında pasiftir.
-- Internal hızlı test kontrolleri kullanıcı arayüzünde gösterilmez.`;
+8) ERİŞİM
+- Demo kaynaklı proje/ürün UI kilitleri bu müşteri sürümünde kaldırılmıştır.
+- Lisans, firma/tenant, oturum, rol ve backend güvenlik kontrolleri kaldırılmamıştır.
+- Henüz geliştirilmemiş CRM, teklif ve ERP modülleri aktifmiş gibi gösterilmez.`;
 
-  const WEB_HELP_TEXT_EN = `PLMR DEMO — QUICK GUIDE
-This package is intended for customer demonstrations. Some project-management functions and products are intentionally disabled in the demo.
+  const WEB_HELP_TEXT_EN = `PLMR — QUICK GUIDE
+This installation is a customer working build. Project management and products enabled by the company license can be used.
 
 1) START
-- Start the demo with Quick Drawing.
-- New Project, Smart Project Wizard, My Projects and Open Project File are disabled in this demo.
+- Use New Project to create a saved project, My Projects to reopen existing projects, or Open Project File to load a local .plmr/.json project.
+- Quick Drawing remains available for temporary work; eligible users can later convert it to a project.
+- Smart Project Wizard can prepare project inputs step by step.
 
-2) BIOCLIMATIC / ECO-BIOCLIMATIC / ROLLING ROOF
-- Enter width, projection and height values in mm; the existing product engine builds the model automatically.
-- 2D opens the technical projection from the same product data; the 3D View button inside Technical2D returns to the model.
+2) PROJECT MANAGEMENT
+- Save writes the current project to the cloud.
+- New Revision preserves the current project and creates the next revision.
+- Revisions is used to inspect/open historical revisions.
+- Actual availability is still controlled by user role, organization/license state and backend write permissions.
 
-3) 3D USE
-- Left-drag rotates, mouse wheel zooms, right-drag pans.
-- Enlarge Preview enters native browser fullscreen; press Esc to exit.
-- Where supported, select a facade/zone to use the existing profile and product placement/editing actions.
+3) PRODUCTS
+- The product selector is no longer locked by historical demo restrictions. Selection still passes the real organization product-entitlement check.
+- Bioclimatic, Eco-Bioclimatic and Rolling Roof use the existing P3DV 3D/Technical2D flows.
+- Sliding, Guillotine, Zip Screen, Door, Fixed Joinery and Folding Glass route to their existing product engines.
+- Pergola currently uses its native Web DXF / 2D owner; this is a current product-architecture boundary, not a demo restriction.
 
-4) PERGOLA
-- Pergola uses native 2D drawing only in this demo. Do not expect a Pergola 3D view.
+4) 3D / 2D USE
+- On 3D-capable products, left-drag rotates, the mouse wheel zooms and right-drag pans.
+- 2D opens the technical view from the same canonical product data; 3D View returns to the same product's 3D workspace.
+- Where supported, selecting a facade/zone enables the existing profile and attached-product placement/editing actions.
 
 5) INPUT FORMATS
 For the main 3D products:
 - ; separates side-by-side modules.
 - : defines front/rear rows.
-- NO is accepted only in the parser's permitted terminal position and enables the special alignment/collection rule. A terminal :NO in width right-aligns the last row; in projection it collects panels toward the outer ends.
+- NO is accepted only in the parser's permitted terminal position and enables the special alignment/collection rule.
 For native Pergola 2D:
 - ; separates multiple positions.
 - A terminal ;NO in Width uses separate widths and physical gaps; N systems require N widths + N-1 gaps, and a gap cannot be below 13 mm.
 
-6) PDF
-- Download PDF in the 3D screen opens the Document Center.
-- Depending on actual product capability, selectable sections can include quote, production form, product list, 3D/2D views, cut list, accessories, optimization and stock profiles. Not every product supports every section.
+6) PDF / DOCUMENTS
+- Download PDF opens the Document Center on supported products.
+- Sections are offered according to actual product capability; not every product supports every section.
+- Existing prototype price fields must not be treated as production/order pricing; the commercial pricing module remains separate future work.
 
 7) DXF
 - DXF is the technical CAD output. Current technical exports use millimetres and 1:1 model-space measurement logic.
 
-8) DEMO LIMITS
-- Sliding, Guillotine, Zip Screen, Door, Fixed Joinery and Folding Glass remain visible but disabled.
-- Project Control Center project-management actions are disabled in the demo.
-- Internal quick-test controls are not shown in the user interface.`;
+8) ACCESS
+- Historical demo UI locks for project/product access are removed in this customer build.
+- License, organization/tenant, session, role and backend security checks are not removed.
+- CRM, quotation and ERP modules that are not yet implemented remain unavailable.`;
 
   function showHelp() {
     const dialog = $('helpDialog');

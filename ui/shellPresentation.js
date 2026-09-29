@@ -1,8 +1,8 @@
 (function (root) {
   'use strict';
   const COPY = Object.freeze({
-    tr: Object.freeze({ demo: 'Demo sürümü', inactive: 'Demo sürümünde pasif', demoProjects: 'DEMO · PROJE YÖNETİMİ PASİF', account: 'Aktif kullanıcı bilgileri', engine: 'Aktif çizim motoru', controls: 'Proje kontrol merkezi', controlTitle: 'PROJE\nKONTROL\nMERKEZİ', projects: 'Proje yönetimi', wizard: 'Akıllı Proje Sihirbazı' }),
-    en: Object.freeze({ demo: 'Demo version', inactive: 'Unavailable in the demo', demoProjects: 'DEMO · PROJECT MANAGEMENT UNAVAILABLE', account: 'Current user details', engine: 'Active drawing engine', controls: 'Project control center', controlTitle: 'PROJECT\nCONTROL\nCENTER', projects: 'Project management', wizard: 'Smart Project Wizard' })
+    tr: Object.freeze({ demo: 'Kısıtlı erişim', inactive: 'Bu kullanıcı için pasif', demoProjects: 'PROJE YÖNETİMİ ERİŞİMİ YOK', account: 'Aktif kullanıcı bilgileri', engine: 'Aktif çizim motoru', controls: 'Proje kontrol merkezi', controlTitle: 'PROJE\nKONTROL\nMERKEZİ', projects: 'Proje yönetimi', wizard: 'Akıllı Proje Sihirbazı' }),
+    en: Object.freeze({ demo: 'Restricted access', inactive: 'Unavailable for this user', demoProjects: 'PROJECT MANAGEMENT ACCESS UNAVAILABLE', account: 'Current user details', engine: 'Active drawing engine', controls: 'Project control center', controlTitle: 'PROJECT\nCONTROL\nCENTER', projects: 'Project management', wizard: 'Smart Project Wizard' })
   });
 
   function labelOptions(select, language, formatter) {
@@ -27,7 +27,10 @@
     ['product', 'wizardProduct'].forEach(id => labelOptions(document.getElementById(id), lang, names.name));
     labelOptions(document.getElementById('moduleName'), lang, names.moduleName);
     const attribute = (selector, key, value) => document.querySelectorAll(selector).forEach(node => node.setAttribute(key, value));
-    const mode = tier && tier.modeVerified ? tier.mode : 'DEMO';
+    const deployment = root.PulumurDeploymentProfile || {};
+    const mode = tier && tier.allowed && deployment.demoRestrictions === false
+      ? String(tier.mode || deployment.defaultProjectMode || 'FULL')
+      : (tier && tier.modeVerified ? tier.mode : 'DEMO');
     document.querySelectorAll('.plmr-release-badge').forEach(node => {
       node.textContent = `PLMR ${mode}`;
       node.setAttribute('aria-label', mode === 'DEMO' ? copy.demo : `PLMR ${mode}`);

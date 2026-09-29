@@ -8,13 +8,33 @@
   const RevisionCore = window.PulumurRevisionCore;
   const AccessPolicy = window.PulumurAccessPolicy;
   const ProductAccessTicket = window.PulumurProductAccessTicket;
+  const DeploymentProfile = window.PulumurDeploymentProfile || Object.freeze({});
   const cloudWriteCoordinator = RevisionCore && typeof RevisionCore.createWriteCoordinator === 'function'
     ? RevisionCore.createWriteCoordinator({ maxCompleted: 64 })
     : null;
   const supabaseFactory = window.supabase;
   function capability(name) {
     if (!AccessPolicy || typeof AccessPolicy.evaluateCapability !== 'function') return { allowed: false, mode: 'DEMO', modeVerified: false };
-    return AccessPolicy.evaluateCapability(accessInput(), name);
+    const base = AccessPolicy.evaluateCapability(accessInput(), name);
+    const customerProjectAccess = DeploymentProfile.demoRestrictions === false &&
+      DeploymentProfile.authenticatedProjectAccess === true &&
+      ['project_access', 'engineering_access'].includes(String(name || ''));
+    if (!customerProjectAccess) return base;
+
+    // V39 customer builds remove the historical sales-demo UI lock. Tenant,
+    // license, session and role/write checks remain owned by the existing access
+    // and cloud-project layers; unfinished Premium/ERP capabilities are not opened.
+    const authenticated = AccessPolicy.evaluateAccess(accessInput());
+    if (!authenticated.allowed) return base;
+    return Object.freeze({
+      ...base,
+      allowed: true,
+      code: 'CUSTOMER_PROJECT_ACCESS',
+      mode: String(DeploymentProfile.defaultProjectMode || 'FULL'),
+      modeVerified: Boolean(base.modeVerified),
+      capability: String(name || ''),
+      deploymentChannel: String(DeploymentProfile.channel || 'CUSTOMER')
+    });
   }
 
   function canManageProjects() { return capability('project_access').allowed; }
@@ -33,7 +53,7 @@
       if (!value || value.user_id !== profile.id || value.organization_id !== profile.organization_id ||
         !['DEMO','FULL','PREMIUM'].includes(value.mode) || !Number.isSafeInteger(value.version) || value.version < 0) return null;
       return { user_id: value.user_id, organization_id: value.organization_id, mode: value.mode, version: value.version };
-    } catch (_) { return null; } // Missing/unreachable staged backend stays Demo.
+    } catch (_) { return null; } // Missing/unreachable staged mode backend is handled by the customer deployment profile.
     finally { window.clearTimeout(timeout); }
   }
 
@@ -85,8 +105,8 @@
       profileMissing: 'Kullanıcı profili bulunamadı. Yönetici profil kaydını kontrol etmeli.',
       setupMissing: 'Altyapı hazır değil. Supabase kurulumunu kontrol et.',
       newProject: 'Yeni proje', unsaved: 'Kaydedilmedi', saving: 'Kaydediliyor…', saved: 'Kaydedildi',
-      projectAccessRequired: 'Proje yönetimi için doğrulanmış Full veya Premium erişimi gerekir.', fullStartTitle: 'PLMR · Projenize başlayın', fullStartText: 'Yeni bir proje oluşturun, kayıtlı çalışmanızı açın veya hızlı çizimle başlayın.',
-      startTitle: 'PLMR Demo · Hızlı Çizim ile başlayın', startText: 'Hızlı Çizim ile ürünleri yapılandırın ve teknik çıktıları inceleyin. Proje yönetimi tam sürümde kullanılabilir.',
+      projectAccessRequired: 'Bu kullanıcı için proje yönetimi erişimi bulunmuyor.', fullStartTitle: 'PLMR · Projenize başlayın', fullStartText: 'Yeni bir proje oluşturun, kayıtlı çalışmanızı açın veya hızlı çizimle başlayın.',
+      startTitle: 'PLMR · Hızlı Çizim', startText: 'Hızlı Çizim ile ürünleri yapılandırın ve teknik çıktıları inceleyin. Proje yönetimi erişimi kullanıcı yetkisine göre belirlenir.',
       quickDrawing: 'Hızlı Çizim', quickTemporary: 'Geçici', quickStarted: 'Hızlı çizim açıldı.', quickConvert: 'Projeye Dönüştür', quickConvertTitle: 'Hızlı Çizimi Projeye Dönüştür', quickConvertRequired: 'Buluta kaydetmek için hızlı çizimi önce projeye dönüştürün.',
       newProjectDialogTitle: 'Yeni Proje', editProjectDialogTitle: 'Proje Bilgilerini Düzenle', projectInfoUpdated: 'Proje bilgileri güncellendi.',
       projectCodeUnavailable: 'Proje kodu oluşturulamadı. Firma ve kullanıcı kodlarını kontrol edin.', projectFieldsRequired: 'Müşteri adı ve proje adı zorunludur.',
@@ -124,8 +144,8 @@
       profileMissing: 'User profile was not found. The administrator must check the profile record.',
       setupMissing: 'Infrastructure is not ready. Check the Supabase setup.',
       newProject: 'New project', unsaved: 'Not saved', saving: 'Saving…', saved: 'Saved',
-      projectAccessRequired: 'Project management requires verified Full or Premium access.', fullStartTitle: 'PLMR · Start your project', fullStartText: 'Create a project, open saved work or start with a quick drawing.',
-      startTitle: 'PLMR Demo · Start with Quick Drawing', startText: 'Use Quick Drawing to configure products and review technical outputs. Project management is available in the full version.',
+      projectAccessRequired: 'Project management access is not available for this user.', fullStartTitle: 'PLMR · Start your project', fullStartText: 'Create a project, open saved work or start with a quick drawing.',
+      startTitle: 'PLMR · Quick Drawing', startText: 'Use Quick Drawing to configure products and review technical outputs. Project-management access follows the user permissions.',
       quickDrawing: 'Quick Drawing', quickTemporary: 'Temporary', quickStarted: 'Quick drawing opened.', quickConvert: 'Convert to Project', quickConvertTitle: 'Convert Quick Drawing to Project', quickConvertRequired: 'Convert the quick drawing to a project before saving it to the cloud.',
       newProjectDialogTitle: 'New Project', editProjectDialogTitle: 'Edit Project Information', projectInfoUpdated: 'Project information updated.',
       projectCodeUnavailable: 'The project code could not be created. Check the company and user codes.', projectFieldsRequired: 'Customer name and project name are required.',
@@ -641,11 +661,43 @@
     currentProfile.next_project_number = Number.isFinite(used) ? Math.max(current, used + 1) : current + 1;
   }
 
-  function currentAuthorName() {
-    const fullName = normalizeProjectText(currentProfile && currentProfile.full_name || '');
-    if (fullName) return fullName;
-    return normalizeProjectText(currentProfile && currentProfile.username || t('unknownUser'));
+  function currentIdentityFullName() {
+    const candidates = [
+      currentProfile && currentProfile.full_name,
+      currentProfile && currentProfile.display_name,
+      verifiedUser && verifiedUser.user_metadata && verifiedUser.user_metadata.full_name,
+      verifiedUser && verifiedUser.user_metadata && verifiedUser.user_metadata.name
+    ];
+    for (const candidate of candidates) {
+      const value = normalizeProjectText(candidate || '');
+      if (value) return value;
+    }
+    return '';
   }
+  function currentIdentityEmail() {
+    return normalizeProjectText(verifiedUser && verifiedUser.email || '');
+  }
+  function currentAuthorName() {
+    const fullName = currentIdentityFullName();
+    if (fullName) return fullName;
+    const username = normalizeProjectText(currentProfile && currentProfile.username || '');
+    if (username) return username;
+    return currentIdentityEmail() || t('unknownUser');
+  }
+  function currentIdentityPayload() {
+    return Object.freeze({
+      userId: String(verifiedUser && verifiedUser.id || ''),
+      fullName: currentIdentityFullName(),
+      email: currentIdentityEmail()
+    });
+  }
+  window.PulumurIdentityContext = Object.freeze({
+    currentAuthorName: () => currentAuthorName(),
+    currentUsername: () => normalizeProjectText(currentProfile && currentProfile.username || ''),
+    currentUserId: () => String(verifiedUser && verifiedUser.id || ''),
+    currentEmail: () => currentIdentityEmail(),
+    getIdentity: () => currentIdentityPayload()
+  });
 
   function applyMetadata(metadata, options = {}) {
     const api = projectUi();
@@ -1096,46 +1148,15 @@
       const expectedUserId = String(result.user_id || '').trim();
       const expectedUsername = normalizeUsername(result.username || username);
       if (!sessionData.access_token || !sessionData.refresh_token || !expectedUserId) throw new Error('INVALID_LOGIN');
-      let sessionResult = null;
-      let authenticatedSession = null;
-
-      for (let installAttempt = 0; installAttempt < 2; installAttempt += 1) {
-        if (installAttempt > 0) {
-          await clearLocalSupabaseSession('identity-mismatch-retry');
-          if (loginEpoch !== authEpoch) return;
-          await new Promise(resolve => window.setTimeout(resolve, 0));
-          if (loginEpoch !== authEpoch) return;
-        }
-
-        const installation = client.auth.setSession({
-          access_token: sessionData.access_token,
-          refresh_token: sessionData.refresh_token
-        });
-
-        tokenInstallInFlight = installation;
-        try { sessionResult = await installation; }
-        finally {
-          if (tokenInstallInFlight === installation) tokenInstallInFlight = null;
-        }
-
-        if (loginEpoch !== authEpoch) return;
-
-        authenticatedSession =
-          sessionResult && sessionResult.data && sessionResult.data.session;
-
-        if (sessionResult && sessionResult.error) throw sessionResult.error;
-        if (!authenticatedSession) throw new Error('INVALID_LOGIN');
-
-        const actualUserId = String(
-          authenticatedSession.user && authenticatedSession.user.id || ''
-        );
-
-        if (actualUserId === expectedUserId) break;
-
-        if (installAttempt === 1) {
-          throw new Error('LOGIN_IDENTITY_MISMATCH');
-        }
-      }
+      const installation = client.auth.setSession({ access_token: sessionData.access_token, refresh_token: sessionData.refresh_token });
+      tokenInstallInFlight = installation;
+      let sessionResult;
+      try { sessionResult = await installation; }
+      finally { if (tokenInstallInFlight === installation) tokenInstallInFlight = null; }
+      if (loginEpoch !== authEpoch) return;
+      const authenticatedSession = sessionResult.data && sessionResult.data.session;
+      if (sessionResult.error || !authenticatedSession) throw sessionResult.error || new Error('INVALID_LOGIN');
+      if (String(authenticatedSession.user && authenticatedSession.user.id || '') !== expectedUserId) throw new Error('LOGIN_IDENTITY_MISMATCH');
 
       localStorage.setItem(REMEMBER_KEY, remember ? '1' : '0');
       if (remember) { localStorage.setItem(SAVED_USERNAME_KEY, username); sessionStorage.removeItem(SESSION_ONLY_KEY); }
@@ -1190,10 +1211,6 @@
         if (transitionEpoch !== authEpoch) return false;
         if (client && client.auth) await clearLocalSupabaseSession('explicit-logout');
         if (transitionEpoch !== authEpoch) return false;
-
-        await new Promise(resolve => window.setTimeout(resolve, 0));
-        if (transitionEpoch !== authEpoch) return false;
-
         await handleSignedOut();
         return true;
       } catch (error) {
@@ -1554,7 +1571,37 @@
   function startNewProject() {
     if (!canWriteProjects()) { window.alert(t('noWritePermission')); return; }
     if (dirty && !window.confirm(t('confirmDiscard'))) return;
-    openProjectDialog('new');
+    const projectCode = previewProjectCode();
+    if (!projectCode) { window.alert(t('projectCodeUnavailable')); return; }
+
+    // V41: yeni proje artık ayrı müşteri/proje modalı açmaz. Proje kodu ve
+    // kullanıcı/tarih bilgileri hemen oluşturulur; kullanıcı Proje Bilgileri
+    // kartındaki Düzenle akışından müşteri ve proje adını tamamlar.
+    suppressDirty = true;
+    const reset = $('resetBtn');
+    if (reset) reset.click();
+    setQuickDrawingMode(false);
+    ProjectState.setRecord({ projectId: null, projectCode, revisionNo: 1, serverVersion: null });
+    applyMetadata({
+      customer: '',
+      project: projectCode,
+      revisionNo: 1,
+      drawnBy: currentAuthorName(),
+      date: localIsoDate()
+    }, { source: 'new-project-direct' });
+    historicalMode = false;
+    historicalCurrentRevision = 1;
+    revisionContext = null;
+    revisionRows = [];
+    dirty = false;
+    setWorkspaceActive(true);
+    suppressDirty = false;
+    markDirty();
+    refreshProjectHeader();
+    setStatus(t('newProject'));
+    try {
+      window.dispatchEvent(new CustomEvent('plmr:new-project-started', { detail: { projectCode, revisionNo: 1, drawnBy: currentAuthorName(), date: localIsoDate() } }));
+    } catch (_) {}
   }
 
   function startQuickDrawing() {

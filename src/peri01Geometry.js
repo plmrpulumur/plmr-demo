@@ -632,15 +632,16 @@
     const gapIndex = Math.max(0, Math.round(Number(raw.gapIndex) || 0));
     const series = String(raw.series || 'A SERIES').trim().toUpperCase() === 'K SERIES' ? 'K SERIES' : 'A SERIES';
     let type = String(raw.type || 'CLEANABLE').trim().toUpperCase();
-    if (!['CLEANABLE', 'UPWARD COLLECTING', 'DOWNWARD COLLECTING'].includes(type)) type = 'CLEANABLE';
-    if (series === 'K SERIES') type = 'CLEANABLE';
+    if (!['STANDARD', 'CLEANABLE', 'UPWARD COLLECTING', 'DOWNWARD COLLECTING'].includes(type)) type = 'STANDARD';
+    if (series === 'K SERIES' && ['UPWARD COLLECTING', 'DOWNWARD COLLECTING'].includes(type)) type = 'CLEANABLE';
     let mechanism = String(raw.mechanism || 'CHAIN').trim().toUpperCase();
     if (!['CHAIN', 'BELT'].includes(mechanism)) mechanism = 'CHAIN';
     if (series === 'K SERIES') mechanism = 'BELT';
     let glassThickness = String(raw.glassThickness || '8 MM').trim().toUpperCase();
     if (!['8 MM', 'INSULATED GLASS'].includes(glassThickness)) glassThickness = '8 MM';
     if (series === 'K SERIES') glassThickness = 'INSULATED GLASS';
-    const panelCount = String(raw.panelCount || '1+1').trim() === '1+2' ? '1+2' : '1+1';
+    const rawPanelCount = String(raw.panelCount || '1+1').trim();
+    const panelCount = ['1+1', '1+2', '1+3'].includes(rawPanelCount) ? rawPanelCount : '1+1';
     const pozNo = String(raw.pozNo || `G${String(index + 1).padStart(2, '0')}`).trim().toUpperCase();
     const cleanable = type === 'CLEANABLE';
     return {
@@ -650,9 +651,11 @@
       customGlassColor: String(raw.customGlassColor || '').trim(),
       panelCount,
       motorDirection: String(raw.motorDirection || 'RIGHT').trim().toUpperCase() === 'LEFT' ? 'LEFT' : 'RIGHT',
-      view: String(raw.view || 'INSIDE VIEW').trim().toUpperCase() === 'OUTSIDE VIEW' ? 'OUTSIDE VIEW' : 'INSIDE VIEW',
+      view: String(raw.view || 'RIGHT').trim().toUpperCase() || 'RIGHT',
       motorType: String(raw.motorType || 'SOMFY RTS').trim().toUpperCase(),
       remoteControl: String(raw.remoteControl || '1 CHANNEL').trim().toUpperCase(),
+      remoteQuantity: Math.max(0, Math.trunc(Number(raw.remoteQuantity) || 0)),
+      displayState: String(raw.displayState || 'OPEN').trim().toUpperCase() === 'CLOSED' ? 'CLOSED' : 'OPEN',
       bottomPanelMode: cleanable ? 'VASISTAS' : 'FIXED',
       bottomPanelState: cleanable && String(raw.bottomPanelState || 'OPEN').trim().toUpperCase() !== 'CLOSED' ? 'OPEN' : 'CLOSED',
       bottomPanelHinge: 'BOTTOM',
@@ -3373,7 +3376,8 @@
     const innerY = 50;
     const innerW = Math.max(1, width - 100);
     const innerH = Math.max(1, height - 200);
-    const panelTotal = placement.panelCount === '1+2' ? 3 : 2;
+    const panelMatch = String(placement.panelCount || '1+1').match(/^1\+(\d+)$/);
+    const panelTotal = Math.max(2, 1 + Number(panelMatch && panelMatch[1] || 1));
     const separatorH = 50;
     const clearPanelH = Math.max(1, (innerH - (panelTotal - 1) * separatorH) / panelTotal);
     const type = String(placement.type || 'CLEANABLE').toUpperCase();
@@ -3424,7 +3428,8 @@
         entities.push({ type:'text', layer, x:innerX+Math.min(innerW*.18,180), y:bottom.y1+Math.min(clearPanelH*.22,90), height:Math.max(16,Math.min(30,width/100)), value:'VASİSTAS', align:'center', rotation:0, semanticRole:'product-state-label' });
       }
     }
-    const viewText = String(placement.view || 'INSIDE VIEW').toUpperCase();
+    const rawViewText = String(placement.view || 'RIGHT').toUpperCase();
+    const viewText = rawViewText === 'RIGHT' ? 'SAĞ' : rawViewText === 'LEFT' ? 'SOL' : rawViewText;
     const textH = guillotineMotorTextHeight(width, viewText);
     const bandY = height - 75;
     const motorRight = String(placement.motorDirection || 'RIGHT').toUpperCase() !== 'LEFT';
