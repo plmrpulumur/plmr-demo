@@ -341,6 +341,10 @@
     const activeSnapshot = rawP3dv.snapshot && typeof rawP3dv.snapshot === 'object'
       ? clone(rawP3dv.snapshot)
       : (productId && snapshots[productId] ? clone(snapshots[productId].snapshot) : null);
+    const rawStandalone = object(source.standalone);
+    const standaloneProject = rawStandalone.project && typeof rawStandalone.project === 'object'
+      ? clone(rawStandalone.project)
+      : null;
     return {
       schema: 'plmr-unified-workspaces-v1',
       activeProductId,
@@ -352,6 +356,12 @@
         snapshot: activeSnapshot,
         snapshots,
         updatedAt: text(rawP3dv.updatedAt, productId && snapshots[productId] ? snapshots[productId].updatedAt : '')
+      },
+      standalone: {
+        schema: 'plmr-standalone-workspace-v1',
+        productId: canonicalWorkspaceProduct(rawStandalone.productId),
+        project: standaloneProject,
+        updatedAt: text(rawStandalone.updatedAt, '')
       }
     };
   }
