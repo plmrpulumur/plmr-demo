@@ -37,6 +37,7 @@
   let lastWorkspaceInactive = document.body.classList.contains('project-workspace-inactive');
   let dedicatedProductId = '';
   let dedicatedProductUrl = '';
+  let activeMaterialAction = 'materials-profiles';
   let moduleSelectorNode = null;
   let moduleSelectorAnchor = null;
   const openGroups = new Set(['Proje Çizimi', 'Teklif', 'Üretim BOM', 'Cariler', 'Ürünler']);
@@ -120,6 +121,10 @@
       'proje çizimi>yeni proje': 'project-new',
       'proje çizimi>projelerim': 'projects',
       'proje çizimi>proje dosyası aç': 'project-import',
+      'ürünler>sistemler': 'materials-systems',
+      'ürünler>profiller': 'materials-profiles',
+      'ürünler>aksesuarlar': 'materials-accessories',
+      'ürünler>yeni ekle': 'materials-new',
       'yönetim': 'management',
       'yardım': 'help',
       'çıkış': 'logout'
@@ -133,6 +138,7 @@
     if (action === 'project-new') return bridgeAvailable('startNewProjectBtn');
     if (action === 'projects') return bridgeAvailable('startOpenProjectsBtn');
     if (action === 'project-import') return bridgeAvailable('startImportProjectBtn');
+    if (action.startsWith('materials-')) return Boolean(window.PulumurMaterialCatalog);
     return false;
   }
 
@@ -267,6 +273,7 @@
     document.querySelectorAll('.erp-panel-view').forEach(panel => { panel.hidden = panel.id !== tab.panelId; });
     renderTabs();
     markActiveMenu();
+    syncGuillotineProductionView(id === 'production');
     if (id === 'help') syncHelpContent();
     if (id === 'management') syncManagementEditor();
     if (id === 'drawing') syncDrawingState();
@@ -320,7 +327,7 @@
   }
 
   function markActiveMenu() {
-    const actionByTab = { home: 'home', management: 'management', help: 'help', projects: 'projects', drawing: 'project-new' };
+    const actionByTab = { home: 'home', management: 'management', help: 'help', projects: 'projects', drawing: 'project-new', materials: activeMaterialAction };
     const activeAction = actionByTab[activeTabId] || '';
     document.querySelectorAll('#erpSidebarMenu [data-erp-action]').forEach(button => {
       button.classList.toggle('is-active', button.dataset.erpAction === activeAction);
@@ -369,6 +376,16 @@
       triggerLegacy('startImportProjectBtn');
       return;
     }
+    if (action.startsWith('materials-')) {
+      const viewByAction = { 'materials-systems': 'systems', 'materials-profiles': 'profiles', 'materials-accessories': 'accessories', 'materials-new': 'profiles' };
+      activeMaterialAction = action;
+      ensureTab('materials', 'Ürünler', 'erpMaterialsPanel', true);
+      activateTab('materials');
+      if (window.PulumurMaterialCatalog && typeof window.PulumurMaterialCatalog.open === 'function') {
+        window.PulumurMaterialCatalog.open(viewByAction[action] || 'profiles', { openNew: action === 'materials-new' });
+      }
+      return;
+    }
     if (action === 'logout') {
       if (!triggerLegacy('startLogoutBtn')) triggerLegacy('logoutBtn');
     }
@@ -394,11 +411,11 @@
       const url = new URL(raw, window.location.href);
       url.searchParams.set('embedded', '1');
       url.searchParams.set('host', 'erp');
-      url.searchParams.set('v', '10.47-r47');
+      url.searchParams.set('v', '10.48-r48');
       return url.href;
     } catch (_) {
       const join = raw.includes('?') ? '&' : '?';
-      return `${raw}${join}embedded=1&host=erp&v=10.47-r47`;
+      return `${raw}${join}embedded=1&host=erp&v=10.48-r48`;
     }
   }
 
@@ -553,7 +570,7 @@
 
   const GUILLOTINE_HOST_SCHEMA = 'plmr-guillotine-workspace-host-v1';
   const GUILLOTINE_HOST_PRODUCT = 'GUILLOTINE';
-  const GUILLOTINE_HOST_REQUEST_TYPES = new Set(['PLMR_IDENTITY_REQUEST']);
+  const GUILLOTINE_HOST_REQUEST_TYPES = new Set(['PLMR_IDENTITY_REQUEST','PLMR_PRODUCTION_TAB_OPEN','PLMR_PRODUCTION_TAB_CLOSE']);
 
   function guillotineHostOriginAccepted(event) {
     const ownOrigin = String(window.location.origin || '');
@@ -586,6 +603,26 @@
     } catch (_) { return { userId:'', fullName:'', email:'' }; }
   }
 
+  function postGuillotineHostState(type, payload) {
+    const frame = $('erpDedicatedProductFrame');
+    if (!frame || !frame.contentWindow || String(dedicatedProductId || '') !== GUILLOTINE_HOST_PRODUCT) return false;
+    try {
+      frame.contentWindow.postMessage({
+        schema: GUILLOTINE_HOST_SCHEMA,
+        source: 'plmr-erp-shell',
+        type,
+        productId: GUILLOTINE_HOST_PRODUCT,
+        payload: payload && typeof payload === 'object' ? payload : {}
+      }, guillotineHostTargetOrigin());
+      return true;
+    } catch (_) { return false; }
+  }
+
+  function syncGuillotineProductionView(active) {
+    if (String(dedicatedProductId || '') !== GUILLOTINE_HOST_PRODUCT) return;
+    postGuillotineHostState('PLMR_PRODUCTION_VIEW_STATE', { active:Boolean(active) });
+  }
+
   function bindGuillotineHostMessages() {
     window.addEventListener('message', event => {
       const frame = $('erpDedicatedProductFrame');
@@ -594,6 +631,16 @@
       if (message.schema !== GUILLOTINE_HOST_SCHEMA || message.source !== 'plmr-guillotine-workspace') return;
       if (!GUILLOTINE_HOST_REQUEST_TYPES.has(String(message.type || ''))) return;
       if (String(message.productId || '') !== GUILLOTINE_HOST_PRODUCT || String(dedicatedProductId || '') !== GUILLOTINE_HOST_PRODUCT) return;
+      if (message.type === 'PLMR_PRODUCTION_TAB_OPEN') {
+        ensureTab('production', 'Üretim Paketi', 'erpDrawingPanel', true);
+        activateTab('production');
+        return;
+      }
+      if (message.type === 'PLMR_PRODUCTION_TAB_CLOSE') {
+        ensureTab('drawing', 'Proje Çizimi', 'erpDrawingPanel', true);
+        activateTab('drawing');
+        return;
+      }
       const sessionId = String(message.sessionId || '');
       if (sessionId.length < 16 || sessionId.length > 160) return;
       const identity = canonicalIdentityPayload();

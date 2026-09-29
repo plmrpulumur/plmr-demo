@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plmr-production-value-v1",
+  "title": "PLMR Production Value V1",
+  "type": "object",
+  "required": ["calculatedValue", "manualValue", "effectiveValue", "status"],
+  "properties": {
+    "calculatedValue": {},
+    "manualValue": {},
+    "effectiveValue": {},
+    "status": {
+      "enum": ["NORMAL", "ZERO_RESULT", "MANUAL_OVERRIDE", "MANUAL_REQUIRED"]
+    }
+  },
+  "additionalProperties": true
+}

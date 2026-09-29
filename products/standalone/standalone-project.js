@@ -32,9 +32,7 @@
       { key: 'view', label: 'Görünüş', type: 'select-custom', values: ['INSIDE VIEW', 'OUTSIDE VIEW', 'OTHER'] },
       { key: 'motorType', label: 'Motor', type: 'select-custom', values: ['SOMFY RTS', 'SOMFY IO', 'CUPPON', 'OTHER'] },
       { key: 'remoteControl', label: 'Kumanda', type: 'select-custom', values: ['1 CHANNEL', '2 CHANNELS', '4 CHANNELS', '6 CHANNELS', '16 CHANNELS', '40 CHANNELS', 'OTHER'] },
-      { key: 'remoteQuantity', label: 'Kumanda Adet', type: 'number', min: 0, max: 999 },
-      { key: 'bottomPanelState', label: 'Alt Panel', type: 'select', values: ['OPEN', 'CLOSED'] },
-      { key: 'displayState', label: 'Gösterim', type: 'select', values: ['OPEN', 'CLOSED'] }
+      { key: 'remoteQuantity', label: 'Kumanda Adet', type: 'number', min: 0, max: 999 }
     ]),
     ZIP_SCREEN: Object.freeze([
       { key: 'series', label: 'Seri', type: 'select', values: ['G SERIES', 'P SERIES'] },
@@ -118,6 +116,17 @@
     ['productType', 'schemaVersion', 'projectName', 'width', 'height', 'id', 'pozNo', 'quantity', 'description'].forEach(key => delete project[key]);
     return project;
   }
+
+  const GUILLOTINE_MAKROSKY_DEFAULTS = Object.freeze({
+    glassThickness:'INSULATED GLASS', glassColor:'TRANSPARENT', type:'STANDARD', mechanism:'CHAIN', panelCount:'1+2',
+    motorDirection:'RIGHT', view:'OUTSIDE VIEW', motorType:'SOMFY RTS', remoteControl:'2 CHANNELS', remoteQuantity:1,
+    bottomPanelState:'CLOSED', displayState:'CLOSED'
+  });
+  const GUILLOTINE_MAKROSKY_POSITIONS = Object.freeze([
+    Object.freeze({positionNo:'P01',width:3000,height:2400,quantity:2}),
+    Object.freeze({positionNo:'P02',width:2560,height:2300,quantity:3}),
+    Object.freeze({positionNo:'P03',width:2460,height:2350,quantity:2})
+  ]);
 
   function slidingPanelCount(width, openingType) {
     let count = Math.max(2, Math.ceil(Math.max(1, Number(width) || 1) / 1200));
@@ -228,7 +237,7 @@
     const incoming = source || {};
     const map = {};
     PRODUCT_IDS.forEach(type => {
-      map[type] = normalizeOptions(type, { ...defaultOptions(type), ...(incoming[type] || {}) }, {}).options;
+      map[type] = normalizeOptions(type, { ...defaultOptions(type), ...(type === 'GUILLOTINE' ? GUILLOTINE_MAKROSKY_DEFAULTS : {}), ...(incoming[type] || {}) }, {}).options;
     });
     return map;
   }
@@ -244,11 +253,11 @@
       schema: SCHEMA,
       schemaVersion: 2,
       projectInfo: {
-        customerName: '', projectName: '', projectCode: '', revision: 'R01', designer: '', date: '',
+        customerName: '', country: '', projectName: '', projectCode: '', revision: 'R01', designer: '', date: '',
         ...(source.projectInfo || {})
       },
       commonSettings: {
-        color: '', glassType: 'CLEAR', generalDescription: '', outputScale: 'AUTO', expandQuantity: false, defaultProductType: initialProductType,
+        color: initialProductType === 'GUILLOTINE' ? 'RAL 7016 TEXTURE' : '', glassType: initialProductType === 'GUILLOTINE' ? 'TRANSPARENT' : 'CLEAR', generalDescription: '', outputScale: 'AUTO', expandQuantity: false, defaultProductType: initialProductType,
         ...(source.commonSettings || {}), defaultsByProduct
       },
       layout: {
@@ -265,7 +274,9 @@
     });
     if (!project.positions.length) {
       const type = canonicalProduct(source.productType || project.commonSettings.defaultProductType || 'SLIDING');
-      project.positions.push(createPosition(type, {}, project.positions, project.commonSettings.defaultsByProduct[type]));
+      if (type === 'GUILLOTINE') {
+        GUILLOTINE_MAKROSKY_POSITIONS.forEach(seed => project.positions.push(createPosition(type, seed, project.positions, project.commonSettings.defaultsByProduct[type])));
+      } else project.positions.push(createPosition(type, {}, project.positions, project.commonSettings.defaultsByProduct[type]));
     }
     if (project.production && root.PulumurProductionPackageModel) root.PulumurProductionPackageModel.markStale(project, api);
     return project;

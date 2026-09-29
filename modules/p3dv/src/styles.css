@@ -4689,3 +4689,21 @@ body.p3dv-host-embedded #viewerFrame { min-height: 560px; height: calc(100vh - 1
   body.p3dv-host-embedded .plmr-main-stack,
   body.p3dv-host-embedded .plmr-designer-layout { height: auto !important; overflow: visible !important; }
 }
+
+/* V43 — Canonical P3DV scene-only host for standalone Giyotin preview. */
+body.p3dv-standalone-guillotine-preview{margin:0!important;overflow:hidden!important;background:#0f172a!important}
+body.p3dv-standalone-guillotine-preview .plmr-studio-header,
+body.p3dv-standalone-guillotine-preview .plmr-project-rail,
+body.p3dv-standalone-guillotine-preview .plmr-parameter-panel,
+body.p3dv-standalone-guillotine-preview .plmr-preview-head,
+body.p3dv-standalone-guillotine-preview .large-preview-toolbox,
+body.p3dv-standalone-guillotine-preview .viewer-meta,
+body.p3dv-standalone-guillotine-preview .preview-input-guidance,
+body.p3dv-standalone-guillotine-preview .toolbox-selection-banner{display:none!important}
+body.p3dv-standalone-guillotine-preview .plmr-studio-workspace,
+body.p3dv-standalone-guillotine-preview .plmr-main-stack,
+body.p3dv-standalone-guillotine-preview .plmr-designer-layout,
+body.p3dv-standalone-guillotine-preview .plmr-preview-panel,
+body.p3dv-standalone-guillotine-preview .plmr-preview-workspace,
+body.p3dv-standalone-guillotine-preview .plmr-preview-canvas{display:block!important;position:relative!important;width:100vw!important;height:100vh!important;min-height:100vh!important;max-width:none!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important}
+body.p3dv-standalone-guillotine-preview #viewerFrame{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;border:0!important;background:#0f172a!important}

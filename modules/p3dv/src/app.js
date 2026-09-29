@@ -1,9 +1,19 @@
 (function () {
   const p3dvEmbeddedHostMode = (() => { try { return new URLSearchParams(window.location.search).get('embedded') === '1' || Boolean(window.frameElement && window.frameElement.dataset && window.frameElement.dataset.p3dvEmbeddedHost === 'true'); } catch (_) { return false; } })();
+  const p3dvStandaloneGuillotinePreviewMode = (() => { try { return new URLSearchParams(window.location.search).get('standalonePreview') === 'guillotine'; } catch (_) { return false; } })();
   const P3DV_PRODUCT_INPUT_SCHEMA = 'p3dv-main-product-input-v14.04';
-  const P3DV_HOST_BUILD = '10.36-r36';
-  const P3DV_HOST_CONTRACT = 'plmr-p3dv-host-bridge-v35';
+  const P3DV_HOST_BUILD = '10.44-r44';
+  const P3DV_HOST_CONTRACT = 'plmr-p3dv-host-bridge-v44';
+  const P3DV_GUILLOTINE_SCHEMA = 'plmr-p3dv-guillotine-v1';
+  const P3DV_GUILLOTINE_PRODUCT = 'GUILLOTINE';
+  const P3DV_GUILLOTINE_INBOUND_TYPES = new Set(['P3DV_GUILLOTINE_INIT','P3DV_GUILLOTINE_STATE','P3DV_GUILLOTINE_PATCH','P3DV_GUILLOTINE_DISPOSE']);
+  let p3dvStandaloneGuillotineSessionId = '';
+  let p3dvStandaloneGuillotineStateKey = '';
+  let p3dvStandaloneGuillotinePositionCount = 0;
+  let p3dvStandaloneGuillotineRenderTimer = 0;
+  let p3dvStandaloneGuillotineRendered = false;
   if (p3dvEmbeddedHostMode && document && document.body) document.body.classList.add('p3dv-host-embedded');
+  if (p3dvStandaloneGuillotinePreviewMode && document && document.body) document.body.classList.add('p3dv-standalone-guillotine-preview');
 
   // V3.86 demo default: keep internal Galaxy identity, expose Bioclimatic (Tilt) as the initial product.
   const defaults = {
@@ -3317,7 +3327,7 @@
 
   function buildEmptyViewerHtml(message) {
     const safe = String(message || 'Ölçüleri girin').replace(/[&<>"]/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[char]));
-    return `<!doctype html><html><head><meta charset="utf-8"><style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#eef3f7;font-family:Arial,Helvetica,sans-serif;color:#576574}.empty{display:grid;place-items:center;width:240px;height:380px;padding:18px;text-align:center;border:2px dashed #c6d4df;border-radius:16px;background:rgba(255,255,255,.10)}strong,.legacy-prompt{display:none}span{max-width:220px;font-size:13px;line-height:1.5;font-weight:800;color:#64717d}</style></head><body><div class="empty"><strong>${productModelLabel()} · Modul 1</strong><span>Önizleme için zorunlu ölçüleri doldurun.</span><i class="legacy-prompt">${safe}</i></div></body></html>`;
+    return `<!doctype html><html><head><meta charset="utf-8"><style>html,body{height:100%;margin:0}body{display:grid;place-items:center;background:#eef3f7;font-family:Arial,Helvetica,sans-serif;color:#576574}.empty{display:grid;place-items:center;width:240px;height:380px;padding:18px;text-align:center;border:2px dashed #c6d4df;border-radius:16px;background:rgba(255,255,255,.10)}strong,.legacy-prompt{display:none}span{max-width:220px;font-size:13px;line-height:1.5;font-weight:800;color:#64717d}</style></head><body><div class="empty"><strong>${productModelLabel()} · Modul 1</strong><span>${p3dvStandaloneGuillotinePreviewMode?safe:'Önizleme için zorunlu ölçüleri doldurun.'}</span><i class="legacy-prompt">${safe}</i></div></body></html>`;
   }
 
   function renderViewer() {
@@ -8178,6 +8188,21 @@
     if (!frame || event.source !== frame.contentWindow) return;
     if (!event.data || event.data.source !== 'product-3d-viewer') return;
     if (event.data.sessionId !== activeViewerSessionId) return;
+    if (p3dvStandaloneGuillotinePreviewMode) {
+      if (event.data.type === 'viewer-ready') {
+        if (p3dvStandaloneGuillotineRenderTimer) window.clearTimeout(p3dvStandaloneGuillotineRenderTimer);
+        p3dvStandaloneGuillotineRenderTimer = 0;
+        p3dvStandaloneGuillotineRendered = true;
+        p3dvHostLifecycleDiagnostics.viewerReadyCount += 1;
+        postViewerMessage('set-runtime-active', { active: p3dvHostRuntimeActive });
+        p3dvStandaloneGuillotinePost('P3DV_GUILLOTINE_RENDERED', { positionCount:p3dvStandaloneGuillotinePositionCount });
+        return;
+      }
+      if (event.data.type === 'viewer-error') {
+        p3dvStandaloneGuillotineFail(event.data.message || '3D görüntüleyici başlatılamadı.');
+        return;
+      }
+    }
     if (event.data.type === 'viewer-ready') {
       viewerLiveProductStateReady = Boolean(event.data.liveProductState);
       viewerLivePanelMasterReady = Boolean(event.data.livePanelMaster);
@@ -8224,10 +8249,18 @@
     if (event.data.type === 'toggle-toolbox-selection' && event.data.item) toggleToolboxSelectionItem(event.data.item);
     if (event.data.type === 'complete-toolbox-selection') completeToolboxSelection();
     if (event.data.type === 'cancel-toolbox-selection') cancelToolboxSelection();
-    if (event.data.type === 'select-zone' && event.data.zone) selectZone(event.data.zone);
+    if (event.data.type === 'select-zone' && event.data.zone) {
+      if (p3dvStandaloneGuillotinePreviewMode && window.parent !== window) {
+        p3dvStandaloneGuillotinePost('P3DV_GUILLOTINE_SELECT_POSITION', { positionId:String(event.data.zone.id||'') });
+      } else selectZone(event.data.zone);
+    }
     if (event.data.type === 'select-divider-profile' && event.data.profile) openDividerProfileDialog(event.data.profile);
     if (event.data.type === 'select-post') openPostActionDialog(event.data.postIndex);
     if (event.data.type === 'toggle-panel-state' && event.data.zoneId) {
+      if (p3dvStandaloneGuillotinePreviewMode) {
+        p3dvStandaloneGuillotinePost('P3DV_GUILLOTINE_TOGGLE_POSITION', { positionId:String(event.data.zoneId), open:Boolean(event.data.open) });
+        return;
+      }
       const zoneId = String(event.data.zoneId);
       const key = String(event.data.productKey || event.data.panelKey || zoneId);
       modelState.productOpenStates[key] = Boolean(event.data.open);
@@ -8239,7 +8272,7 @@
   // Pergo Rise no longer has a dedicated iframe/viewer builder. It is routed
   // through buildViewerHtml together with B-Cube Freedom and Bio-Rise.
 
-  function buildViewerHtml({ productGroup, width, depth, height, lamellaCount, systemCount, freedomLayout, bioRiseLayout, galaxyLayout, orientations, postSections, beamSection, placements, zipPlacements, facadeProfiles, colorMode, systemColor, panelColor, pergoRiseUrl, pergoRiseProject, viewerSessionId, cameraState, selectedZoneId: activeZoneId, dimensionVisibility: showDimensionVisibility, productsOpen, productOpenStates, panelStates, panelMasterOpen, toolboxSelectionMode: activeSelectionMode, toolboxSelectionKeys: activeSelectionKeys }) {
+  function buildViewerHtml({ productGroup, width, depth, height, lamellaCount, systemCount, freedomLayout, bioRiseLayout, galaxyLayout, orientations, postSections, beamSection, placements, zipPlacements, facadeProfiles, colorMode, systemColor, panelColor, pergoRiseUrl, pergoRiseProject, viewerSessionId, cameraState, selectedZoneId: activeZoneId, dimensionVisibility: showDimensionVisibility, productsOpen, productOpenStates, panelStates, panelMasterOpen, toolboxSelectionMode: activeSelectionMode, toolboxSelectionKeys: activeSelectionKeys, standaloneGuillotineItems }) {
     const W = width;
     const D = depth;
     const H = height;
@@ -8275,6 +8308,12 @@
     const panelMasterOpenJson = safeScriptJson(Boolean(panelMasterOpen));
     const toolboxSelectionModeJson = safeScriptJson(activeSelectionMode || null);
     const toolboxSelectionKeysJson = safeScriptJson(Array.isArray(activeSelectionKeys) ? activeSelectionKeys : []);
+    const standaloneGuillotineItemsJson = safeScriptJson(Array.isArray(standaloneGuillotineItems) ? standaloneGuillotineItems : []);
+    // A local-file Giyotin preview must not depend on a reachable CDN.
+    // Keep the established engine/version and use classic scripts for file: support.
+    const standalonePreview = Array.isArray(standaloneGuillotineItems) && standaloneGuillotineItems.length > 0;
+    const threeSource = standalonePreview ? './vendor/three-r128/three.min.js?v=10.48-r48' : 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+    const controlsSource = standalonePreview ? './vendor/three-r128/OrbitControls.js?v=10.48-r48' : 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js';
     const zipFabricMeta = {};
     ZIP_FABRIC_CATALOG.forEach((section) => section.pages.forEach((page) => page.items.forEach((item) => {
       const embeddedTextureMap = window.P3DV_ZIP_FABRIC_TEXTURES || {};
@@ -8354,8 +8393,8 @@ body.ar-landscape #arTrackingStatus{left:12px;right:338px;top:58px}
 body.ar-landscape #arControlPanel{left:auto;right:8px;top:8px;bottom:8px;width:310px;max-height:none}
 body.ar-landscape #arScaleBadge{max-width:calc(100% - 350px)}
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></scr` + `ipt>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></scr` + `ipt>
+<script src="${threeSource}"></scr` + `ipt>
+<script src="${controlsSource}"></scr` + `ipt>
 <script src="./products/pergo-rise/pergo-rise-editing.js"></scr` + `ipt>
 <script src="./products/pergo-rise/pergo-rise-viewer.js"></scr` + `ipt>
 </head>
@@ -8412,21 +8451,32 @@ body.ar-landscape #arScaleBadge{max-width:calc(100% - 350px)}
 </div>
 <script>
 (function(){
-if(!window.THREE || !THREE.OrbitControls){
-  document.getElementById('fallback').style.display='grid';
-  return;
-}
-
 const VIEWER_SESSION_ID=${viewerSessionIdJson};
-const PERGO_RISE_GLB_URL=${pergoRiseUrlJson};
-let pergoRiseProject=${pergoRiseProjectJson};
-let pergoRiseDerived=pergoRiseProject&&pergoRiseProject.derived?pergoRiseProject.derived:null;
 function postParent(type,payload){
   parent.postMessage({source:'product-3d-viewer',sessionId:VIEWER_SESSION_ID,type,...(payload||{})},'*');
 }
+function reportViewerFailure(error){
+  const message=String(error&&error.message||error||'3D görüntüleyici başlatılamadı.').slice(0,500);
+  const fallback=document.getElementById('fallback');
+  if(fallback){fallback.textContent='3D çizim oluşturulamadı: '+message;fallback.style.display='grid';}
+  postParent('viewer-error',{message});
+}
+if(${standalonePreview}){
+  window.addEventListener('error',event=>reportViewerFailure(event.error||event.message));
+  window.addEventListener('unhandledrejection',event=>reportViewerFailure(event.reason));
+}
+if(!window.THREE || !THREE.OrbitControls){
+  reportViewerFailure(${safeScriptJson(standalonePreview ? 'Paket içindeki Three.js veya OrbitControls dosyası yüklenemedi. ZIP dosyasını tamamen çıkarıp tekrar açın.' : 'Three.js veya OrbitControls yüklenemedi.')});
+  return;
+}
+const PERGO_RISE_GLB_URL=${pergoRiseUrlJson};
+let pergoRiseProject=${pergoRiseProjectJson};
+let pergoRiseDerived=pergoRiseProject&&pergoRiseProject.derived?pergoRiseProject.derived:null;
 // Legacy static-envelope contract retained for regression scanners: const W=${W}, D=${D}, H=${H};
 let W=${W}, D=${D}, H=${H};
 const PRODUCT_GROUP=${productGroupJson};
+const STANDALONE_GUILLOTINE_ITEMS=${standaloneGuillotineItemsJson};
+const IS_STANDALONE_GUILLOTINE_PREVIEW=Array.isArray(STANDALONE_GUILLOTINE_ITEMS)&&STANDALONE_GUILLOTINE_ITEMS.length>0;
 const IS_BIO_RISE=PRODUCT_GROUP==='bio-rise';
 const IS_GALAXY=PRODUCT_GROUP==='b-cube-galaxy';
 const IS_BIO_FAMILY=IS_BIO_RISE||IS_GALAXY;
@@ -10810,7 +10860,10 @@ function facadeRightDirectionSign(zone){
 }
 
 function buildGuillotineProduct(zone,placement){
-  zone=fitProductZone(zone,5);
+  const standalone=Boolean(zone.standaloneGuillotine);
+  zone=fitProductZone(zone,standalone?0:5);
+  if(standalone && String(placement.subtype)==='STANDARD')placement={...placement,subtype:'DOWNWARD COLLECTING'};
+  const insideView=standalone && String(placement.view).toUpperCase()==='INSIDE VIEW';
   const seriesK=String(placement.series||'A SERIES')==='K SERIES';
   const frameColor=DEFAULT_COLOR_MODE?(seriesK?0x1e293b:0x334155):SYSTEM_COLOR;
   const panelColor=DEFAULT_COLOR_MODE?(seriesK?0x6d28d9:0x7c3aed):SYSTEM_COLOR;
@@ -10824,8 +10877,14 @@ function buildGuillotineProduct(zone,placement){
   addProductBox(zone,{name:'Guillotine Motor Box',u:0,y:motorY,v:motorBoxV,w:dims.innerW,h:motorH,t:motorBoxDepth},motorVisualColor(placement),1);
 
   const facadeRightSign=facadeRightDirectionSign(zone);
-  const motorSide=String(placement.motorDirection||'RIGHT')==='RIGHT'?facadeRightSign:-facadeRightSign;
-  addFacadeText(zone,{name:'Guillotine Motor Label',text:'MOTOR',u:motorSide*(dims.innerW/2-150),y:motorY,v:zone.outerFaceV-zone.inward*34,w:220,h:70});
+  const motorSide=(String(placement.motorDirection||'RIGHT')==='RIGHT'?facadeRightSign:-facadeRightSign)*(insideView?-1:1);
+  const labelZone=insideView?{...zone,inward:-zone.inward}:zone;
+  const labelV=insideView?zone.outerFaceV+zone.inward*130:zone.outerFaceV-zone.inward*34;
+  const motorLabel=addFacadeText(labelZone,{name:'Guillotine Motor Label',text:'MOTOR',u:motorSide*(dims.innerW/2-150),y:motorY,v:labelV,w:220,h:70});
+  const guillotineView=String(placement.view||'OUTSIDE VIEW').toUpperCase();
+  const guillotineViewText=guillotineView==='INSIDE VIEW'?'İÇ BAKIŞ':(guillotineView==='OUTSIDE VIEW'?'DIŞ BAKIŞ':guillotineView);
+  const viewLabel=addFacadeText(labelZone,{name:'Guillotine View Label',text:guillotineViewText,u:0,y:motorY,v:labelV,w:Math.max(260,Math.min(dims.innerW*.55,720)),h:70});
+  if(standalone){motorLabel.material.side=THREE.FrontSide;viewLabel.material.side=THREE.FrontSide;}
   addProductBox(zone,{name:'Guillotine Motor Side',u:motorSide*(dims.innerW/2-32),y:motorY,v:productDepthCenter(zone,112,0),w:52,h:motorH*.72,t:112},profileColor(0x111827),1);
   const panels=Math.max(2,Math.min(8,Math.round(Number(placement.panels)||3)));
   const usableH=Math.max(360,dims.innerH-motorH-16);
@@ -11992,6 +12051,62 @@ function buildModel(showAll,options){
   zonePickers=[];
   hoveredZone=null;
   selectedZonePicker=null;
+  if(IS_STANDALONE_GUILLOTINE_PREVIEW){
+    const items=STANDALONE_GUILLOTINE_ITEMS;
+    const columns=Math.max(1,Math.min(items.length,10,Math.round(Number(items[0]&&items[0].layoutColumns)||2)));
+    const gap=700;
+    const rowHeights=[];
+    const colWidths=[];
+    items.forEach((item,index)=>{const row=Math.floor(index/columns),col=index%columns;rowHeights[row]=Math.max(rowHeights[row]||0,Number(item.height)||2400);colWidths[col]=Math.max(colWidths[col]||0,Number(item.width)||3000);});
+    const totalW=colWidths.reduce((a,b)=>a+b,0)+Math.max(0,columns-1)*gap;
+    const totalH=rowHeights.reduce((a,b)=>a+b,0)+Math.max(0,rowHeights.length-1)*gap;
+    const xStarts=[];let x=-totalW/2;colWidths.forEach((w,i)=>{xStarts[i]=x;x+=w+gap;});
+    const yStarts=[];let top=totalH/2;rowHeights.forEach((h,i)=>{yStarts[i]=top-h;top-=h+gap;});
+    items.forEach((item,index)=>{
+      const row=Math.floor(index/columns),col=index%columns;
+      const width=Math.max(151,Number(item.width)||3000),height=Math.max(251,Number(item.height)||2400);
+      const cx=xStarts[col]+width/2;
+      const bottomY=yStarts[row];
+      const zone={standaloneGuillotine:true,id:String(item.id||('G'+index)),axis:'x',cx,cz:0,width,height,bottomY,topY:bottomY+height,beamBottomY:bottomY+height,inward:-1,outerFaceV:0,startBoundaryWidth:0,endBoundaryWidth:0};
+      const placement={type:'guillotine',series:String(item.series||'A SERIES'),subtype:String(item.subtype||item.type||'STANDARD'),mechanism:String(item.mechanism||'CHAIN'),glassThickness:String(item.glassThickness||'8 MM'),glassColor:String(item.glassColor||'TRANSPARENT'),customGlassColor:String(item.customGlassColor||''),panels:Math.max(2,Math.min(8,Math.round(Number(item.panels)||2))),panelType:String(item.panelType||'1+1'),motorDirection:String(item.motorDirection||'RIGHT'),view:String(item.view||'OUTSIDE VIEW'),motorType:String(item.motorType||'SOMFY RTS'),remoteControl:String(item.remoteControl||'1 CHANNEL'),bottomPanelMode:String(item.bottomPanelMode||'FIXED'),bottomPanelState:String(item.bottomPanelState||'CLOSED'),bottomPanelHinge:String(item.bottomPanelHinge||'BOTTOM'),collectionState:String(item.collectionState||'NORMAL')};
+      productOpenStates[zone.id]=String(item.displayState||'OPEN')!=='CLOSED';
+      const savedStandaloneColorState={SYSTEM_COLOR,PANEL_COLOR,SYSTEM_FINISH,PANEL_FINISH,SYSTEM_COLOR_CODE,PANEL_COLOR_CODE,SYSTEM_COLOR_KIND,PANEL_COLOR_KIND,DEFAULT_COLOR_MODE};
+      if(item.systemColor&&typeof item.systemColor==='object'){
+        SYSTEM_COLOR=liveColorNumber(item.systemColor,SYSTEM_COLOR);PANEL_COLOR=SYSTEM_COLOR;
+        SYSTEM_FINISH=liveFinish(item.systemColor.finish,SYSTEM_FINISH);PANEL_FINISH=SYSTEM_FINISH;
+        SYSTEM_COLOR_CODE=String(item.systemColor.code||'');PANEL_COLOR_CODE=SYSTEM_COLOR_CODE;
+        SYSTEM_COLOR_KIND=String(item.systemColor.kind||'ral');PANEL_COLOR_KIND=SYSTEM_COLOR_KIND;DEFAULT_COLOR_MODE=false;
+      }
+      try{
+        const firstChild=group.children.length;
+        buildGuillotineProduct(zone,placement);
+        if(placement.view==='INSIDE VIEW'){
+          group.children.slice(firstChild).forEach(part=>{
+            part.position.x=zone.cx-(part.position.x-zone.cx);
+            part.position.z=2*zone.cz-part.position.z;
+            part.rotation.y+=Math.PI;
+          });
+        }
+      }finally{
+        SYSTEM_COLOR=savedStandaloneColorState.SYSTEM_COLOR;PANEL_COLOR=savedStandaloneColorState.PANEL_COLOR;SYSTEM_FINISH=savedStandaloneColorState.SYSTEM_FINISH;PANEL_FINISH=savedStandaloneColorState.PANEL_FINISH;SYSTEM_COLOR_CODE=savedStandaloneColorState.SYSTEM_COLOR_CODE;PANEL_COLOR_CODE=savedStandaloneColorState.PANEL_COLOR_CODE;SYSTEM_COLOR_KIND=savedStandaloneColorState.SYSTEM_COLOR_KIND;PANEL_COLOR_KIND=savedStandaloneColorState.PANEL_COLOR_KIND;DEFAULT_COLOR_MODE=savedStandaloneColorState.DEFAULT_COLOR_MODE;
+      }
+      addZonePicker(zone,true);
+      if(item.showDimensions){ addZoneWidthDimension(zone,index%3); addZoneHeightDimension(zone,index%3); }
+    });
+    parts.forEach(part=>part.visible=true);
+    group.updateMatrixWorld(true);
+    const bounds=fastWorldBounds(group);
+    const span=Math.max(1200,bounds.max.x-bounds.min.x,bounds.max.y-bounds.min.y);
+    camera.position.set(0,(bounds.min.y+bounds.max.y)/2,Math.max(3500,span*1.45));
+    controls.target.set(0,(bounds.min.y+bounds.max.y)/2,0);controls.update();
+    if(floor){floor.position.y=bounds.min.y-50;floor.visible=true;}
+    if(grid){grid.position.y=bounds.min.y-49;grid.visible=true;}
+    if(box)box.visible=false;
+    // Zone width/height helpers register their objects as intermediate dimensions.
+    setDimensionVisibility({intermediate:items.some(item=>item.showDimensions),main:false});
+    lastBuiltGeometrySignature='standalone-guillotine:'+items.length+':'+Date.now();endPerfCycle();
+    return;
+  }
   const p=[postDims(0),postDims(1),postDims(2),postDims(3)];
   if(IS_PERGO_RISE){
     buildPergoRiseModel();
@@ -13049,6 +13164,7 @@ async function initializeViewer(){
   await loadPergoRiseTemplate();
   buildModel(true);
   if(IS_PERGO_RISE)updatePergoRiseCommonTestState();
+  if(IS_STANDALONE_GUILLOTINE_PREVIEW)renderer.render(scene,camera);
   syncViewerAnimationLoop();
   postParent('viewer-ready',{
     liveProductState:true,
@@ -13062,7 +13178,7 @@ async function initializeViewer(){
     pergoRiseComponentMapping:pergoRiseComponentLibrary&&pergoRiseComponentLibrary.mapping||[]
   });
 }
-initializeViewer();
+initializeViewer().catch(reportViewerFailure);
 })();
 </scr` + `ipt>
 </body>
@@ -14057,8 +14173,160 @@ initializeViewer();
     }, 650);
   }
 
+  function p3dvRenderStandaloneGuillotinePreview(items, options = {}) {
+    if (!p3dvStandaloneGuillotinePreviewMode) throw new Error('P3DV_STANDALONE_PREVIEW_MODE_REQUIRED');
+    const list = Array.isArray(items) ? items.filter(item => item && Number(item.width) > 0 && Number(item.height) > 0).map(item => ({ ...item })) : [];
+    const frame = $(ids.frame);
+    if (!frame) throw new Error('P3DV_VIEWER_FRAME_MISSING');
+    if (!list.length) { frame.srcdoc = buildEmptyViewerHtml('Geçerli Giyotin pozları bekleniyor.'); return false; }
+    const columns = Math.max(1, Math.min(10, Math.round(Number(options.layoutColumns) || 2)));
+    list.forEach(item => { item.layoutColumns = columns; });
+    const widths = Array(columns).fill(0);
+    const rowHeights = [];
+    list.forEach((item,index)=>{ const col=index%columns,row=Math.floor(index/columns); widths[col]=Math.max(widths[col],Number(item.width)||0); rowHeights[row]=Math.max(rowHeights[row]||0,Number(item.height)||0); });
+    const gap = 700;
+    const sceneWidth = Math.max(2200, widths.reduce((a,b)=>a+b,0)+Math.max(0,columns-1)*gap);
+    const sceneHeight = Math.max(2200, rowHeights.reduce((a,b)=>a+b,0)+Math.max(0,rowHeights.length-1)*gap);
+    const color = options.systemColor && typeof options.systemColor === 'object' ? options.systemColor : defaults.systemColor;
+    // The nested viewer and its message listener must share the SAME session.
+    activeViewerSessionId = `p3dv-standalone-guillotine-${Date.now()}-${++viewerSessionCounter}`;
+    const viewerId = activeViewerSessionId;
+    p3dvStandaloneGuillotinePositionCount = list.length;
+    p3dvStandaloneGuillotineRendered = false;
+    if (p3dvStandaloneGuillotineRenderTimer) window.clearTimeout(p3dvStandaloneGuillotineRenderTimer);
+    p3dvStandaloneGuillotineRenderTimer = window.setTimeout(() => {
+      p3dvStandaloneGuillotineRenderTimer = 0;
+      p3dvStandaloneGuillotineFail('3D görüntüleyici zamanında başlatılamadı. Paket dosyalarını ve tarayıcının WebGL desteğini kontrol edin.');
+    }, 15000);
+    if ($(ids.pergo2DViewport)) $(ids.pergo2DViewport).hidden = true;
+    frame.hidden = false; frame.style.display = 'block';
+    frame.srcdoc = buildViewerHtml({
+      productGroup:'b-cube-galaxy', width:sceneWidth, depth:Math.max(1800,sceneWidth*.35), height:sceneHeight,
+      lamellaCount:8, systemCount:1, freedomLayout:null, bioRiseLayout:null, galaxyLayout:null,
+      orientations:[0,0,0,0], postSections:defaults.postSections, beamSection:defaults.beamSection,
+      placements:{}, zipPlacements:{}, facadeProfiles:{}, colorMode:'ral', systemColor:color, panelColor:color,
+      pergoRiseUrl:'', pergoRiseProject:null, viewerSessionId:viewerId, cameraState:null, selectedZoneId:String(options.selectedPositionId||'')||null,
+      dimensionVisibility:{intermediate:false,main:false}, productsOpen:true, productOpenStates:{}, panelStates:{}, panelMasterOpen:true,
+      toolboxSelectionMode:null, toolboxSelectionKeys:[], standaloneGuillotineItems:list
+    });
+    return true;
+  }
+
+  function p3dvStandaloneGuillotineTargetOrigin() {
+    const origin = window.location.protocol === 'file:' ? 'null' : String(window.location.origin || '');
+    return origin && origin !== 'null' ? origin : '*';
+  }
+  function p3dvStandaloneGuillotineOriginAccepted(eventOrigin) {
+    const origin = window.location.protocol === 'file:' ? 'null' : String(window.location.origin || '');
+    return origin && origin !== 'null' ? eventOrigin === origin : (eventOrigin === 'null' || eventOrigin === '' || (window.location.protocol === 'file:' && eventOrigin === 'file://'));
+  }
+  function p3dvStandaloneGuillotinePost(type, payload) {
+    if (!p3dvStandaloneGuillotinePreviewMode || window.parent === window || !p3dvStandaloneGuillotineSessionId) return false;
+    try {
+      window.parent.postMessage({
+        schema:P3DV_GUILLOTINE_SCHEMA, source:'plmr-p3dv-host', type,
+        sessionId:p3dvStandaloneGuillotineSessionId, productId:P3DV_GUILLOTINE_PRODUCT,
+        payload:payload&&typeof payload==='object'?payload:{}
+      }, p3dvStandaloneGuillotineTargetOrigin());
+      return true;
+    } catch (_) { return false; }
+  }
+  function p3dvStandaloneGuillotineFail(message) {
+    if (p3dvStandaloneGuillotineRenderTimer) window.clearTimeout(p3dvStandaloneGuillotineRenderTimer);
+    p3dvStandaloneGuillotineRenderTimer = 0;
+    p3dvStandaloneGuillotineRendered = false;
+    p3dvStandaloneGuillotineStateKey = '';
+    p3dvStandaloneGuillotinePost('P3DV_GUILLOTINE_ERROR', { message:String(message || '3D çizim oluşturulamadı.').slice(0,500) });
+  }
+  function p3dvStandaloneGuillotineValidatePosition(item, index, state) {
+    if (!item || typeof item !== 'object') return null;
+    const width = Number(item.width), height = Number(item.height);
+    if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) return null;
+    const text = (value, fallback, max=120) => String(value == null ? fallback : value).slice(0,max);
+    return {
+      id:text(item.id,`G${index+1}`,96), positionNo:text(item.positionNo,`P${String(index+1).padStart(2,'0')}`,40),
+      width, height, quantity:Math.max(1,Math.min(9999,Math.trunc(Number(item.quantity)||1))),
+      series:text(item.series,'A SERIES'), type:text(item.type||item.subtype,'STANDARD'), subtype:text(item.subtype||item.type,'STANDARD'), mechanism:text(item.mechanism,'CHAIN'),
+      glassThickness:text(item.glassThickness,'8 MM'), glassColor:text(item.glassColor,'TRANSPARENT'), customGlassColor:text(item.customGlassColor,''),
+      finish:text(item.finish||item.surface,'MAT'), surface:text(item.surface||item.finish,'MAT'), panelCount:text(item.panelCount||item.panelType,'1+1'),
+      panels:Math.max(2,Math.min(8,Math.round(Number(item.panels)||2))), panelType:text(item.panelType||item.panelCount,'1+1'), motorDirection:text(item.motorDirection,'RIGHT'),
+      view:text(item.view,'OUTSIDE VIEW'), motorType:text(item.motorType,'SOMFY RTS'), remoteControl:text(item.remoteControl,'1 CHANNEL'),
+      color:text(item.color,''),
+      systemColor:item.systemColor&&typeof item.systemColor==='object'?{
+        code:text(item.systemColor.code,'RAL 7016',80),
+        hex:/^#[0-9a-f]{6}$/i.test(String(item.systemColor.hex||''))?String(item.systemColor.hex):'#383e42',
+        finish:['GLOSS','MATTE','TEXTURE'].includes(String(item.systemColor.finish||'').toUpperCase())?String(item.systemColor.finish).toUpperCase():'MATTE',
+        kind:text(item.systemColor.kind,'ral',32)
+      }:null,
+      bottomPanelMode:text(item.bottomPanelMode,(String(item.subtype||item.type||'')==='CLEANABLE'?'VASISTAS':'FIXED')),
+      bottomPanelState:text(item.bottomPanelState,'CLOSED'), bottomPanelHinge:'BOTTOM', collectionState:text(item.collectionState,'NORMAL'),
+      displayState:text(item.displayState||state.openState,'OPEN'), showDimensions:Boolean(item.showDimensions ?? state.showDimensions), layoutColumns:state.layoutColumns
+    };
+  }
+  function p3dvStandaloneGuillotineValidatedState(payload) {
+    if (!payload || typeof payload !== 'object') return null;
+    const common = payload.commonSettings && typeof payload.commonSettings === 'object' ? payload.commonSettings : {};
+    const layoutColumns = Math.max(1,Math.min(10,Math.round(Number(common.layoutColumns)||2)));
+    const openState = String(payload.openState||'OPEN') === 'CLOSED' ? 'CLOSED' : 'OPEN';
+    const showDimensions = Boolean(payload.showDimensions);
+    const positions = Array.isArray(payload.positions) ? payload.positions.slice(0,250).map((item,index)=>p3dvStandaloneGuillotineValidatePosition(item,index,{layoutColumns,openState,showDimensions})).filter(Boolean) : [];
+    const c = common.systemColor && typeof common.systemColor === 'object' ? common.systemColor : {};
+    const systemColor = {
+      code:String(c.code||'RAL 7016').slice(0,80),
+      hex:/^#[0-9a-f]{6}$/i.test(String(c.hex||''))?String(c.hex):'#383e42',
+      finish:['GLOSS','MATTE','TEXTURE'].includes(String(c.finish||'').toUpperCase())?String(c.finish).toUpperCase():'MATTE',
+      kind:String(c.kind||'ral').slice(0,32)
+    };
+    return { positions, commonSettings:{layoutColumns,systemColor}, selectedPositionId:String(payload.selectedPositionId||'').slice(0,96), openState, showDimensions };
+  }
+  if (p3dvStandaloneGuillotinePreviewMode) {
+    window.addEventListener('message', event => {
+      if (event.source !== window.parent || !p3dvStandaloneGuillotineOriginAccepted(event.origin)) return;
+      const message = event.data || {};
+      if (message.schema !== P3DV_GUILLOTINE_SCHEMA || message.source !== 'plmr-guillotine-workspace' || message.productId !== P3DV_GUILLOTINE_PRODUCT) return;
+      if (!P3DV_GUILLOTINE_INBOUND_TYPES.has(String(message.type||''))) return;
+      const sessionId = String(message.sessionId||'');
+      if (sessionId.length < 16 || sessionId.length > 160) return;
+      if (message.type === 'P3DV_GUILLOTINE_INIT') {
+        if (p3dvStandaloneGuillotineSessionId && p3dvStandaloneGuillotineSessionId !== sessionId) return;
+        p3dvStandaloneGuillotineSessionId = sessionId;
+        p3dvStandaloneGuillotinePost('P3DV_HOST_READY', { ready:true });
+        return;
+      }
+      if (!p3dvStandaloneGuillotineSessionId || sessionId !== p3dvStandaloneGuillotineSessionId) return;
+      if (message.type === 'P3DV_GUILLOTINE_DISPOSE') {
+        if (p3dvStandaloneGuillotineRenderTimer) window.clearTimeout(p3dvStandaloneGuillotineRenderTimer);
+        p3dvStandaloneGuillotineRenderTimer = 0;
+        p3dvStandaloneGuillotineStateKey = '';
+        p3dvStandaloneGuillotineRendered = false;
+        activeViewerSessionId = '';
+        const frame = $(ids.frame);
+        if (frame) frame.srcdoc = buildEmptyViewerHtml('Giyotin 3D oturumu kapatıldı.');
+        p3dvStandaloneGuillotineSessionId = '';
+        return;
+      }
+      const state = p3dvStandaloneGuillotineValidatedState(message.payload);
+      if (!state) return;
+      const stateKey = JSON.stringify(state);
+      if (stateKey === p3dvStandaloneGuillotineStateKey) {
+        if (p3dvStandaloneGuillotineRendered) p3dvStandaloneGuillotinePost('P3DV_GUILLOTINE_RENDERED', { positionCount:p3dvStandaloneGuillotinePositionCount });
+        return;
+      }
+      try {
+        const started = p3dvRenderStandaloneGuillotinePreview(state.positions, {
+          layoutColumns:state.commonSettings.layoutColumns, systemColor:state.commonSettings.systemColor, selectedPositionId:state.selectedPositionId
+        });
+        if (started) p3dvStandaloneGuillotineStateKey = stateKey;
+        else p3dvStandaloneGuillotineFail('3D çizim için en az bir geçerli Giyotin pozu gerekiyor.');
+      } catch (error) {
+        p3dvStandaloneGuillotineFail(error && error.message || error);
+      }
+    });
+  }
+
   window.__P3DV_HOST_BRIDGE__ = Object.freeze({
     embedded: p3dvEmbeddedHostMode,
+    standaloneGuillotinePreview: p3dvStandaloneGuillotinePreviewMode,
     build: P3DV_HOST_BUILD,
     hostContract: P3DV_HOST_CONTRACT,
     snapshot: p3dvHostSnapshot,
@@ -14078,7 +14346,9 @@ initializeViewer();
     runtimeDiagnostics: () => ({
       ...p3dvHostLifecycleDiagnostics, runtimeActive:p3dvHostRuntimeActive, drawingMode:p3dvDrawingMode,
       activeTransitionId:p3dvHostActiveTransitionId, activeViewerSessionId, viewerSessionCounter, activeViewerProductGroup,
-      viewerReady:viewerLiveModelStateReady, productGroup:modelState.productGroup, history:p3dvHistoryInspect()
+      viewerReady:p3dvStandaloneGuillotinePreviewMode ? p3dvStandaloneGuillotineRendered : viewerLiveModelStateReady,
+      standaloneGuillotinePositionCount:p3dvStandaloneGuillotinePositionCount,
+      productGroup:modelState.productGroup, history:p3dvHistoryInspect()
     }),
     setDrawingMode: (mode, transitionId) => { p3dvHostActiveTransitionId = Number(transitionId || p3dvHostActiveTransitionId || 0); return setP3dvDrawingMode(mode, { resetView: true }); },
     getDrawingMode: () => p3dvDrawingMode,
@@ -14092,7 +14362,8 @@ initializeViewer();
     history: () => p3dvHistoryInspect(),
     undoTechnical2DCommand: () => p3dvUndoPhysicalCommand(),
     redoTechnical2DCommand: () => p3dvRedoPhysicalCommand(),
-    rebaseTechnical2DHistory: (reason) => p3dvHistoryRebase(reason || 'host-rebase')
+    rebaseTechnical2DHistory: (reason) => p3dvHistoryRebase(reason || 'host-rebase'),
+    renderStandaloneGuillotinePreview: (items, options) => p3dvRenderStandaloneGuillotinePreview(items, options || {})
   });
 
   window.__P3DV_DOCUMENT_BRIDGE__ = Object.freeze({
@@ -14155,8 +14426,12 @@ initializeViewer();
   bindPreviewToolbarControls();
   bindEvents();
   updateToolbox();
-  renderViewer();
-  scheduleAutomaticPreview();
+  if(p3dvStandaloneGuillotinePreviewMode){
+    $(ids.frame).srcdoc=buildEmptyViewerHtml('Giyotin 3D bağlantısı bekleniyor.');
+  }else{
+    renderViewer();
+    scheduleAutomaticPreview();
+  }
   if (p3dvEmbeddedHostMode) {
     window.setTimeout(() => p3dvHostPost('ready', { productGroup: modelState.productGroup, version: '3.86', build: P3DV_HOST_BUILD, hostContract: P3DV_HOST_CONTRACT }, p3dvHostActiveTransitionId), 0);
   }

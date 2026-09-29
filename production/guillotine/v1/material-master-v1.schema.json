@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plmr-material-master-v1",
+  "title": "PLMR Material Master V1",
+  "type": "object",
+  "required": [
+    "materialId",
+    "code",
+    "descriptionTr",
+    "category1",
+    "unit",
+    "active"
+  ],
+  "properties": {
+    "materialId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "organizationId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "descriptionEn": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "descriptionTr": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category1": {
+      "type": "string",
+      "minLength": 1
+    },
+    "category2": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "category3": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "minLength": 1
+    },
+    "unitWeight": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "cost": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "salePrice": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "image": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "createdAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "updatedAt": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "createdBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "updatedBy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "active": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": true
+}

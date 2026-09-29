@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "plmr-guillotine-production-result-v1",
+  "title": "PLMR Giyotin 1+2 Isıcam Standart Production Result V1",
+  "type": "object",
+  "required": ["schema", "engineId", "contractId", "productType", "positions", "cutItems", "accessoryItems", "glassItems", "validation"],
+  "properties": {
+    "schema": { "const": "plmr-guillotine-production-result-v1" },
+    "engineId": { "const": "plmr-guillotine-1plus2-insulated-standard-engine-v1" },
+    "contractId": { "type": "string", "minLength": 1 },
+    "productType": { "const": "GUILLOTINE" },
+    "positions": { "type": "array" },
+    "cutItems": { "type": "array" },
+    "accessoryItems": { "type": "array" },
+    "glassItems": { "type": "array" },
+    "validation": {
+      "type": "object",
+      "required": ["errors", "warnings"],
+      "properties": {
+        "errors": { "type": "array" },
+        "warnings": { "type": "array" }
+      }
+    }
+  },
+  "additionalProperties": true
+}

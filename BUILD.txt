@@ -1,1 +1,1 @@
-PLMR V47 RC / build 10.47-r47
+PLMR V48 RC / build 10.48-r48

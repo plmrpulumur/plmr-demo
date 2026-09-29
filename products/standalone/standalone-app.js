@@ -364,6 +364,7 @@
     $('projectInfoCode').classList.toggle('is-placeholder', !info.projectCode);
     $('projectInfoCustomer').textContent=info.customerName||'Cari seçiminden otomatik gelecektir';
     $('projectInfoCustomer').classList.toggle('is-placeholder', !info.customerName);
+    $('projectInfoCountry').textContent=info.country||'—'; $('projectInfoCountry').classList.toggle('is-placeholder', !info.country);
     $('projectInfoName').textContent=info.projectName||info.projectCode||'İsim verilmezse proje kodu yazılacaktır';
     $('projectInfoName').classList.toggle('is-placeholder', !info.projectName);
     $('projectInfoRevision').textContent=info.revision||'R01';
@@ -411,14 +412,14 @@
 
   function openProjectEditor() {
     syncProjectInfoFromParent({ force:true }); ensureProjectCode(); const info=project.projectInfo;
-    $('customerProjectCode').value=''; $('customerProjectCode').placeholder=info.projectCode||'Otomatik oluşturulacak'; $('customerName').value=info.customerName||''; $('projectName').value=info.projectName||'';
+    $('customerProjectCode').value=''; $('customerProjectCode').placeholder=info.projectCode||'Otomatik oluşturulacak'; $('customerName').value=info.customerName||''; $('projectCountry').value=info.country||''; $('projectName').value=info.projectName||'';
     $('revision').value=info.revision||'R01'; $('designer').value=info.designer||activeIdentityAuthor()||''; $('projectDate').value=info.date||localIsoDate();
     $('projectInfoDialog').showModal();
   }
   function saveProjectInfo() {
     const info=project.projectInfo;
     ensureProjectCode();
-    info.customerName=$('customerName').value.trim(); info.projectName=$('projectName').value.trim(); info.revision=$('revision').value.trim().toUpperCase()||'R01';
+    info.customerName=$('customerName').value.trim(); info.country=$('projectCountry').value.trim(); info.projectName=$('projectName').value.trim(); info.revision=$('revision').value.trim().toUpperCase()||'R01';
     info.designer=$('designer').value.trim()||activeIdentityAuthor()||''; info.date=$('projectDate').value||localIsoDate();
     if (!info.projectName) info.projectName=info.projectCode||'PROJE';
     $('projectInfoDialog').close(); renderProjectSummary(); drawing=null; scheduleDraw(); void stageSave('Proje bilgileri proje aşamasına ve Projelerim kaydına işlendi.');
@@ -497,12 +498,8 @@
       setCustomControl('gPanelCount','gPanelCountCustom',values.panelCount,KNOWN.panelCount); setCustomControl('gMotorDirection','gMotorDirectionCustom',values.motorDirection,KNOWN.motorDirection);
       setCustomControl('gView','gViewCustom',values.view || 'OUTSIDE VIEW',KNOWN.view); setCustomControl('gMotorType','gMotorTypeCustom',values.motorType,KNOWN.motorType);
       setCustomControl('gRemoteControl','gRemoteControlCustom',values.remoteControl,KNOWN.remoteControl);
-      $('gRemoteQuantity').value=Number(values.remoteQuantity)||0; $('gBottomPanel').value=values.bottomPanelState==='CLOSED'?'CLOSED':'OPEN'; $('gDisplayState').value=values.displayState==='CLOSED'?'CLOSED':'OPEN';
-      syncBottomPanelAvailability();
+      $('gRemoteQuantity').value=Number(values.remoteQuantity)||0;
     } else renderGenericOptionFields($('genericCommonFields'), type, values);
-  }
-  function syncBottomPanelAvailability() {
-    const typeValue=customControlValue('gType','gTypeCustom'); const enabled=typeValue==='CLEANABLE'; $('gBottomPanel').disabled=!enabled; if (!enabled) $('gBottomPanel').value='CLOSED';
   }
   function openCommonEditor() { fillCommonEditor(); $('commonSettingsDialog').showModal(); }
   function readGiyotinCommonFromStatic() {
@@ -596,7 +593,7 @@
     const container=$('productOptions'); container.dataset.productType=type;
     if(type==='GUILLOTINE'){
       container.innerHTML=giyotinDetailHtml(values);
-      container.querySelectorAll('[data-dkey]').forEach(select=>{ if(select.tagName==='SELECT' && container.querySelector(`[data-dcustom="${CSS.escape(select.dataset.dkey)}"]`)) select.addEventListener('change',()=>{const input=container.querySelector(`[data-dcustom="${CSS.escape(select.dataset.dkey)}"]`); input.hidden=select.value!=='OTHER'; if(select.dataset.dkey==='type'){const bottom=container.querySelector('[data-dkey="bottomPanelState"]');const clean=select.value==='CLEANABLE';bottom.disabled=!clean;if(!clean)bottom.value='CLOSED';}}); });
+      container.querySelectorAll('[data-dkey]').forEach(select=>{ if(select.tagName==='SELECT' && container.querySelector(`[data-dcustom="${CSS.escape(select.dataset.dkey)}"]`)) select.addEventListener('change',()=>{const input=container.querySelector(`[data-dcustom="${CSS.escape(select.dataset.dkey)}"]`); input.hidden=select.value!=='OTHER';}); });
       $('detailColorButton').addEventListener('click',()=>openRalPicker((base,finish)=>{ $('detailColorValue').value=base; $('detailColorFinish').value=finish; $('detailColorLabel').textContent=buildColorValue(base, finish)||'Renk seç'; const o=colorOption(base); const swatch=$('detailColorSwatch'); swatch.style.backgroundColor=o?o.hex:'#d9e0e4'; swatch.style.backgroundImage=o&&o.image?`url('../../modules/p3dv/${String(o.image).replace(/^\/+/, '')}')`:''; $('detailColorCustom').hidden = true; }));
     } else renderGenericOptionFields(container,type,values);
     $('detailDialog').showModal();
@@ -619,7 +616,7 @@
     const finish = String($('detailColorFinish').value || '').trim().toUpperCase();
     const rawBase = $('detailColorValue').value === 'OTHER' ? String($('detailColorCustom').value || '').trim().toUpperCase() : $('detailColorValue').value;
     const out={color:buildColorValue(rawBase, finish)};
-    container.querySelectorAll('[data-dkey]').forEach(control=>{ const key=control.dataset.dkey; if(control.disabled && key==='bottomPanelState'){out[key]='CLOSED';return;} let value=control.value; const custom=container.querySelector(`[data-dcustom="${CSS.escape(key)}"]`); if(value==='OTHER'&&custom)value=custom.value.trim().toUpperCase()||'OTHER'; if(control.type==='number')value=Math.max(0,Math.trunc(Number(value)||0)); out[key]=value; }); return out;
+    container.querySelectorAll('[data-dkey]').forEach(control=>{ const key=control.dataset.dkey; let value=control.value; const custom=container.querySelector(`[data-dcustom="${CSS.escape(key)}"]`); if(value==='OTHER'&&custom)value=custom.value.trim().toUpperCase()||'OTHER'; if(control.type==='number')value=Math.max(0,Math.trunc(Number(value)||0)); out[key]=value; }); out.bottomPanelState='CLOSED'; out.displayState='OPEN'; return out;
   }
   function saveDetail() {
     if (bulkDetailIds.length) {
@@ -845,7 +842,6 @@
 
   fillLayoutModeSelect(); initializeProject(); renderAll(); syncPreviewModeControls(); draw({quiet:true}); subscribeParentState(); requestCanonicalIdentity();
   ['gGlassThickness','gGlassColor','gType','gMechanism','gPanelCount','gMotorDirection','gView','gMotorType','gRemoteControl'].forEach(id=>bindCustomPair(id,`${id}Custom`));
-  $('gType').addEventListener('change',syncBottomPanelAvailability);
   $('editProjectInfoBtn').addEventListener('click',openProjectEditor); $('projectInfoSaveBtn').addEventListener('click',saveProjectInfo);
   $('editCommonSettingsBtn').addEventListener('click',openCommonEditor); $('commonSettingsSaveBtn').addEventListener('click',saveCommonSettings);
   $('commonColorButton').addEventListener('click',()=>openRalPicker((base,finish)=>updateColorButton(base,finish))); $('commonColorCustom').addEventListener('input',()=>{ if($('commonColor').value==='OTHER') $('commonColorLabel').textContent=buildColorValue($('commonColorCustom').value, $('commonColorFinish').value)||'Renk seç'; }); $('ralCloseBtn').addEventListener('click',()=>{ $('ralDialog').close(); resetRalPickerStage(); }); $('ralOtherBtn').addEventListener('click',()=>startRalFinish('OTHER')); $('ralFinishBackBtn').addEventListener('click',resetRalPickerStage); $('ralSearch').addEventListener('input',renderRalGrid); $('ralStandardOnly').addEventListener('change',renderRalGrid);

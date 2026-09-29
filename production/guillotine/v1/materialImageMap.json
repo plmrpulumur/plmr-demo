@@ -1,0 +1,133 @@
+{
+  "schema": "plmr-guillotine-material-image-map-v1",
+  "sourceWorkbook": "Ergbey Giyotin Tablolar.xlsx",
+  "sourceWorkbookSha256": "3d102bd53d9802a45a16d0b6736ab1736ed0b7385271d41ff7aec689c4ab5e0b",
+  "mapping": [
+    {
+      "materialCode": "1212",
+      "source": "xl/media/image1.png",
+      "asset": "assets/production/guillotine/materials/1212.png",
+      "sha256": "af1ba09e168d1d24c8275867e6395f7a69a49fc3be9e5d520a0a33328f6db7af"
+    },
+    {
+      "materialCode": "1211",
+      "source": "xl/media/image2.png",
+      "asset": "assets/production/guillotine/materials/1211.png",
+      "sha256": "a0ce70b62e09a1e943a19734007816ce88bd1a5798bc423c167d3ff76a9f40af"
+    },
+    {
+      "materialCode": "1208",
+      "source": "xl/media/image3.png",
+      "asset": "assets/production/guillotine/materials/1208.png",
+      "sha256": "b5965600e08e3ded8917e251759b14c22b1f27fb0732d86379d542b495fc3e09"
+    },
+    {
+      "materialCode": "1207",
+      "source": "xl/media/image4.png",
+      "asset": "assets/production/guillotine/materials/1207.png",
+      "sha256": "82338266185ce7a8a219f1fc480655e6e92a48febbe1d56092933598689be250"
+    },
+    {
+      "materialCode": "1206",
+      "source": "xl/media/image5.png",
+      "asset": "assets/production/guillotine/materials/1206.png",
+      "sha256": "596bdb0762d76907263bdac0e818ea3519ad3f22bb9f23302e734c9fded835bb"
+    },
+    {
+      "materialCode": "1209",
+      "source": "xl/media/image6.png",
+      "asset": "assets/production/guillotine/materials/1209.png",
+      "sha256": "5fd73ca030667ff996fe4064ac255fe1329170b4835cbeb47e397203f24b9e49"
+    },
+    {
+      "materialCode": "1213",
+      "source": "xl/media/image7.png",
+      "asset": "assets/production/guillotine/materials/1213.png",
+      "sha256": "93317ede166669fe7496b4c1e7824a89bdc2154a139ddc429b92db1ab7a1728a"
+    },
+    {
+      "materialCode": "1214",
+      "source": "xl/media/image8.png",
+      "asset": "assets/production/guillotine/materials/1214.png",
+      "sha256": "8e0094ae04f454e0018aea62fa7d861a39449210d15f1653113c17faa8b07c3f"
+    },
+    {
+      "materialCode": "1215",
+      "source": "xl/media/image9.png",
+      "asset": "assets/production/guillotine/materials/1215.png",
+      "sha256": "7672fa1498179de2641fe7559497901e23de0525397438b934c87d3bb5f6df05"
+    },
+    {
+      "materialCode": "1216",
+      "source": "xl/media/image10.png",
+      "asset": "assets/production/guillotine/materials/1216.png",
+      "sha256": "3738314bce8da507f7581f71cf6cad4ee097dc2c7fb3ab4c6cc85a65c7f81845"
+    },
+    {
+      "materialCode": "1204",
+      "source": "xl/media/image11.png",
+      "asset": "assets/production/guillotine/materials/1204.png",
+      "sha256": "7eb8d211477b7ebe2a56adda4225ce173317a285ad62b763808ecb84ffed4f8a"
+    },
+    {
+      "materialCode": "1203",
+      "source": "xl/media/image12.png",
+      "asset": "assets/production/guillotine/materials/1203.png",
+      "sha256": "494308b742e86ebc1c155f66bbbf7f4c8997aa3bc803060f93630256516297b7"
+    },
+    {
+      "materialCode": "AKS0001",
+      "source": "xl/media/image13.png",
+      "asset": "assets/production/guillotine/materials/AKS0001.png",
+      "sha256": "6e40191fafa5524cb1f539f90d91dcf341846f47eec91b07e0cccdb014b31092"
+    },
+    {
+      "materialCode": "AKS0002",
+      "source": "xl/media/image14.png",
+      "asset": "assets/production/guillotine/materials/AKS0002.png",
+      "sha256": "c728b069d5d3e2bfdca8b9f5dfd9c13db219618337ecfd785b924633d939b498"
+    },
+    {
+      "materialCode": "AKS0003",
+      "source": "xl/media/image15.png",
+      "asset": "assets/production/guillotine/materials/AKS0003.png",
+      "sha256": "f266d89575e05928d84ffd8a8f7664e9d2b1ba062bc0366f85cd0da893b77433"
+    },
+    {
+      "materialCode": "AKS0004",
+      "source": "xl/media/image16.png",
+      "asset": "assets/production/guillotine/materials/AKS0004.png",
+      "sha256": "910b266d6dacefbb863499bdc09d75235830213c71daf1852c7661c5310a9f95"
+    },
+    {
+      "materialCode": "AKS0005",
+      "source": "xl/media/image17.png",
+      "asset": "assets/production/guillotine/materials/AKS0005.png",
+      "sha256": "fb921620a5cac9b4d9827e8b8e38f333aac2f31c639f712b18ea8437ff92f713"
+    },
+    {
+      "materialCode": "AKS0006",
+      "source": "xl/media/image18.png",
+      "asset": "assets/production/guillotine/materials/AKS0006.png",
+      "sha256": "008cb3933803592c030185743282d907e38c4110890003ba1375e7e41043e3ea"
+    },
+    {
+      "materialCode": "AKS0007",
+      "source": "xl/media/image19.png",
+      "asset": "assets/production/guillotine/materials/AKS0007.png",
+      "sha256": "9bc4fa314a70f8a8044a0e8b84ec86f5c09b9111097e9e8cefa30f564cabd54e"
+    },
+    {
+      "materialCode": "SM0001",
+      "source": "xl/media/image20.png",
+      "asset": "assets/production/guillotine/materials/SM0001.png",
+      "sha256": "ee5ce0adacf5f700b465bd5a9be1d13f89f16a09f01c6c330484518d61fdea26"
+    },
+    {
+      "materialCode": "CAM0001",
+      "source": "xl/media/image21.png",
+      "asset": "assets/production/guillotine/materials/CAM0001.png",
+      "sha256": "45dd898a8928368c31f18985a5964b343f501c7f2fec3b5fa1e7d7d9510ab883"
+    }
+  ]
+}
