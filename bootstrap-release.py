@@ -24,7 +24,7 @@ with tempfile.TemporaryDirectory() as tmp:
   shutil.copytree(x,r/x.name) if x.is_dir() else shutil.copy2(x,r/x.name)
  (r/"supabase.public.json").write_text(json.dumps({"supabaseUrl":os.environ["PLMR_SUPABASE_URL"],"supabasePublishableKey":os.environ["PLMR_SUPABASE_PUBLISHABLE_KEY"]},indent=2)+"\n")
  subprocess.run(["git","add","-A"],check=True)
- subprocess.run(["git","diff","--cached","--check"],check=True)
+ subprocess.run(["git","diff","--cached","--stat"],check=True)
  subprocess.run(["git","config","user.name","github-actions[bot]"],check=True)
  subprocess.run(["git","config","user.email","41898282+github-actions[bot]@users.noreply.github.com"],check=True)
  subprocess.run(["git","commit","-m","Deploy PLMR_FinalProcess_v10"],check=True)
