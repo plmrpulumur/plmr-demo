@@ -22,6 +22,8 @@ with tempfile.TemporaryDirectory() as tmp:
   shutil.rmtree(x) if x.is_dir() else x.unlink()
  for x in d.iterdir():
   shutil.copytree(x,r/x.name) if x.is_dir() else shutil.copy2(x,r/x.name)
+ shutil.rmtree(r/".github"/"workflows")
+ subprocess.run(["git","restore","--source=HEAD","--staged","--worktree","--",".github/workflows"],check=True)
  (r/"supabase.public.json").write_text(json.dumps({"supabaseUrl":os.environ["PLMR_SUPABASE_URL"],"supabasePublishableKey":os.environ["PLMR_SUPABASE_PUBLISHABLE_KEY"]},indent=2)+"\n")
  subprocess.run(["git","add","-A"],check=True)
  subprocess.run(["git","diff","--cached","--stat"],check=True)
