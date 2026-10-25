@@ -1,42 +1,10 @@
-# Secrets / local environment
+_site/
+node_modules/
 .env
 .env.*
 !.env.example
-*.pem
-*.key
-private/
-**/private/
-
-# Generated output
-*.pdf
-*.zip
-coverage/
-playwright-report/
-test-results/
-**/test-results/
-**/screenshots/
-**/*-actual.png
-**/*-expected.png
-**/*-diff.png
-
-# Cache / temp
-node_modules/
-.cache/
-.tmp/
-tmp/
-*.tmp
+supabase.public.local.json
+.plmr-shares/
 *.log
 .DS_Store
 Thumbs.db
-
-# IDE
-.vscode/
-.idea/
-*.swp
-
-# Supabase local metadata
-supabase/.temp/
-
-# Local deployment tooling
-package.json
-package-lock.json
