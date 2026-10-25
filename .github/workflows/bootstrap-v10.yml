@@ -1,0 +1,41 @@
+name: Bootstrap PLMR V10
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify and replace repository
+        env:
+          PLMR_SUPABASE_URL: https://asirqshnxodniluciodw.supabase.co
+          PLMR_SUPABASE_PUBLISHABLE_KEY: sb_publishable_SyHY5LOXpWVXSQufFhelNg_T4GrxuLv
+        run: python3 bootstrap-release.py
+      - uses: actions/configure-pages@v5
+      - name: Build static site
+        run: npm run build
+      - name: Verify static site
+        run: npm run verify
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
