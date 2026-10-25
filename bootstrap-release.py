@@ -4,7 +4,7 @@ for x in m:
  b=(r/x["path"]).read_bytes()
  assert len(b)==x["length"]
  assert hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()==x["sha"]
- t=b.decode("ascii").strip();assert len(t)==x["base64_chars"];parts.append(t)
+ t="".join(b.decode("ascii").splitlines());assert len(t)==x["base64_chars"];parts.append(t)
 z=base64.b64decode("".join(parts),validate=True)
 assert hashlib.sha256(z).hexdigest()=="c4548d9b0936dbe4765132ba4bddc5830f5c21d3c65929d7af835bef58d3aab3"
 with tempfile.TemporaryDirectory() as tmp:
