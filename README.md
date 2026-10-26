@@ -1,13 +1,16 @@
-# PLMR FinalProcess V12
+# PLMR FinalProcess V13
 
-Önce Supabase klasöründeki `hizliyukle.bat`, ardından bu klasördeki `hizliyukle.bat` çalıştırılır. Hedef: `plmrpulumur/plmr-demo`, `main`. GitHub Actions > Publish PLMR V12 sonucunu kontrol edin.
+GitHub Pages hedefi: `plmrpulumur/plmr-demo`, `main`; yayın tabanı `/plmr-demo/`.
+Supabase zaten kuruludur. Bu sürüm için Supabase yükleyicisini çalıştırmayın.
 
-Node.js 22+ ve Git gerekir. `npm run build` statik siteyi `_site` altında hazırlar; `npm run verify` dosya/varlık/hash izin listesini doğrular. `npm start` HTTP yerel denemesini açar. Günlük kullanım yayımlanmış site üzerinden yapılır. Dosya olarak açılan index.html yerel test modudur.
+ZIP'i tamamen çıkarıp `Uygulama/github/hizliyukle.bat` dosyasını çalıştırın. Git for Windows ve Windows PowerShell 5.1 gerekir. GitHub hesabınızın depoya yazma yetkisi olmalı. BAT için Node.js gerekmez. Yükleyici normal commit/push kullanır; uzak-only dosyaları silmez, force/reset yapmaz ve merge çatışmasında kaynak kopyalanmadan durur. Aynı adlı kaynak dosyaları güncellenir. İşlemin ayrıntıları `HIZLI_YUKLE_OKU.txt` içindedir.
 
-HTTP(S) sürümü merkezi Supabase Auth ve `plmr-platform` kayıt servisini kullanır. Firma/cari/proje/dosya verisi tarayıcı veritabanına kaydedilmez. Public URL/anahtar kaynakta vardır; service_role/secret anahtarı yoktur. Bağlantı ayarı `supabase.public.json` içindedir ve uygulama kaynak derlemesinde de üretilir. Başka Supabase projesine geçiş tam kaynak derlemesi gerektirir; yalnız bu dosyayı değiştirerek mevcut runtime başka projeye taşınmaz.
+GitHub Settings → Pages → Source: GitHub Actions. Actions bölümünde `Publish PLMR V13` iş akışının başarılı olmasını bekleyin. İş akışı Node.js 24 ile `npm run build` ve `npm run verify` çalıştırır; yalnız doğrulanan `_site` dizinini yayımlar. Başarılı push tek başına yayın kanıtı değildir.
 
-Kısa sunum bağlantısı rastgele kimlik kullanır ve 30 gün geçerlidir. Linke sahip kişi girişsiz sunumu görür. Yeni sunum kurulum tamamlanmadan üretilmez; uzun veri URL'sine sessiz dönüş yoktur. localhost internetten erişilemez.
+Yerel HTTP denemesi için Node.js 22+ ile bu klasörde `npm start` çalıştırın. `npm run build` yayın kopyasını, `npm run verify` dosya/varlık/hash denetimini üretir. `index.html` dosyasını çift tıklamak farklı, yerel dosya modudur; bulut giriş kabulü sayılmaz.
 
-Eski yerel kayıtlar silinmez veya otomatik birleştirilmez. .plmr dışa aktar/aç akışı ile doğru firmaya proje aktarılabilir. Aynı hesapla son girişin geçerli olması mevcut Auth kuralıdır.
+HTTP(S) uygulama `yackwdxdyajejtdxvncu` Supabase projesini kullanır. Kullanıcı adı/PIN formu mevcut `admin-users` servisine; kullanıcı, firma ve iş kayıtları `plmr-platform` servisine bağlanır. Yeni yönetici oluşturulmaz. Mevcut Aytug hesabını kullanın. Aynı kullanıcıyla ikinci tarayıcıdan giriş yapmak önceki oturumu geçersiz kılabilir. Eski tarayıcı iş verileri silinmez veya otomatik taşınmaz.
 
-Yükleyici normal Git commit/push yapar, force/reset kullanmaz. Çatışmada durur. Yükleme araçları, cache ve yerel gizli dosyalar siteye girmez. Canlı dağıtım ve gerçek hesap testi kullanıcının yüklemesinden sonra yapılır.
+Public bağlantı `supabase.public.json` dosyasından tam uygulama derlemesine gömülür. Yalnız JSON değiştirmek çalışan uygulamanın bağlantısını değiştirmez. Gizli anahtar, PIN veya kullanıcı tokenı bu klasöre konmamalıdır.
+
+Kısa sunum bağlantıları mevcut yetki ve 30 gün kurallarıyla çalışır. localhost bağlantısı internetten erişilemez. İlk yayın sonrasında mevcut Aytug/PIN girişi, yenileme, çıkış ve temiz tarayıcı girişi normal uygulama formundan kontrol edilmelidir. Gerçek PIN ve canlı Pages kabul durumu kökteki DEVIR_NOTU.md içinde ayrı belirtilir.

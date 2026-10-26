@@ -25,7 +25,7 @@ const server=http.createServer(async(req,res)=>{
   res.setHeader('Content-Length',data.length);res.end(req.method==='HEAD'?undefined:data)})
 });
 server.listen(Number(process.env.PLMR_PORT)||41760,'127.0.0.1',()=>{
- const url='http://127.0.0.1:'+server.address().port+'/';console.log('PLMR FinalProcess v10: '+url);
+ const url='http://127.0.0.1:'+server.address().port+'/';console.log('PLMR FinalProcess v13: '+url);
  if(process.platform==='win32'&&process.env.PLMR_OPEN_BROWSER==='1')require('child_process').spawn('cmd',['/c','start','',url],{detached:true,stdio:'ignore'}).unref();
 });
 const cleanup=setInterval(()=>store.sweep().catch(e=>console.error('Share cleanup:',e.message)),60*60*1000);cleanup.unref();
