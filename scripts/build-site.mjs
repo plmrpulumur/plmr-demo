@@ -44,7 +44,7 @@ export async function buildSite(root = runtimeRoot, destination = path.join(root
     hashes[path.relative(destination, file).split(path.sep).join('/')] = crypto.createHash('sha256').update(content).digest('hex');
   }
   await fs.writeFile(path.join(destination, 'deployment-manifest.json'), JSON.stringify({
-    release: 'PLMR_FinalProcess_v12', format: 1, selfExcluded: 'deployment-manifest.json',
+    release: 'PLMR_FinalProcess_v13', format: 1, selfExcluded: 'deployment-manifest.json',
     businessDataMode: 'supabase', supabaseConnectionConfigured: config.configured, files: hashes
   }, null, 2) + '\n');
   return {fileCount: Object.keys(hashes).length, configured: config.configured};
