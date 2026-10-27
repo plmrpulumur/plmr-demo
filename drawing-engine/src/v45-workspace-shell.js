@@ -184,7 +184,7 @@
       toolButton('Sahneleri Seç','petrol',()=>window.PLMRAnimationUI.openScenes(),{id:'rrV22ScenesBtn'}),
       toolButton('Animasyon Paylaş','petrol',()=>window.PLMRAnimationUI.openShare(),{id:'rrV22ShareBtn'}),
       toolButton('Ürün Listesi PDF','teal',()=>clickLegacy('exportProductListPdfBtn'),{id:'rrV11ProductListPdfBtn'}),
-      toolButton('Üretim Paketini Oluştur','gold',()=>placeholder('Üretim paketi standalone drawing-engine scope dışında; Ana PLMR entegrasyonunda sağlanacak.'),{id:'rrV45ProductionBtn'})
+      toolButton('Üretim Paketini Oluştur','gold',()=>{}, {id:'rrV45ProductionBtn',disabled:true,'aria-disabled':'true',title:'Üretim paketi oluşturma şu anda pasif.'})
     );
     const view=el('div',{class:'v33-toolbar-view'});
     const columns=el('select',{class:'v33-columns',id:'rrV45ColumnsSelect'});

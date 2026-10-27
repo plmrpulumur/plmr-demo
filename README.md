@@ -1,11 +1,11 @@
-# PLMR FinalProcess V13
+# PLMR FinalProcess V14
 
 GitHub Pages hedefi: `plmrpulumur/plmr-demo`, `main`; yayın tabanı `/plmr-demo/`.
 Supabase zaten kuruludur. Bu sürüm için Supabase yükleyicisini çalıştırmayın.
 
 ZIP'i tamamen çıkarıp `Uygulama/github/hizliyukle.bat` dosyasını çalıştırın. Git for Windows ve Windows PowerShell 5.1 gerekir. GitHub hesabınızın depoya yazma yetkisi olmalı. BAT için Node.js gerekmez. Yükleyici normal commit/push kullanır; uzak-only dosyaları silmez, force/reset yapmaz ve merge çatışmasında kaynak kopyalanmadan durur. Aynı adlı kaynak dosyaları güncellenir. İşlemin ayrıntıları `HIZLI_YUKLE_OKU.txt` içindedir.
 
-GitHub Settings → Pages → Source: GitHub Actions. Actions bölümünde `Publish PLMR V13` iş akışının başarılı olmasını bekleyin. İş akışı Node.js 24 ile `npm run build` ve `npm run verify` çalıştırır; yalnız doğrulanan `_site` dizinini yayımlar. Başarılı push tek başına yayın kanıtı değildir.
+GitHub Settings → Pages → Source: GitHub Actions. Actions bölümünde `Publish PLMR V14` iş akışının başarılı olmasını bekleyin. İş akışı Node.js 24 ile `npm run build` ve `npm run verify` çalıştırır; yalnız doğrulanan `_site` dizinini yayımlar. Başarılı push tek başına yayın kanıtı değildir.
 
 Yerel HTTP denemesi için Node.js 22+ ile bu klasörde `npm start` çalıştırın. `npm run build` yayın kopyasını, `npm run verify` dosya/varlık/hash denetimini üretir. `index.html` dosyasını çift tıklamak farklı, yerel dosya modudur; bulut giriş kabulü sayılmaz.
 

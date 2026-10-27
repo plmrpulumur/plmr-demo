@@ -5,6 +5,13 @@
     window.PLMRFinalReadOnly = () => readOnly;
     let session = '', initialized = false, readOnly = true, last = '', suspended = false, info = {}, timer, previewOnly=false, motionCacheFailed=false;
     const send = (type, payload = {}, requestId) => parent.postMessage({ channel: CHANNEL, session, type, payload, requestId }, '*');
+    window.PLMRProcess = {
+        begin(label) {
+            const id = crypto.randomUUID();
+            if (session) send('PROCESS_START', {id, label});
+            return { end() { if (session) send('PROCESS_END', {id}); } };
+        }
+    };
     function viewer() { return $('viewerFrame')?.contentWindow; }
     function ready() { return !!(window.PLMRV15Project && window.PLMRV24Host && window.PLMRUnifiedDrawingWorkspaceV4?.activateProduct && window.PLMRV24Workspace && window.PLMRV16Commands && viewer()?.PLMRV24StandaloneViewer && window.__P3DV_HOST_BRIDGE__?.runtimeDiagnostics().viewerReady); }
     function rows() {
@@ -295,6 +302,7 @@
     function permitted(control){return readonlyButtons.has(control.id)||control.closest('.rr-v11-filter-menu')||control.closest('.v22-animation-modal')||viewLegacy.has(control.dataset.legacyId)||control.classList.contains('close');}
     function lockControls(){
         for(const b of document.querySelectorAll('#rrV45Workspace button,#rrV45Workspace select,#rrV45Workspace input')){
+            if(b.id==='rrV45ProductionBtn'){b.disabled=true;b.setAttribute('aria-disabled','true');b.title='Üretim paketi oluşturma şu anda pasif.';continue;}
             if(permitted(b)||b.closest('#v24Player'))continue;
             if(readOnly){if(!lockState.has(b))lockState.set(b,b.disabled);b.dataset.finalLocked='true';b.setAttribute('aria-disabled','true');b.title='Düzenlemek için çizim kilidini kaldırın.';b.disabled=true;}
             else if(b.dataset.finalLocked){b.disabled=lockState.get(b)||false;lockState.delete(b);delete b.dataset.finalLocked;b.removeAttribute('aria-disabled');b.removeAttribute('title');}
@@ -312,8 +320,8 @@
     document.addEventListener('click', e => { if(e.target.closest('#rrV45CaptureBtn')&&initialized&&!readOnly){try{send('DRAWING_CAPTURE',{dataUrl:viewer().PLMRV24Viewer.shot(undefined,1920,1080),width:1920,height:1080});}catch(error){send('ERROR',{message:error.message});}} if (e.target.closest('#rrV45ProductionBtn')) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        if (initialized)
-            send('PRODUCTION', capture());
+        // V14: production package creation is intentionally disabled.
+        return;
         return;
     } gate(e); }, true);
     document.addEventListener('keydown', e => { if (readOnly && (e.key === 'Delete' || e.key === 'Backspace' || (e.ctrlKey || e.metaKey) && ['z', 'y'].includes(e.key.toLowerCase()))) {

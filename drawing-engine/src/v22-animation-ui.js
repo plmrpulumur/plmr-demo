@@ -28,7 +28,11 @@
  function layoutPreview(){if(!previewWindow||previewWindow.hidden)return;const box=$('rrV23PreviewScreen').getBoundingClientRect();let changed=false;for(const [k,v]of Object.entries({x:box.x,y:box.y,w:box.width,h:box.height})){const key='--plmr-preview-'+k,value=v+'px';if(document.body.style.getPropertyValue(key)!==value){document.body.style.setProperty(key,value);changed=true;}}if(changed)window.__P3DV_HOST_BRIDGE__.resize();}
  function ensurePreviewWindow(){if(previewWindow)return;previewWindow=el('div',{id:'rrV23PreviewWindow',class:'plmr-animation-preview-backdrop',hidden:''});const close=button('×','rrV23PreviewClose',stopPreview);close.setAttribute('aria-label','Önizlemeyi kapat');const dialog=el('section',{class:'plmr-animation-window',role:'dialog','aria-modal':'true','aria-label':'3D animasyon önizleme'},[el('header',{},[el('strong',{text:'3D Sunum'}),close]),el('div',{id:'rrV23PreviewScreen',class:'plmr-animation-screen'})]);previewWindow.append(dialog);document.body.append(previewWindow);}
  window.addEventListener('resize',()=>{if(preview)requestAnimationFrame(layoutPreview);});
- async function startPreview(){C.scenes(selected);threeD();const v=await waitReady();player();v.begin(selected);ensurePreviewWindow();preview=true;document.body.classList.add('plmr-animation-preview-active');panel.hidden=true;playbar.hidden=false;previewWindow.hidden=false;layoutPreview();v.play();updatePlayer();$('rrV23PreviewClose').focus();}
+ async function startPreview(){
+ const operation=window.PLMRProcess?.begin("Animasyon hazırlanıyor…");
+ try {C.scenes(selected);threeD();const v=await waitReady();player();v.begin(selected);ensurePreviewWindow();preview=true;document.body.classList.add('plmr-animation-preview-active');panel.hidden=true;playbar.hidden=false;previewWindow.hidden=false;layoutPreview();v.play();updatePlayer();$('rrV23PreviewClose').focus();
+ } finally { operation?.end(); }
+}
  function stopPreview(){preview=false;if(previewWindow)previewWindow.hidden=true;document.body.classList.remove('plmr-animation-preview-active');window.__P3DV_HOST_BRIDGE__.resize();try{viewer().stop();}catch(_){}document.body.classList.remove('plmr-animation-preview-active');cancelAnimationFrame(raf);if(playbar)playbar.hidden=true;if(panel&&!shared){panel.hidden=false;changed();}}
  function ensureShare(){if(share)return;const backdrop=el('div',{class:'plmr-animation-backdrop',id:'rrV22ShareBackdrop',hidden:''});share=backdrop;
   const modal=el('section',{class:'plmr-animation-share',role:'dialog','aria-modal':'true','aria-label':'Animasyon paylaş'}),output=el('input',{id:'rrV22ShareUrl',type:'text',readonly:'','aria-label':'Paylaşım bağlantısı'});
@@ -44,6 +48,8 @@
   const url=new URL('index.html',location.href);url.search='?presentation=1';url.hash='data='+token;return url.href;
  }
  async function createShare(){
+ const operation=window.PLMRProcess?.begin("Paylaşım bağlantısı oluşturuluyor…");
+ try {
   const b=$('rrV22CreateShare');b.disabled=true;$('rrV22ShareUrl').value='';$('rrV22OpenShare').removeAttribute('href');try{const payload=C.validate(C.create({...window.PLMRV15Project.capture(),v24ActiveProduct:window.PLMRV24Workspace?.active()||null},selected,$('rrV22Title').value),window.PLMRV15Core),config=window.PLMR_ANIMATION_SHARE_CONFIG||{},endpoint=new URL(config.endpoint||'./api/animation-shares',location.href);let link;
    $('rrV22ShareStatus').textContent='Bağlantı hazırlanıyor…';
    const token=typeof config.getAccessToken==='function'?await config.getAccessToken():null,headers={'Content-Type':'application/json'};if(config.publicKey)headers.apikey=config.publicKey;if(token)headers.Authorization='Bearer '+token;
@@ -52,7 +58,9 @@
    else{const data=await response.json();if(!response.ok)throw Error(data.error||'Paylaşım bağlantısı oluşturulamadı.');if(!/^[a-f0-9]{32}$/.test(data.id))throw Error('Paylaşım yanıtı geçersiz.');const url=new URL('index.html',location.href);url.search='?presentation=1';url.hash='share='+data.id;link=url.href;$('rrV22ShareStatus').textContent='Bağlantı hazır. '+(data.expiresAt?'Son kullanım: '+new Date(data.expiresAt).toLocaleDateString('tr-TR')+'.':'');}
    $('rrV22ShareUrl').value=link;$('rrV22OpenShare').href=link;
   }catch(e){$('rrV22ShareStatus').textContent=e.message;}finally{b.disabled=false;}
- }
+ 
+ } finally { operation?.end(); }
+}
  async function decodeLink(token){
   if(token.length>120000||!/^([gj])\.[A-Za-z0-9_-]+$/.test(token))throw Error('Sunum bağlantısı geçersiz.');
   const raw=atob(token.slice(2).replaceAll('-','+').replaceAll('_','/')),bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));let stream=new Blob([bytes]).stream();
