@@ -1,0 +1,16 @@
+{
+  "name": "plmr-finalprocess-publication",
+  "version": "14.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Prebuilt PLMR application: static publication and optional Supabase connection preparation",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "node scripts/build-site.mjs",
+    "verify": "node scripts/verify-site.mjs",
+    "connection:check": "node scripts/check-supabase.mjs",
+    "start": "node start-local.cjs"
+  }
+}
