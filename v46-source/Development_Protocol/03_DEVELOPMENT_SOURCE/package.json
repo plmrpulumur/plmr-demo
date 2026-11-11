@@ -1,0 +1,32 @@
+{
+  "name": "plmr-final-process",
+  "private": true,
+  "version": "46.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build_cloud.cjs && node scripts/build_backend_v21.cjs && node scripts/sync_final_engine.cjs && node scripts/build_pwa.cjs public && tsc -b && vite build && node scripts/build_pwa.cjs dist && node scripts/stage_web_runtime.cjs",
+    "preview": "vite preview",
+    "build:web": "npm run build",
+    "build:offline": "node scripts/build_cloud.cjs && node scripts/build_backend_v21.cjs && node scripts/sync_final_engine.cjs && node scripts/build_offline_runtime.cjs && node scripts/build_pwa.cjs && node scripts/sync_deployment.cjs",
+    "verify:release": "node scripts/verify_release_v46.cjs",
+    "test:release": "npm run test:release:domain && npm run test:release:integration && npm run test:release:access && npm run test:release:async && npm run test:release:ui",
+    "test:release:domain": "node ../../Test-Mantik/v35/domain-and-cloud.cjs && node ../../Test-Mantik/v35/quote-revisions.cjs && node ../../Test-Mantik/v35/catalog-domain.cjs && node ../../Test-Mantik/v35/cloud-catalog.cjs && node scripts/test_v49_engine.cjs",
+    "test:release:integration": "node scripts/test_release_v35_integration.cjs",
+    "test:release:access": "node scripts/test_release_v35_access.cjs",
+    "test:release:async": "node scripts/test_release_v35_async.cjs",
+    "test:release:ui": "node ../../Test-Mantik/v35/approvals-ui.cjs && node ../../Test-Mantik/v35/position-forms.cjs && node ../../Test-Mantik/v35/catalog-zip-ui.cjs && node ../../Test-Mantik/v35/catalog-ui.cjs && node ../../Test-Mantik/v35/production-ui.cjs && node ../../Test-Mantik/v35/media-browser.cjs && node ../../Test-Mantik/v35/form-statuses.cjs && python3 ../../Test-Mantik/v35/validate-outputs.py",
+    "package:release": "python3 scripts/package_v46.py"
+  },
+  "dependencies": {
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^5.0.4",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.7"
+  }
+}

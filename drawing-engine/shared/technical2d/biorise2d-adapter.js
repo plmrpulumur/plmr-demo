@@ -358,7 +358,7 @@
       buildElevation(model, layout, envelope, 'left', contract),
       buildElevation(model, layout, envelope, 'front', contract),
       buildElevation(model, layout, envelope, 'right', contract)
-    ]);
+    ].map(view=>root.PLMROrthographicAxes.project(view)));
     return Object.freeze({
       schema: SCHEMA,
       productId: PRODUCT_ID,

@@ -8555,7 +8555,7 @@ for(const was of old){const wasHidden=zoneFilters.ids[was.owner+'|'+was.id]===fa
   function v18Prepare(){if(v18Busy||v18OwnerContext||!window.PLMRV18Zones||modelState.productGroup!=='b-cube'||ensureSceneEditor().zoneGraphVersion===20)return;const before=p3dvHistoryClone(modelState);const owners=v12Owners();for(const w of modelState.sketchWalls||[]){const owner=owners.find(o=>o.id===w.zone?.owner);if(!owner||owner.id==='roof-main'||!w.frame)continue;const legacy=window.PLMRRollingRoofSceneCore.placeFrame(window.PLMRRollingRoofSceneCore.zoneFrame(w.zone),ensureSceneEditor().roofPose,modelState.height,ensureSceneEditor().groundY);if(w.frame.origin.every((n,i)=>Math.abs(n-legacy.origin[i])<.5)){w.frame=window.PLMRRollingRoofSceneCore.placeFrame(window.PLMRRollingRoofSceneCore.zoneFrame(w.zone),owner.pose,owner.spec.height,ensureSceneEditor().groundY);w.v18OwnerFrameRepaired=true;}}v18Cache=null;v18Migrate(before,false);}
   window.PLMRV18Commands=Object.freeze({zones:()=>v18AllZones(modelState),audit:()=>p3dvHistoryClone(ensureSceneEditor().zoneAuditIssues||[]),graph:()=>[...v18Graph(modelState).bases.values()].flat()});
 
-  let v17Busy=false,v17SettingsDraft=null,v17AnnotationSelection=[];
+  let v17Busy=false,v17SettingsDraft=null,v17AnnotationSelection=[],v46MultiZones=[];
   function v17Ensure(){if(v17Busy||!window.PLMRV17Core)return;v17Busy=true;try{const owners=v12Owners().filter(o=>o.spec.width>=1000&&o.spec.height>=roofInput.minimumHeight(o.spec.productGroup));for(const o of owners){o.spec.freedomLayout=freedomMultiPositionLayout(o.spec);if(o.id!=='roof-main'){delete o.spec.codeRegistry;delete o.spec.systemSelection;}}if(!modelState.systemSelection){const chosen=owners.flatMap(o=>Object.values(o.spec.sceneEditor?.roofProducts||{})).filter(c=>c.id&&c.id!=='none');modelState.systemSelection={id:chosen.length&&chosen.every(c=>c.id===chosen[0].id)?chosen[0].id:'meru',locked:chosen.length>0,applied:Object.fromEntries(owners.flatMap(o=>(o.spec.freedomLayout?.modules||[]).map(m=>[o.id+':'+m.moduleIndex,true]))) };}const sys=modelState.systemSelection;sys.applied=sys.applied||{};for(const o of owners)for(const m of o.spec.freedomLayout?.modules||[]){const key=o.id+':'+m.moduleIndex;if(!sys.applied[key]){const ps=o.spec.sceneEditor.roofProducts=o.spec.sceneEditor.roofProducts||{};if(!ps[m.moduleIndex]&&sys.id!=='meru')ps[m.moduleIndex]={id:sys.id,rotation:0,open:window.PLMRBioclimaticRoof.product(sys.id).motion!=='Fixed',revision:1};sys.applied[key]=true;}}if(window.PLMRV18Zones)v18Prepare();window.PLMRV17Core.codes(modelState,owners);}finally{v17Busy=false;}}
   window.PLMRV17PositionName=(no,index=0)=>{const o=[{id:'roof-main',spec:modelState},...(modelState.sceneEditor?.roofCopies||[])].find(o=>Number(o.spec.pozNo||1)===Number(no||1));return o?.spec.sceneEditor?.bioCodes?.[index]||'BIO-'+String(Number(no)||1).padStart(2,'0');};
   function v17Scene(scene){if(!window.PLMRV17Core)return scene;v17Ensure();const next=p3dvHistoryClone(scene||ensureSceneEditor());for(const o of v12Owners()){if(!o.spec.width||!o.spec.height)continue;const spec=o.spec,layout=freedomMultiPositionLayout(spec),source={...spec,parapetOwner:o.id,parapetWalls:modelState.sketchWalls,freedomLayout:layout,sceneEditor:{...spec.sceneEditor,roofPose:o.pose,facadeZonesGenerated:true}};const target=o.id==='roof-main'?next:next.roofCopies?.find(c=>c.id===o.id)?.spec.sceneEditor;if(target){target.generalOptions={led:String(spec.led||'NO')};target.bioCodes=p3dvHistoryClone(spec.sceneEditor.bioCodes);target.facadeGraph=buildReportFacades(source);}}return next;}
@@ -8566,7 +8566,13 @@ for(const was of old){const wasHidden=zoneFilters.ids[was.owner+'|'+was.id]===fa
   function v17SaveSettings(id){v17Ensure();const before=v17SettingsDraft||p3dvHistoryClone(modelState),sys=modelState.systemSelection,keys=window.PLMRV17Core.optionsKeys(),options=Object.fromEntries(keys.filter(k=>modelState[k]!==undefined).map(k=>[k,p3dvHistoryClone(modelState[k])]));if(!sys.locked&&!['meru',...window.PLMRBioclimaticRoof.products.map(p=>p.id)].includes(id))throw Error('Sistem seçimi geçersiz.');const changed=!sys.locked&&sys.id!==id;if(!sys.locked)sys.id=id;v17SettingsDraft=null;for(const o of v12Owners()){for(const k of keys){if(options[k]!==undefined)o.spec[k]=p3dvHistoryClone(options[k]);else delete o.spec[k];}if(changed){const ps=o.spec.sceneEditor.roofProducts=o.spec.sceneEditor.roofProducts||{};for(const m of freedomMultiPositionLayout(o.spec)?.modules||[]){if(id==='meru')delete ps[m.moduleIndex];else ps[m.moduleIndex]={id,rotation:0,open:window.PLMRBioclimaticRoof.product(id).motion!=='Fixed',revision:(ps[m.moduleIndex]?.revision||0)+1};}}}const oldOwners=new Map([['roof-main',before],...(before.sceneEditor?.roofCopies||[]).map(o=>[o.id,o.spec])]);for(const o of v12Owners())v27SyncColors(o.spec,JSON.stringify(v27BioColor(o.spec))!==JSON.stringify(v27BioColor(oldOwners.get(o.id)||{})));p3dvHostSyncControls();v11Commit('v17-settings-save',before);document.dispatchEvent(new CustomEvent('plmr-v17-system'));return true;}
   function v17Switch(zone){if(!zone||zone.isRoofZone)throw Error('Tavan yönü bu işlemle değiştirilemez.');const o=v12Owners().find(o=>o.id===(zone.owner||'roof-main'));if(!o)throw Error('Poz bulunamadı.');const before=p3dvHistoryClone(modelState),dirs=o.spec.sceneEditor.zoneRotations=o.spec.sceneEditor.zoneRotations||{};dirs[zone.id]=zone.mountRotation===180?0:180;closeZoneActionDialog();clearZoneSelection();v11Commit('v17-zone-switch',before);return dirs[zone.id];}
   function v17Editable(zone){return window.PLMRV17Core.editable(zone,v11OwnerModel(zone).facadeProfiles);}
-  function v17Hide(items=v17AnnotationSelection){if(items.length){for(const i of items){if(i.kind==='zone')zoneFilters.ids[i.owner+'|'+i.id]=false;else if(i.kind==='measurement'){dimensionVisibility.hiddenIds=dimensionVisibility.hiddenIds||{};dimensionVisibility.hiddenIds[i.id]=true;}else if(i.kind==='information'){dimensionVisibility.infoIds=dimensionVisibility.infoIds||{};dimensionVisibility.infoIds[i.code]=false;}}v11PublishFilters();}else{window.PLMRZones.setAll(false);dimensionVisibility={...dimensionVisibility,main:false,positions:false,total:false,intermediate:false};}window.PLMRV11Commands.setDimensions(dimensionVisibility);v17AnnotationSelection=[];postViewerMessage('v17-clear-annotation-selection');document.dispatchEvent(new CustomEvent('plmr-v17-selection',{detail:[]}));return true;}
+  function v17Hide(items){
+    if(!items){
+      const zones=v46MultiZones.length?v46MultiZones:(selectedZone?[selectedZone]:[]);
+      items=[...v17AnnotationSelection,...zones.map(zone=>({kind:'zone',owner:zone.owner||'roof-main',id:zone.id}))];
+    }
+    if(items.length){for(const i of items){if(i.kind==='zone')zoneFilters.ids[i.owner+'|'+i.id]=false;else if(i.kind==='measurement'){dimensionVisibility.hiddenIds=dimensionVisibility.hiddenIds||{};dimensionVisibility.hiddenIds[i.id]=true;}else if(i.kind==='information'){dimensionVisibility.infoIds=dimensionVisibility.infoIds||{};dimensionVisibility.infoIds[i.code]=false;}}v11PublishFilters();}else{window.PLMRZones.setAll(false);dimensionVisibility={...dimensionVisibility,main:false,positions:false,total:false,intermediate:false};}window.PLMRV11Commands.setDimensions(dimensionVisibility);v17AnnotationSelection=[];v46MultiZones=[];clearZoneSelection();postViewerMessage('v17-clear-annotation-selection');document.dispatchEvent(new CustomEvent('plmr-v17-selection',{detail:[]}));return true;
+  }
   function v17Select(item){const at=v17AnnotationSelection.findIndex(i=>i.key===item.key);if(at<0)v17AnnotationSelection.push(item);else v17AnnotationSelection.splice(at,1);document.dispatchEvent(new CustomEvent('plmr-v17-selection',{detail:p3dvHistoryClone(v17AnnotationSelection)}));postViewerMessage('v17-annotation-selection',{items:v17AnnotationSelection});}
   function v17Measurements(){const scene=v17Scene(ensureSceneEditor()),owners=v12Owners().map(o=>({...o,spec:{...o.spec,sceneEditor:o.id==='roof-main'?scene:scene.roofCopies.find(c=>c.id===o.id).spec.sceneEditor}}));return window.PLMRV17Core.measureDefinitions(owners,window.PLMRBioclimaticRoof);}
   window.PLMRV17Commands=Object.freeze({ensure:v17Ensure,system:()=>{v17Ensure();return p3dvHistoryClone(modelState.systemSelection);},previewCodes:count=>{v17Ensure();const n=modelState.codeRegistry?.next?.BIO||1;return Array.from({length:count},(_,i)=>'BIO-'+String(n+i).padStart(2,'0'));},beginSettings:v17BeginSettings,cancelSettings:v17CancelSettings,saveSettings:v17SaveSettings,switchZone:v17Switch,editable:v17Editable,measurements:v17Measurements,select:v17Select,hide:v17Hide,selection:()=>p3dvHistoryClone(v17AnnotationSelection),clearSelection:()=>{v17AnnotationSelection=[];postViewerMessage('v17-clear-annotation-selection');document.dispatchEvent(new CustomEvent('plmr-v17-selection',{detail:[]}));},editProduct:item=>{const o=v12Owners().find(o=>o.id===item.owner),z=buildReportFacades({...o.spec,parapetOwner:o.id,freedomLayout:freedomMultiPositionLayout(o.spec)}).flatMap(f=>f.zones).find(z=>z.id===item.zoneId);if(z)window.PLMRV11Commands.editSelection([{kind:'facade',...item,zone:z}]);}});
@@ -8874,9 +8880,19 @@ for(const was of old){const wasHidden=zoneFilters.ids[was.owner+'|'+was.id]===fa
     if(event.data.type==='v16-roof-delete'){v16RoofBatch([{owner:event.data.owner,moduleIndex:event.data.moduleIndex}],event.data.productId,true);return;}
     if(event.data.type==='v16-open-roof-choice'){v16OpenBulkRoof(event.data.item);return;}
     if(event.data.type==='v11-product-selection'){const e=new CustomEvent('plmr-v11-selection',{detail:event.data.items||[]});e.plmrAppend=Boolean(event.data.append);document.dispatchEvent(e);return;}
-    if(event.data.type==='v42-zone-selection'){document.dispatchEvent(new CustomEvent('plmr-zone-selection',{detail:event.data.zones||[]}));return;}
+    if(event.data.type==='v42-zone-selection'){
+      v46MultiZones=Array.isArray(event.data.zones)?event.data.zones:[];
+      document.dispatchEvent(new CustomEvent('plmr-zone-selection',{detail:v46MultiZones}));
+      return;
+    }
     if(event.data.type==='v11-delete-selection'){v11Delete(event.data.items||[]);return;}
-    if(event.data.type==='v12-escape-request'){window.PLMRV12UI?.escape();return;}
+    if(event.data.type==='v12-escape-request'){
+      window.PLMRV17Commands.clearSelection();
+      v46MultiZones=[];
+      clearZoneSelection();
+      window.PLMRV12UI?.escape();
+      return;
+    }
     if(event.data.type==='v11-clear-zone'){clearZoneSelection();return;}
     if (event.data.type === 'select-zone' && event.data.zone) {
       if (p3dvStandaloneGuillotinePreviewMode && window.parent !== window) {
@@ -13047,7 +13063,7 @@ window.addEventListener('message',event=>{
   if(event.data.type==='set-zones-visible'||event.data.type==='set-zone-filters'){zonesVisible=Boolean(event.data.visible);if(event.data.filters)zoneFilters=event.data.filters;v11Interactions.clearZones();v11RefreshZoneVisibility();if(hoveredZone)setZoneHighlight(hoveredZone,false);hoveredZone=null;window.PLMRBioclimaticRoofChooser.close();return;}
   if(event.data.type==='v14-selection-motion'){const products=event.data.products||[];bioclimaticRoof.previewSelection(products.filter(p=>p.kind==='roof'));for(const p of products.filter(p=>p.kind==='facade'))for(const r of facadeMotions.values())if(r.owner===p.owner&&r.key===p.productKey){const restore=r.preview?r.preview.restore:r.target;r.preview={restore,stage:'out'};r.target=restore?0:1;}return;}
   if(event.data.type==='v17-annotation-selection'){v17Annotations.set(event.data.items||[]);return;}
-  if(event.data.type==='v17-clear-annotation-selection'){v17Annotations.set([]);return;}
+  if(event.data.type==='v17-clear-annotation-selection'){v17Annotations.set([]);v11Interactions.clearZones();return;}
   if(event.data.type==='v12-roof-states'){bioclimaticRoof.setStates(event.data.items||[]);return;}
   if(event.data.type==='v12-roof-preview'){const r=bioclimaticRoof.state().find(r=>r.owner===event.data.owner&&r.moduleIndex===event.data.moduleIndex);if(r)bioclimaticRoof.preview({...r,index:r.moduleIndex},event.data.productId);return;}
   if(event.data.type==='v12-roof-preview-cancel'){bioclimaticRoof.restorePreview();return;}
@@ -13823,6 +13839,13 @@ initializeViewer().catch(reportViewerFailure);
       if (!event.target.closest('#largePreviewProductStateControl')) closeLargeProductStateMenu();
     });
     window.addEventListener('keydown', (event) => {
+      if(!event.defaultPrevented&&!window.PLMRFinalReadOnly?.()&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&
+          event.key.toLowerCase()==='h'&&(selectedZone||v46MultiZones.length||v17AnnotationSelection.length)&&
+          !event.target?.isContentEditable&&!/INPUT|SELECT|TEXTAREA/.test(event.target?.tagName||'')){
+        event.preventDefault();
+        v17Hide();
+        return;
+      }
       if (!toolboxSelectionMode) return;
       const tag = event.target && event.target.tagName ? String(event.target.tagName).toUpperCase() : '';
       const isField = ['INPUT', 'SELECT', 'TEXTAREA'].includes(tag);

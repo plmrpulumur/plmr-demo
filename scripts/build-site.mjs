@@ -26,7 +26,7 @@ export async function buildSite(root = runtimeRoot, destination = path.join(root
   }
   const config = await readPublicConfig(root, env);
   const web=JSON.parse(await fs.readFile(path.join(root,'web/WEB_FILES.json'),'utf8'));
-  if(web.release!=='PLMR_FinalProcess_v45'||!web.files?.['index.html']||!web.files?.['sw.js'])throw Error('V45 web derlemesi eksik veya eski.');
+  if(web.release!=='PLMR_FinalProcess_v46'||!web.files?.['index.html']||!web.files?.['sw.js'])throw Error('V46 web derlemesi eksik veya eski.');
   for (const name of publicEntries) await fs.access(path.join(root, name));
   await fs.rm(destination, {recursive: true, force: true});
   await fs.mkdir(destination, {recursive: true});
@@ -55,7 +55,7 @@ export async function buildSite(root = runtimeRoot, destination = path.join(root
     hashes[path.relative(destination, file).split(path.sep).join('/')] = crypto.createHash('sha256').update(content).digest('hex');
   }
   await fs.writeFile(path.join(destination, 'deployment-manifest.json'), JSON.stringify({
-    release: 'PLMR_FinalProcess_v45', format: 1, selfExcluded: 'deployment-manifest.json',
+    release: 'PLMR_FinalProcess_v46', format: 1, selfExcluded: 'deployment-manifest.json',
     businessDataMode: 'supabase', webRuntime:'split', initialEntryRawBytes:web.initialEntryRawBytes, supabaseConnectionConfigured: config.configured, files: hashes
   }, null, 2) + '\n');
   return {fileCount: Object.keys(hashes).length, configured: config.configured};

@@ -7,24 +7,20 @@
   const views = [{
     id: 'front',
     title: 'ÖN GÖRÜNÜŞ · DIŞ BAKIŞ',
-    u: [-1, 0],
     n: [0, 1]
   }, {
     id: 'rear',
     title: 'ARKA GÖRÜNÜŞ',
-    u: [-1, 0],
     n: [0, -1]
   }, {
     id: 'left',
     title: 'SOL GÖRÜNÜŞ · DIŞ BAKIŞ',
-    u: [0, 1],
     n: [-1, 0]
   }, {
     id: 'right',
     title: 'SAĞ GÖRÜNÜŞ · DIŞ BAKIŞ',
-    u: [0, -1],
     n: [1, 0]
-  }];
+  }].map(view=>({...view,u:root.PLMROrthographicAxes.exteriorRight(view.n)}));
   const dot = (p, a) => p[0] * a[0] + p[1] * a[1];
   function hull(points) {
     const ps = [...new Map(points.map(p => [p.map(n => n.toFixed(5)).join(','), p])).values()].sort((a, b) => a[0] - b[0] || a[1] - b[1]);

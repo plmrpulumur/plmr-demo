@@ -424,7 +424,7 @@
       buildElevation(model, layout, envelope, 'left', contract),
       buildElevation(model, layout, envelope, 'front', contract),
       buildElevation(model, layout, envelope, 'right', contract)
-    ].map(view=>({...view,entities:view.entities.map(e=>({...e,...(e.type==='dimension'&&e.axis!=='aligned'?{referenceBounds:{...view.bounds}}:{}),meta:{...(e.meta||{}),sceneObjectId:ctx.ownerId||'roof-main'}}))})).map(view=>filterPositionDimensions(presentDimensions((()=>{const next=addSketchProjection(view,model,ctx);return ctx.localOwner?{...next,entities:next.entities.map(e=>({...e,meta:{...(e.meta||{}),sceneObjectId:ctx.ownerId}}))}:next;})(),model),source.dimensionVisibility)));
+    ].map(view=>({...view,entities:view.entities.map(e=>({...e,...(e.type==='dimension'&&e.axis!=='aligned'?{referenceBounds:{...view.bounds}}:{}),meta:{...(e.meta||{}),sceneObjectId:ctx.ownerId||'roof-main'}}))})).map(view=>filterPositionDimensions(presentDimensions((()=>{const next=addSketchProjection(view,model,ctx);return ctx.localOwner?{...next,entities:next.entities.map(e=>({...e,meta:{...(e.meta||{}),sceneObjectId:ctx.ownerId}}))}:next;})(),model),source.dimensionVisibility)).map(view=>ctx.localOwner?view:root.PLMROrthographicAxes.project(view)));
     return Object.freeze({
       schema: SCHEMA,
       productId: PRODUCT_ID,
