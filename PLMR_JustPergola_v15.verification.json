@@ -1,0 +1,30 @@
+{
+  "status": "PARTIAL_ACCEPTANCE",
+  "files": 641,
+  "crc": true,
+  "allSha256": true,
+  "selfExcluded": true,
+  "requiredFiles": true,
+  "noInternalTestImages": true,
+  "zipSha256": "4acd49255f3f52cf8cb63c2e8ab63d651b7b9c96f87a4d6d04050a80bca9281b",
+  "cleanRoot": "/workspace/work/clean-v15-delivery/PLMR_JustPergola_v15",
+  "release": "15.0.0",
+  "archiveIntegrity": "PASS",
+  "fileSizeBytes": 14320861,
+  "sourceCheck": {
+    "status": "PASS",
+    "jsSyntaxFiles": 96,
+    "runtimeFiles": 141,
+    "sourceRuntimeByteAgreement": true,
+    "providerHashesVerified": true,
+    "removedControlsVerified": true
+  },
+  "runtimeFilesIncludingManifestCompared": 142,
+  "cleanRuntimeEqualsBrowserTestedRuntime": true,
+  "gitBundleRestoredCommit": "715eb1e03802528d341bc4f895d7750e5e9597b5",
+  "mainPatchApplyCheck": "PASS",
+  "commercialIntegration": "BLOCKED",
+  "nativeAutoCadStretch": "NOT TESTED",
+  "unassociatedDimensions": 37,
+  "productionWrites": false
+}
