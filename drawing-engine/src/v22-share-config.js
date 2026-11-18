@@ -1,0 +1,1 @@
+window.PLMR_ANIMATION_SHARE_CONFIG=location.protocol==='file:'?{mode:'inline'}:{mode:'cloud',endpoint:"https://yackwdxdyajejtdxvncu.supabase.co/functions/v1/plmr-platform",publicKey:"sb_publishable_IXfqhBIsQSlMqlAlgi9Bbg_HMn4fg_k",getAccessToken:()=>window.parent.PLMRCloud?.getAccessToken(),getCompanyId:()=>window.parent.PLMRCloud?.getCompanyId()};
