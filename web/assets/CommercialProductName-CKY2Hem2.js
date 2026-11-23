@@ -1,1 +1,0 @@
-import{j as e}from"./vendor-react-vUDIHcEN.js";import{a0 as i}from"./AuthenticatedWorkspace-BX5aPsFd.js";import{a9 as r,t as o}from"./index-CvbvnKtL.js";function f({product:m}){r();const n=i.some(a=>a.id===m.id&&a.name===m.name);return e.jsx(e.Fragment,{children:n?o(m.name):m.name})}export{f as C};
